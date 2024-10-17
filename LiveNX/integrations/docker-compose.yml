@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  livenx_integrations:
+    image: liveaction/livenx-integrations
+    environment:
+      LIVENX_API_HOST: 0.0.0.0
+      LIVENX_API_PORT: 8093
+      LIVENX_API_TOKEN: ""
+      LIVENX_TARGET_IP: ""
+      THIRDEYE_API_HOST: 0.0.0.0
+      THIRDEYE_API_USER: admin
+      THIRDEYE_API_PASSWORD: ""
+      THIRDEYE_NETWORK: Default
+    command: ["--inventory", "--fromproduct", "livenx", "--toproduct", "netld", "--continuous", "--noprompt", "--logstdout"]

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CmConfig xmlns="http://purl.org/cloudmeter/config" version="8.0.1">
+  <Vocabulary id="livewire_ipfix">
+    <Name>LiveWire Protocol Vocabulary</Name>
+    <Locked>true</Locked>
+    <Term id="cisco.meanMediaBitRate">
+      <Type>uint32</Type>
+      <Comment>meanMediaBitRate</Comment>
+    </Term>
+    <Term id="cisco.packetExpectedCount">
+      <Type>uint32</Type>
+      <Comment>packetExpectedCount</Comment>
+    </Term>
+    <Term id="cisco.packetLossCount">
+      <Type>uint32</Type>
+      <Comment>packetLossCount</Comment>
+    </Term>
+    <Term id="cisco.fractionLost">
+      <Type>uint32</Type>
+      <Comment>fractionLost</Comment>
+    </Term>
+    <Term id="cisco.rtpSsrc">
+      <Type>uint32</Type>
+      <Comment>rtpSsrc</Comment>
+    </Term>
+    <Term id="cisco.interarrivalJitterMean">
+      <Type>uint32</Type>
+      <Comment>interarrivalJitterMean</Comment>
+    </Term>
+    <Term id="cisco.interarrivalJitterMin">
+      <Type>uint32</Type>
+      <Comment>interarrivalJitterMin</Comment>
+    </Term>
+    <Term id="cisco.interarrivalJitterMax">
+      <Type>uint32</Type>
+      <Comment>interarrivalJitterMax</Comment>
+    </Term>
+    <Term id="cisco.artCountRetransmissions">
+      <Type>uint32</Type>
+      <Comment>artCountRetransmissions</Comment>
+    </Term>
+    <Term id="cisco.connectionServerCounterPacketsRetrans">
+      <Type>uint32</Type>
+      <Comment>connectionServerCounterPacketsRetrans</Comment>
+    </Term>
+    <Term id="cisco.artCountResponses">
+      <Type>uint16</Type>
+      <Comment>artCountResponses</Comment>
+    </Term>
+    <Term id="cisco.artResponseTimeSum">
+      <Type>uint32</Type>
+      <Comment>artResponseTimeSum</Comment>
+    </Term>
+    <Term id="cisco.artServerResponseTimeSum">
+      <Type>uint32</Type>
+      <Comment>artServerResponseTimeSum</Comment>
+    </Term>
+    <Term id="cisco.artNetworkTimeSum">
+      <Type>uint32</Type>
+      <Comment>artNetworkTimeSum</Comment>
+    </Term>
+    <Term id="cisco.artClientNetworkTimeSum">
+      <Type>uint32</Type>
+      <Comment>artClientNetworkTimeSum</Comment>
+    </Term>
+    <Term id="cisco.artServerNetworkTimeSum">
+      <Type>uint32</Type>
+      <Comment>artServerNetworkTimeSum</Comment>
+    </Term>
+    <Term id="cisco.ciscoClientip">
+      <Type>uint32</Type>
+      <Comment>ciscoClientip</Comment>
+    </Term>
+    <Term id="cisco.ciscoServerip">
+      <Type>uint32</Type>
+      <Comment>ciscoServerip</Comment>
+    </Term>
+    <Term id="cisco.serverTransportPort">
+      <Type>uint16</Type>
+      <Comment>serverTransportPort</Comment>
+    </Term>
+    <Term id="livewire.ApplicationLatencyMin">
+      <Type>uint32</Type>
+      <Comment>ApplicationLatencyMin</Comment>
+    </Term>
+    <Term id="livewire.ApplicationLatencyMax">
+      <Type>uint32</Type>
+      <Comment>ApplicationLatencyMax</Comment>
+    </Term>
+    <Term id="livewire.ApplicationLatencyAvg">
+      <Type>uint32</Type>
+      <Comment>ApplicationLatencyAvg</Comment>
+    </Term>
+    <Term id="livewire.NetworkLatencyMin">
+      <Type>uint32</Type>
+      <Comment>NetworkLatencyMin</Comment>
+    </Term>
+    <Term id="livewire.NetworkLatencyMax">
+      <Type>uint32</Type>
+      <Comment>NetworkLatencyMax</Comment>
+    </Term>
+    <Term id="livewire.NetworkLatencyAvg">
+      <Type>uint32</Type>
+      <Comment>NetworkLatencyAvg</Comment>
+    </Term>
+    <Term id="livewire.ConnectionLost">
+      <Type>uint64</Type>
+      <Comment>ConnectionLost</Comment>
+    </Term>
+    <Term id="livewire.ConnectionRefused">
+      <Type>uint64</Type>
+      <Comment>ConnectionRefused</Comment>
+    </Term>
+    <Term id="livewire.RepeatedConnectionAttempt">
+      <Type>uint64</Type>
+      <Comment>RepeatedConnectionAttempt</Comment>
+    </Term>
+    <Term id="livewire.ZeroWindow">
+      <Type>uint64</Type>
+      <Comment>ZeroWindow</Comment>
+    </Term>
+    <Term id="livewire.LowWindow">
+      <Type>uint64</Type>
+      <Comment>LowWindow</Comment>
+    </Term>
+    <Term id="livewire.vxlanGroupPolicyId">
+      <Type>uint16</Type>
+      <Comment>vxlanGroupPolicyId</Comment>
+    </Term>
+    <Term id="livewire.voipSignalingProtocol">
+      <Type>uint8</Type>
+      <Comment>voipSignalingProtocol</Comment>
+    </Term>
+    <Term id="livewire.mediaEndpointIPv4">
+      <Type>uint32</Type>
+      <Comment>mediaEndpointIPv4</Comment>
+    </Term>
+    <Term id="livewire.mediaEndpointPort">
+      <Type>uint16</Type>
+      <Comment>mediaEndpointPort</Comment>
+    </Term>
+    <Term id="livewire.interarrivalJitterMeanMus">
+      <Type>uint32</Type>
+      <Comment>interarrivalJitterMeanMus</Comment>
+    </Term>
+    <Term id="livewire.interarrivalJitterMinMus">
+      <Type>uint32</Type>
+      <Comment>interarrivalJitterMinMus</Comment>
+    </Term>
+    <Term id="livewire.interarrivalJitterMaxMus">
+      <Type>uint32</Type>
+      <Comment>interarrivalJitterMaxMus</Comment>
+    </Term>
+    <Term id="livewire.pageResponseTimeCount">
+      <Type>uint32</Type>
+      <Comment>pageResponseTimeCount</Comment>
+    </Term>
+    <Term id="livewire.pageResponseTimeSum">
+      <Type>uint32</Type>
+      <Comment>pageResponseTimeSum</Comment>
+    </Term>
+    <Term id="livewire.pageResponseTimeMax">
+      <Type>uint32</Type>
+      <Comment>pageResponseTimeMax</Comment>
+    </Term>
+    <Term id="livewire.pageResponseTimeMin">
+      <Type>uint32</Type>
+      <Comment>pageResponseTimeMin</Comment>
+    </Term>
+    <Term id="livewire.ResponseTimeMax">
+      <Type>uint32</Type>
+      <Comment>ResponseTimeMax</Comment>
+    </Term>
+    <Term id="livewire.deltaTimeMilliseconds">
+      <Type>uint32</Type>
+      <Comment>deltaTimeMilliseconds</Comment>
+    </Term>
+    <Term id="livewire.L4PayloadLength">
+      <Type>uint16</Type>
+      <Comment>L4PayloadLength</Comment>
+    </Term>
+    <Term id="livewire.sourceOctetDeltaCount">
+      <Type>uint64</Type>
+      <Comment>sourceOctetDeltaCount</Comment>
+    </Term>
+    <Term id="livewire.sourcePacketDeltaCount">
+      <Type>uint64</Type>
+      <Comment>sourcePacketDeltaCount</Comment>
+    </Term>
+    <Term id="livewire.destinationOctetDeltaCount">
+      <Type>uint64</Type>
+      <Comment>destinationOctetDeltaCount</Comment>
+    </Term>
+    <Term id="livewire.destinationPacketDeltaCount">
+      <Type>uint64</Type>
+      <Comment>destinationPacketDeltaCount</Comment>
+    </Term>
+    <Term id="livewire.tcpMaxSegSizeOpt">
+      <Type>uint16</Type>
+      <Comment>tcpMaxSegSizeOpt</Comment>
+    </Term>
+    <Term id="livewire.appOctetCount">
+      <Type>uint64</Type>
+      <Comment>appOctetCount</Comment>
+    </Term>
+    <Term id="livewire.srcPacketCount">
+      <Type>uint64</Type>
+      <Comment>srcPacketCount</Comment>
+    </Term>
+    <Term id="livewire.dstPacketCount">
+      <Type>uint64</Type>
+      <Comment>dstPacketCount</Comment>
+    </Term>
+    <Term id="livewire.tcpSWinScaleOpt">
+      <Type>uint16</Type>
+      <Comment>tcpSWinScaleOpt</Comment>
+    </Term>
+    <Term id="livewire.octetCount">
+      <Type>uint64</Type>
+      <Comment>octetCount</Comment>
+    </Term>
+    <Term id="livewire.srcHops">
+      <Type>uint8</Type>
+      <Comment>srcHops</Comment>
+    </Term>
+    <Term id="livewire.tcpSWinSizeOpt">
+      <Type>uint16</Type>
+      <Comment>tcpSWinSizeOpt</Comment>
+    </Term>
+    <Term id="livewire.packetCount">
+      <Type>uint64</Type>
+      <Comment>packetCount</Comment>
+    </Term>
+    <Term id="cisco.clientTransportPort">
+      <Type>uint16</Type>
+      <Comment>clientTransportPort</Comment>
+    </Term>
+    <Term id="livewire.tlsHandshakeVersion">
+      <Type>uint16</Type>
+      <Comment>tlsHandshakeVersion</Comment>
+    </Term>
+    <Term id="livewire.dnsRType">
+      <Type>uint16</Type>
+      <Comment>dnsRType</Comment>
+    </Term>
+    <Term id="livewire.dnsQType">
+      <Type>uint16</Type>
+      <Comment>dnsQType</Comment>
+    </Term>
+  </Vocabulary>
+</CmConfig>

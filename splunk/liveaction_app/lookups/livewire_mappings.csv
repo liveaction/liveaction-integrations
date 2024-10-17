@@ -1,0 +1,2828 @@
+Application,cl_eng_id,sel_id
+Activesync,13,490
+AdobeConnect,13,505
+AdobeConnect,13,505
+Adobe Services,13,1203
+AirBnB,13,735
+Amazon Chime,13,1282
+Amazon Web Services,13,603
+Ameba,13,695
+Apple Services,13,577
+Ares,13,565
+Ares,13,565
+Atlassian,13,769
+BACNET,3,47808
+Badoo,13,684
+BGP,3,179
+Bitcoin,13,1125
+Box,13,1074
+Call of Duty,3,20500
+Capital One,13,690
+CBS Sports,13,749
+Citrix,13,56
+Citrix,13,56
+CNN,13,1167
+CoAP,13,1239
+CrashPlan,13,820
+CrashPlan,13,820
+DHCP,13,13
+DHCPv6,13,1263
+DingTalk,13,1270
+DingTalk,13,1270
+DirectConnect,13,70
+DirectConnect,13,70
+DNS,3,53
+Douyin,13,1271
+Dropbox,3,17500
+DTLS,13,1077
+eBay,13,270
+EGP,1,8
+EIGRP,1,88
+Etsy,13,646
+Evernote,13,687
+Facebook,13,518
+Facebook,13,518
+FaceTime,13,535
+Fasttrack,13,57
+Filetopia,13,433
+Filetopia,13,433
+FIX,13,74
+Flickr,13,641
+Foursquare,13,806
+Fox News,13,659
+Fring,13,54
+Fring,13,54
+FTP,3,21
+Genie,3,402
+GitHub,13,625
+GMX Mail,13,662
+GoDaddy,13,640
+Google Chat,13,1288
+Google Docs,13,522
+Google Earth,13,441
+Google Maps,13,1290
+Google Meet,13,1284
+Google Photos,13,1264
+Google Play,13,589
+Google Plus,13,521
+Google Shared Services,13,520
+Google Translate,13,1289
+GoToMeeting,13,1166
+GoToMyPC,13,499
+GRE,1,47
+H225,13,1172
+H245,13,1173
+H323,13,64
+HamachiVPN,3,12975
+HamachiVPN,3,12975
+HL7,13,73
+HTTP,3,80
+HubSpot,13,1197
+Hulu,13,458
+IAX,3,4569
+iCloud,13,564
+ICMP,1,1
+ICQ,13,269
+IGMP,13,1210
+IMAP,3,143
+IMDb,13,529
+Imgur,13,292
+Instagram,13,598
+Intuit,13,665
+Iperf,13,335
+Iperf,13,335
+IPFIX,13,606
+IP in IP,1,94
+IPP,3,631
+IPP,3,631
+IPsec,13,9
+IRC,3,194
+ISAKMP,3,500
+ISIS,1,124
+iTunes,13,434
+Kakao Services,13,583
+Kakaotalk,13,579
+Kerberos,3,88
+L2TP,1,115
+LDAP,3,389
+LDP,3,646
+LinkedIn,13,527
+LivePerson,13,801
+LogMeIn,13,519
+LogMeIn,13,519
+Lotus Notes,3,1352
+Lotus Notes,3,1352
+Mailchimp,13,651
+Mail-Ru,13,614
+Manolito,13,266
+Manolito,13,266
+Mapi,13,78
+MapleStory,13,448
+MapleStory,13,448
+MulticastDNS,13,1244
+MGCP,13,62
+Mixi,13,592
+Modbus,13,555
+MQTT,13,1233
+Mux,1,18
+MySQL,3,3306
+Napster,13,268
+NBC News,13,719
+NetBIOS,13,26
+NetFlix,13,457
+NetFlow,13,604
+NFS,3,2049
+NNTP,3,119
+NTP,3,123
+OCSP,13,819
+OkCupid,13,703
+OpenVPN,13,455
+OSPF,1,89
+Outbrain,13,637
+Pando,13,443
+Pando,13,443
+Pandora,13,515
+PayPal,13,512
+PCAnywhere,13,32
+PCAnywhere,13,32
+PCoIP,3,4172
+Pinterest,13,752
+Pocket,13,803
+PPStream,13,423
+PPStream,13,423
+PPTP,3,1723
+PPTV,13,542
+Proton VPN,13,1277
+PTP,1,123
+QQLive,13,540
+QQLive,13,540
+QUIC,13,778
+RADIUS,3,1812
+RDP,1,27
+RealDataTransport,3,6970
+RealMedia,13,507
+Rhapsody,13,489
+Rhapsody,13,489
+RingCentral,13,1188
+Routing Information Protocol,3,520
+RSVP,1,46
+Rsync,3,873
+RTCP,13,66
+RTMP,13,418
+RTP,13,61
+RTSP,3,554
+Salesforce,13,509
+SAP,13,84
+SAP,13,84
+SCTP,1,132
+Second Life,13,328
+Second Life,13,328
+ServiceNow,13,1181
+sFlow,3,6343
+SHOUTcast,13,544
+Shoutcast,13,544
+SIP,3,5060
+Skinny,13,63
+Skinny,13,63
+Skydrive,13,562
+Sky News,13,786
+Skype,13,83
+Skype,13,83
+Slack,13,1217
+Slingbox,13,440
+SMTP,3,25
+Snapchat,13,1242
+SNMP,3,161
+Socks,3,1080
+SopCast,13,429
+SopCast,13,429
+Soribada,13,438
+Speedtest,13,692
+Speedtest,13,692
+Splunk,13,1084
+Spotify,13,1165
+Spotify,13,1165
+SSDP,13,1265
+SSH,3,22
+SSL,13,453
+Steam,13,472
+Steam,13,472
+Syslog,13,41
+TACACS,3,49
+TeamSpeak,13,447
+TeamSpeak,13,447
+TeamViewer,13,494
+TeamViewer,13,494
+Telnet,3,23
+Telnet,3,23
+TFTP,3,69
+TOR,13,460
+Tor,13,460
+Trulia,13,710
+Tumblr,13,1241
+Twitter,13,517
+UltraSurf,13,584
+UltraSurf,13,584
+United Parcel Service,3,401
+United States Postal Service,13,660
+Ventrilo,13,446
+Ventrilo,13,446
+Viber,13,1320
+Viber,13,1320
+Vimeo,13,1168
+Vine,13,744
+VNC,13,100
+VNC,13,100
+Virtual Router Redundancy Protocol,1,112
+VXLAN,13,1254
+WAP-WSP,3,9200
+Washington Post,13,656
+WeChat,13,1037
+WeChat,13,1037
+Wells Fargo,13,650
+WhatsApp,13,553
+WhatsApp,13,553
+Wikipedia,13,608
+Windows Azure,13,510
+Windows Store,13,590
+WinMX,13,68
+WinNY,13,469
+WireGuard,13,1276
+XDMCP,3,177
+Yahoo,13,831
+Yahoo,13,831
+Yahoo Mail,13,526
+Yandex,13,611
+YouTube,13,82
+Zattoo,13,428
+Zattoo,13,428
+ZenDesk,13,685
+Zillow,13,654
+Zscaler,13,1275
+10upload-com,6,16777187
+123upload,6,16777186
+123upload-pl,6,16777185
+123VPN,6,16777184
+139pan-com,6,16777183
+163pan-com,6,16777182
+1-clickshare-com,6,16777181
+1clickshare-net,6,16777180
+1fichier-com,6,16777179
+1kxun,6,16777178
+1-upload-com,6,16777177
+1-upload-to,6,16777176
+22cans,6,16777175
+2channel,6,16777174
+2Gis,6,16777173
+2K,6,16777172
+2shared-com,6,16777171
+360 Total Security,6,16777170
+4fastfile-com,6,16777169
+4shared-com,6,16777168
+4shared-vn,6,16777167
+4share-ws,6,16777166
+4us-to,6,16777165
+5channel,6,16777164
+5GMARK,6,16777163
+6Sense,6,16777162
+7TV,6,16777161
+99Taxis,6,16777160
+9GAG,6,16777159
+9ku,6,16777158
+A1 Belarus,6,16777157
+Aarki,6,16777156
+Aarogya Setu,6,16777155
+American Broadcasting Company,6,16777154
+Acast,6,16777153
+Accedo,6,16777152
+Accountkit,6,16777151
+Activision Blizzard,6,16777150
+Activision Services,6,16777149
+Actmobile Services,6,16777148
+Actmobile Services,6,16777148
+Act VPN,6,16777147
+Act VPN,6,16777147
+Ada Support,6,16777146
+Adcolony,6,16777145
+Adex,6,16777144
+AdForm,6,16777143
+Adidas Services,6,16777142
+Adjust,6,16777141
+Admixer,6,16777140
+Adobe Creative Cloud,6,16777139
+Adobe Document Cloud,6,16777138
+Adobe Experience Cloud,6,16777137
+Adobe Fonts,6,16777136
+adRise,6,16777135
+Adrive,6,16777134
+adrive-com,6,16777133
+AdSafeProtected,6,16777132
+AdsWizz,6,16777131
+Adtech Studio,6,16777130
+Adtelligent,6,16777129
+AdTiming,6,16777128
+AFK Arena,6,16777127
+AFP,6,16777126
+After School,6,16777125
+Age of Empires,6,16777124
+Agoda,6,16777123
+Agora,6,16777122
+Agora Services,6,16777121
+AG Projects Services,6,16777120
+AIHelp,6,16777119
+AIM,6,16777118
+Aiming Inc,6,16777117
+Aimini,6,16777116
+Aimini,6,16777116
+AIONCLOUD,6,16777115
+Airable,6,16777114
+Airship,6,16777113
+Akamai Cloud,6,16777112
+Akamai Technologies,6,16777111
+Akatsuki Services,6,16777110
+Algolia,6,16777109
+Alibaba,6,16777108
+Alibaba,6,16777108
+Alibaba Cloud,6,16777107
+Alibaba Group Services,6,16777106
+AliExpress,6,16777105
+AliPay,6,16777104
+Al Jazeera English,6,16777103
+Al Jazeera Services,6,16777102
+alldrives-ge,6,16777101
+AllJoyn,6,16777100
+allshares-ge,6,16777099
+AlphaBetty Saga,6,16777098
+Amagi,6,16777097
+Amaze VPN,6,16777096
+Amaze VPN,6,16777096
+Amazon Ads,6,16777095
+Amazon Alexa,6,16777094
+Amazon Cloud,6,16777093
+Amazon Drive,6,16777092
+Amazon Games,6,16777091
+Amazon Luna,6,16777090
+Amazon Prime Music,6,16777089
+Amazon Prime Now,6,16777088
+Amazon Prime Video,6,16777087
+Amazon Services,6,16777086
+Amazon shopping,6,16777085
+Amazon Trust Services,6,16777084
+AMC Networks,6,16777083
+AMC Plus,6,16777082
+AMC SVOD,6,16777081
+AMC Theatres,6,16777080
+Advanced Micro Devices Services,6,16777079
+Amediateka,6,16777078
+AmEx Services,6,16777077
+Amobee,6,16777076
+Among Us,6,16777075
+Among Us,6,16777075
+Amplitude,6,16777074
+AMQP,6,16777073
+Anchorfm,6,16777072
+AnchorFree Services,6,16777071
+Anchorfree Services,6,16777071
+Anghami,6,16777070
+Angry Birds,6,16777069
+Aniview,6,16777068
+Ankama Games,6,16777067
+annonhost-net,6,16777066
+Another Eden,6,16777065
+ANtsP2P,6,16777064
+AnyDesk,6,16777063
+Anzu VR,6,16777062
+Age of Warring Empire,6,16777061
+Age of Warring Empire,6,16777061
+Apex Legends,6,16777060
+Apex Legends,6,16777060
+APNS,6,16777059
+App Bazaar,6,16777058
+AppDynamics,6,16777057
+AppleJuice,6,16777056
+AppleJuice,6,16777056
+Apple Geolocation,6,16777055
+Apple Maps,6,16777054
+Apple Music,6,16777053
+Apple News,6,16777052
+Apple TV,6,16777051
+Apple Weather,6,16777050
+Applicaster,6,16777049
+AppLovin,6,16777048
+AppMetrica,6,16777047
+AppNexus,6,16777046
+Appsee,6,16777045
+AppsFlyer,6,16777044
+Apptentive,6,16777043
+AppVPN,6,16777042
+AppVPN,6,16777042
+Apteligent,6,16777041
+APUS Services,6,16777040
+Arc Publishing,6,16777039
+Arc XP,6,16777038
+Arena of Valor,6,16777037
+ArkVPN,6,16777036
+Arlo,6,16777035
+Armagetron,6,16777034
+Armagetron,6,16777034
+ARP,6,16777033
+ART19,6,16777032
+ARTE,6,16777031
+Artifact,6,16777030
+asixfiles-com,6,16777029
+Asphalt8,6,16777028
+Asphalt9,6,16777027
+Asphalt9,6,16777027
+ASUS WebStorage,6,16777026
+Atom VPN,6,16777025
+Atom VPN,6,16777025
+Atresmedia,6,16777024
+ATRESplayer,6,16777023
+ATT Services,6,16777022
+atudo,6,16777021
+Audible,6,16777020
+Audiko,6,16777019
+Audiogalaxy,6,16777018
+Audiogalaxy,6,16777018
+Audiomack,6,16777017
+Australia Post,6,16777016
+Auth0,6,16777015
+Avast Services,6,16777014
+Avast VPN Services,6,16777013
+AVG Antivirus,6,16777012
+AVG Services,6,16777011
+AVI,6,16777010
+Avira Antivirus,6,16777009
+Avira Phantom VPN,6,16777008
+Avira Services,6,16777007
+Avo,6,16777006
+Ayoba,6,16777005
+Azar,6,16777004
+Azur Games,6,16777003
+Azur Games,6,16777003
+B612,6,16777002
+BaBe,6,16777001
+BackBlaze,6,16777000
+Badlanders,6,16776999
+badongo-com,6,16776998
+badongo-net,6,16776997
+Baidu,6,16776996
+Baidu Maps,6,16776995
+BAMTech Media,6,16776994
+banashare-com,6,16776993
+Banco Azteca,6,16776992
+BanCoppel,6,16776991
+BAND,6,16776990
+Bandai Namco Entertainment,6,16776989
+Batch,6,16776988
+Battlefield,6,16776987
+Battlefield,6,16776987
+BattleNet,6,16776986
+BattleNet,6,16776986
+BattlEye,6,16776985
+BattlEye,6,16776985
+Bazaarvoice,6,16776984
+BBC News,6,16776983
+BBC Services,6,16776982
+BlackBerry Messenger,6,16776981
+BCE Services,6,16776980
+Beamable,6,16776979
+BeautyCam,6,16776978
+BeautyPlus,6,16776977
+Bebi,6,16776976
+Beeswax,6,16776975
+BeeTalk,6,16776974
+Behaviour Services,6,16776973
+beIN CONNECT,6,16776972
+beIN Media Services,6,16776971
+beIN SPORTS,6,16776970
+BeReal,6,16776969
+Bermuda Video Chat,6,16776968
+bestsharing-com,6,16776967
+BET Plus,6,16776966
+BFD,6,16776965
+BidSwitch,6,16776964
+Big Farm,6,16776963
+bigfilez-com,6,16776962
+biggerupload-com,6,16776961
+BIGO Services,6,16776960
+BIGO Services,6,16776960
+Bilibili,6,16776959
+Bilibili Games,6,16776958
+Bilibili Gaming,6,16776957
+Billo,6,16776956
+Binance,6,16776955
+Bingo Blitz,6,16776954
+BiP Messenger,6,16776953
+BitTorrent,6,16776952
+BitTorrent,6,16776952
+Bitdefender Services,6,16776951
+BitPay,6,16776950
+bitshare-com,6,16776949
+BitTorrent Now,6,16776948
+BlackBerry Services,6,16776947
+BlackBerry Work,6,16776946
+Blackboard,6,16776945
+Black Library,6,16776944
+Blinkist,6,16776943
+Blitzer-de,6,16776942
+Blockchain-com,6,16776941
+Block Craft 3D,6,16776940
+Block Inc,6,16776939
+Bloomberg,6,16776938
+Blossom Blast Saga,6,16776937
+Blue Billywig,6,16776936
+BlueJeans,6,16776935
+BluTV,6,16776934
+Bolt,6,16776933
+Bolt,6,16776933
+Bolt Technology,6,16776932
+Bombora,6,16776931
+Booking-com,6,16776930
+Booking Holdings Services,6,16776929
+Boom Beach,6,16776928
+Boomplay Music,6,16776927
+boosterking-com,6,16776926
+BootstrapCDN,6,16776925
+BOTIM,6,16776924
+BOTIM,6,16776924
+Brainly,6,16776923
+Branch,6,16776922
+Brawl Stars,6,16776921
+Braze,6,16776920
+BRD Wallet,6,16776919
+Bria Mobile,6,16776918
+Bria Teams,6,16776917
+Brightcove,6,16776916
+Bright Data,6,16776915
+BrightLine,6,16776914
+Browsec VPN,6,16776913
+Bubble Witch,6,16776912
+Budge Studios,6,16776911
+Buffered VPN,6,16776910
+Bugsnag,6,16776909
+Bumble,6,16776908
+Bungie Games,6,16776907
+bunny-net,6,16776906
+Burner,6,16776905
+Buzzsprout,6,16776904
+BYJUS,6,16776903
+ByteDance,6,16776902
+BytePlus,6,16776901
+Cabify,6,16776900
+CacheFly,6,16776899
+Cadent,6,16776898
+Cake,6,16776897
+Call of Duty Mobile,6,16776896
+Calm,6,16776895
+Cam-Content,6,16776894
+CamScanner,6,16776893
+CamScanner,6,16776893
+Canal Plus,6,16776892
+Canal Plus Afrique,6,16776891
+Candy Crush,6,16776890
+Candy Crush Soda,6,16776889
+Canonical Services,6,16776888
+Capcom Services,6,16776887
+CapCut,6,16776886
+Captivate FM,6,16776885
+Cash App,6,16776884
+cash-file-net,6,16776883
+Cashi,6,16776882
+Castbox,6,16776881
+CatchMedia,6,16776880
+CBS News,6,16776879
+CBS Services,6,16776878
+CCP Games,6,16776877
+CCP Games,6,16776877
+CDA PL,6,16776876
+CDN77,6,16776875
+CDNetworks,6,16776874
+CDNJS,6,16776873
+CDNvideo,6,16776872
+Cisco Discovery Protocol,6,16776871
+Cedexis,6,16776870
+Celtic Heroes,6,16776869
+Celtic Heroes,6,16776869
+Celtra,6,16776868
+Certum,6,16776867
+Chamet,6,16776866
+Channel 4oD,6,16776865
+Channel One,6,16776864
+Chartbeat,6,16776863
+Chartboost,6,16776862
+Charter Communications,6,16776861
+ChatCube,6,16776860
+ChatCube,6,16776860
+ChatGPT,6,16776859
+chinamofile-com,6,16776858
+Ciaomobile HDTV,6,16776857
+Cassandra Internode Communication,6,16776856
+Common Industrial Protocol,6,16776855
+Cires21,6,16776854
+Cisco Metadata,6,16776853
+Cisco Systems Services,6,16776852
+Citadel Colour,6,16776851
+CitrixGoTo,6,16776850
+CitrixGoTo,6,16776850
+Citrix XenApp,6,16776849
+Clash of Clans,6,16776848
+Clash of Kings,6,16776847
+Clash Royale,6,16776846
+ClassDojo,6,16776845
+Clearbit,6,16776844
+Clicktouch Games,6,16776843
+ClickView,6,16776842
+Cloudflare,6,16776841
+Cloudflare,6,16776841
+Cloudflare WARP VPN,6,16776840
+Cloudinary,6,16776839
+Cloud-Mail-Ru,6,16776838
+CloudMe,6,16776837
+Club Factory,6,16776836
+Clubhouse,6,16776835
+ClubPenguin,6,16776834
+ClubPenguin,6,16776834
+CME,6,16776833
+CNTV,6,16776832
+cobrashare-sk,6,16776831
+Coinbase,6,16776830
+Coinbox,6,16776829
+CoinCap,6,16776828
+CoinGecko,6,16776827
+collectd,6,16776826
+collectd,6,16776826
+Comcast,6,16776825
+Comcast Technology Solutions,6,16776824
+Commerzbank Banking,6,16776823
+Comodo Services,6,16776822
+ComodoUnite,6,16776821
+Conductrics,6,16776820
+Constant Contact,6,16776819
+Contentful,6,16776818
+Contentsquare,6,16776817
+Conviva,6,16776816
+CookiePro,6,16776815
+coolshare-cz,6,16776814
+Coppel,6,16776813
+Corporacion Medcom,6,16776812
+Counterpath Services,6,16776811
+Counter-Strike 2,6,16776810
+CounterStrikeGO,6,16776809
+CounterStrikeGO,6,16776809
+Coveo,6,16776808
+Cassandra Query Language,6,16776807
+Crackle,6,16776806
+cramit-in,6,16776805
+Crashlytics,6,16776804
+Crave,6,16776803
+Creative Assembly,6,16776802
+Crime City,6,16776801
+Criteo,6,16776800
+crocko-com,6,16776799
+CrossFire,6,16776798
+CrossFire,6,16776798
+Crunchyroll,6,16776797
+Crunchyroll Games,6,16776796
+Cryptic Studios,6,16776795
+Cryptic Studios,6,16776795
+Crypto-com,6,16776794
+CryptoTrader,6,16776793
+CryptoWatch,6,16776792
+CSG Media,6,16776791
+CtiTV,6,16776790
+cum-com,6,16776789
+Curalate,6,16776788
+CW Seed,6,16776787
+Cxense,6,16776786
+CyberAgent Services,6,16776785
+CyberGhost,6,16776784
+CyberGhost,6,16776784
+Cybertrust CA,6,16776783
+Cygames,6,16776782
+czshare-com,6,16776781
+Dailymotion,6,16776780
+Dash VPN,6,16776779
+Datadog,6,16776778
+data-hu,6,16776777
+data-loading-com,6,16776776
+dataport-cz,6,16776775
+datei-to,6,16776774
+Daum Cafe,6,16776773
+Daum Mail,6,16776772
+Dauntless,6,16776771
+DAZN,6,16776770
+Dead by Daylight,6,16776769
+DCE RPC,6,16776768
+DC Universe,6,16776767
+Dead Rivals,6,16776766
+Dead Rivals,6,16776766
+DECA Games,6,16776765
+Deezer,6,16776764
+DeltaDNA,6,16776763
+Deluxe Media,6,16776762
+Demand 5,6,16776761
+Demandbase,6,16776760
+DeNA,6,16776759
+depositfiles-com,6,16776758
+Destiny,6,16776757
+Destiny,6,16776757
+Deutsche Bank,6,16776756
+Diablo Immortal,6,16776755
+Diameter,6,16776754
+Diamond Diaries Saga,6,16776753
+Diamond Digger Saga,6,16776752
+DiDi,6,16776751
+DiDi Food,6,16776750
+DiDi Rider,6,16776749
+DiDi Services,6,16776748
+DiDi Services,6,16776748
+Digicel Music,6,16776747
+Digicel PlayGo,6,16776746
+Digicel Services,6,16776745
+Digicel TopUp,6,16776744
+DigiCert,6,16776743
+Digital Extremes,6,16776742
+DigitalOcean,6,16776741
+Digital Turbine,6,16776740
+Digiturk Play,6,16776739
+DirecTV,6,16776738
+Discord,6,16776737
+Discovery Communications,6,16776736
+Discovery Plus,6,16776735
+Dish Network,6,16776734
+Disney Channel,6,16776733
+Disney Hotstar,6,16776732
+Disney Plus,6,16776731
+Disney Radio,6,16776730
+Disney Services,6,16776729
+Disney Storytime,6,16776728
+Display-io,6,16776727
+DivanTV,6,16776726
+Deutsche Kreditbank,6,16776725
+DNA TV,6,16776724
+DNP3,6,16776723
+DNSCrypt,6,16776722
+Docler Holding Services,6,16776721
+NTT Docomo,6,16776720
+DocuSign,6,16776719
+Dofus,6,16776718
+Dofus,6,16776718
+DO Global Services,6,16776717
+Dogus Services,6,16776716
+Dominos Pizza,6,16776715
+Donuts Services,6,16776714
+Doook,6,16776713
+Doook,6,16776713
+DoorDash,6,16776712
+Dota 2,6,16776711
+Dota 2,6,16776711
+Dota Legend,6,16776710
+DotVPN,6,16776709
+DoubleVerify,6,16776708
+Douyu,6,16776707
+Dovetail,6,16776706
+downupload-com,6,16776705
+DraftKings Casino,6,16776704
+DraftKings Services,6,16776703
+DraftKings Sportsbook,6,16776702
+Dragon Ball Legends,6,16776701
+DRAGON BALL Z DOKKAN BATTLE,6,16776700
+Drift,6,16776699
+DriveLock,6,16776698
+Droid VPN,6,16776697
+Droid VPN,6,16776697
+Deutsche Telekom AG Services,6,16776696
+Dynamic Trunking Protocol,6,16776695
+Dubsmash,6,16776694
+DuckDuckGo,6,16776693
+Dungeon Fighter Online,6,16776692
+Duo Duo,6,16776691
+Duokan,6,16776690
+Duolingo,6,16776689
+DU Recorder,6,16776688
+Dynamic Yield,6,16776687
+EA Games,6,16776686
+Eagle VPN,6,16776685
+EA Origin,6,16776684
+EA Origin,6,16776684
+Easybrain,6,16776683
+Easybrain Music Maker,6,16776682
+easybytez-com,6,16776681
+EasyPark,6,16776680
+easypaste-org,6,16776679
+easy-share-com,6,16776678
+Easy Taxi,6,16776677
+e-bot7,6,16776676
+eBuddy,6,16776675
+eBuddy,6,16776675
+Edgio,6,16776674
+eDisk,6,16776673
+edisk-cz,6,16776672
+eDonkey,6,16776671
+eDonkey,6,16776671
+edX,6,16776670
+Elder Scrolls Online,6,16776669
+Elder Scrolls Online,6,16776669
+Electronic Arts,6,16776668
+Elex Technology,6,16776667
+Elex Technology,6,16776667
+Elfsight,6,16776666
+Elisa Services,6,16776665
+Elisa Viihde,6,16776664
+Embrace,6,16776663
+Embracer Group,6,16776662
+Encrypt-me,6,16776661
+Endeavor Services,6,16776660
+Endeavor Streaming,6,16776659
+Endomondo,6,16776658
+enLegion,6,16776657
+Enmasse Games,6,16776656
+enterupload-com,6,16776655
+Entrust,6,16776654
+Epic,6,16776653
+Epic Browser Proxy,6,16776652
+Epic Games,6,16776651
+EPIK,6,16776650
+Epsilon-Conversant,6,16776649
+Ericsson Services,6,16776648
+Erstream,6,16776647
+Escape from Tarkov,6,16776646
+Escape from Tarkov,6,16776646
+ESET Services,6,16776645
+ESPN,6,16776644
+EtherCAT,6,16776643
+Ethereum,6,16776642
+Ethernet,6,16776641
+EtherNetIP,6,16776640
+Ethernet Powerlink,6,16776639
+Etisalat Services,6,16776638
+Euronews,6,16776637
+euroshare-eu,6,16776636
+Eurosport News,6,16776635
+Eurosport Player,6,16776634
+Eurosport Services,6,16776633
+EVE Echoes,6,16776632
+EVE Online,6,16776631
+Eversend,6,16776630
+Evolution Engine,6,16776629
+Evony,6,16776628
+Exactag,6,16776627
+Exaring Services,6,16776626
+Exodus Wallet,6,16776625
+Expedia,6,16776624
+Expo Framework,6,16776623
+ExpressVPN,6,16776622
+ExpressVPN,6,16776622
+extabit-com,6,16776621
+Extole,6,16776620
+Extreme Reach,6,16776619
+Exxen,6,16776618
+eyvx-com,6,16776617
+FaceApp,6,16776616
+Facebook Broadcasting,6,16776615
+Facebook Cloud,6,16776614
+Facebook Lite,6,16776613
+Facebook Messenger,6,16776612
+FACEIT,6,16776611
+Fall Guys,6,16776610
+Fall Guys,6,16776610
+Fandom,6,16776609
+FanDuel Casino,6,16776608
+FanDuel Services,6,16776607
+FanDuel Sportsbook,6,16776606
+Farm Hero,6,16776605
+FASP,6,16776604
+fastfileshare-com-ar,6,16776603
+fast-load-net,6,16776602
+Fastly,6,16776601
+Fast Secure VPN,6,16776600
+Fast Secure VPN,6,16776600
+fast-share-com,6,16776599
+FastVPN Master,6,16776598
+Fubon E-Broker,6,16776597
+FC2 Services,6,16776596
+FeedAd,6,16776595
+Feidian,6,16776594
+Feidian,6,16776594
+Feral Interactive,6,16776593
+FETnet,6,16776592
+FiCall,6,16776591
+Fiesta,6,16776590
+Fiesta,6,16776590
+FIFA Soccer,6,16776589
+fik1-com,6,16776588
+file2upload-net,6,16776587
+fileape-com,6,16776586
+filearchiv-ru,6,16776585
+filearn-com,6,16776584
+filebase-to,6,16776583
+filecloud-com,6,16776582
+filedude-com,6,16776581
+filefactory-com,6,16776580
+fileflyer-com,6,16776579
+filefrog-com,6,16776578
+filefront-com,6,16776577
+fileho-com,6,16776576
+filehook-com,6,16776575
+filehost-tv,6,16776574
+filejungle-com,6,16776573
+filemaze-ws,6,16776572
+fileover-net,6,16776571
+filepost-com,6,16776570
+filepost-ru,6,16776569
+filer-net,6,16776568
+filesafe-to,6,16776567
+filesend-net,6,16776566
+fileserve-com,6,16776565
+filesflash-com,6,16776564
+fileshare-in-ua,6,16776563
+files-mail-ru,6,16776562
+filesmonster-com,6,16776561
+filesonic-com,6,16776560
+filesonic-in,6,16776559
+files-to,6,16776558
+filestube-com,6,16776557
+files-upload-com,6,16776556
+file-upload-net,6,16776555
+file-upload-to,6,16776554
+fileupyours-com,6,16776553
+filevo-com,6,16776552
+filezup-com,6,16776551
+FilGoal,6,16776550
+Final Fantasy XIV,6,16776549
+Final Fantasy XIV,6,16776549
+Financial Times,6,16776548
+Finch VPN,6,16776547
+Finnpanel,6,16776546
+FINS,6,16776545
+Firefox Private Network,6,16776544
+FireVPN,6,16776543
+Fishdom,6,16776542
+Fitbit,6,16776541
+Fizy by Turkcell,6,16776540
+Flash,6,16776539
+Flashtalking,6,16776538
+Fliggy,6,16776537
+Flipboard,6,16776536
+Flipkart,6,16776535
+Florensia,6,16776534
+Florensia,6,16776534
+Flurry,6,16776533
+FLUTE,6,16776532
+Font Awesome,6,16776531
+Forfone,6,16776530
+Forge of Empires,6,16776529
+For Honor,6,16776528
+Fortnite,6,16776527
+Fortnite,6,16776527
+Fox Business,6,16776526
+Fox Services,6,16776525
+Fox Sports,6,16776524
+freakshare-net,6,16776523
+Freedome VPN,6,16776522
+Freenet,6,16776521
+Freenet,6,16776521
+FreePP,6,16776520
+freespace-by,6,16776519
+FreeWheel,6,16776518
+Freshdesk,6,16776517
+Freshworks,6,16776516
+Friendster,6,16776515
+FrootVPN,6,16776514
+Fruitshake,6,16776513
+F-Secure,6,16776512
+fshare-vn,6,16776511
+fsx-hu,6,16776510
+ftp2share-com,6,16776509
+fuboTV,6,16776508
+Fuelio,6,16776507
+FullStory,6,16776506
+Funimation,6,16776505
+Funk,6,16776504
+FunPlus,6,16776503
+Funshion,6,16776502
+Funshion,6,16776502
+Fuze Meeting,6,16776501
+Fuze Meeting,6,16776501
+Fyber,6,16776500
+FYEO,6,16776499
+Gaana,6,16776498
+Gab,6,16776497
+Gadu-Gadu,6,16776496
+Gadu-Gadu,6,16776496
+gaiafile-com,6,16776495
+Gaijin Entertainment,6,16776494
+Gaijin Entertainment,6,16776494
+gamefront-com,6,16776493
+GameKit,6,16776492
+GameKit,6,16776492
+Gameloft-Services,6,16776491
+Gameloft Services,6,16776491
+Game of War,6,16776490
+Games Workshop,6,16776489
+Gaode Map,6,16776488
+Gardenscapes,6,16776487
+Garena Free Fire,6,16776486
+Garena Free Fire,6,16776486
+Garena Services,6,16776485
+Garmin Connect,6,16776484
+Garmin Services,6,16776483
+Gazprom-Media,6,16776482
+G-Core Services,6,16776481
+Gearbox Entertainment Services,6,16776480
+Gearbox Publishing,6,16776479
+Gearbox Shift,6,16776478
+Geekflare,6,16776477
+Gemini Media Egypt,6,16776476
+GenieVPN,6,16776475
+Genshin Impact,6,16776474
+Geocaching,6,16776473
+GeoComply Services,6,16776472
+Geolocation Technology,6,16776471
+Ghost Foundation,6,16776470
+gigapeta-com,6,16776469
+gigasize-com,6,16776468
+gigeshare-com,6,16776467
+Gigya,6,16776466
+GIOP,6,16776465
+Giphy,6,16776464
+Glassbox,6,16776463
+GlobalSign,6,16776462
+Globoplay,6,16776461
+Glovo,6,16776460
+Glu Mobile Services,6,16776459
+Gnutella,6,16776458
+Gnutella,6,16776458
+Gods and Glory,6,16776457
+GODSOME Clash of Gods,6,16776456
+Godus,6,16776455
+GOG,6,16776454
+Golf Clash,6,16776453
+Goober,6,16776452
+Goober,6,16776452
+Good,6,16776451
+Good,6,16776451
+GoodBarber,6,16776450
+Goodgame Studios,6,16776449
+Google Ads,6,16776448
+Google Allo,6,16776447
+Google Analytics,6,16776446
+Google APIs,6,16776445
+Google App Engine,6,16776444
+Google Bard,6,16776443
+Google Calendar,6,16776442
+Google Classroom,6,16776441
+Google Cloud,6,16776440
+Google Drive,6,16776439
+Google Duo,6,16776438
+Google Family Link,6,16776437
+Google FCM,6,16776436
+Google Fit,6,16776435
+Google Hangouts,6,16776434
+Google Jibe,6,16776433
+Google Mail,6,16776432
+Google News,6,16776431
+Google One,6,16776430
+Google Pay,6,16776429
+Google Play Music,6,16776428
+Google Podcasts,6,16776427
+Google Trust Services,6,16776426
+Google TV,6,16776425
+Google Voice,6,16776424
+Google VPN,6,16776423
+GO Taxi,6,16776422
+GoTo Technologies,6,16776421
+GoTo Technologies,6,16776421
+gotoupload-com,6,16776420
+Grab,6,16776419
+Gracenote,6,16776418
+Grapeshot,6,16776417
+Gravatar,6,16776416
+GREE Services,6,16776415
+Grindr,6,16776414
+Grooveshark,6,16776413
+GroupM,6,16776412
+Groupon,6,16776411
+Grubhub,6,16776410
+Grupo Globo Services,6,16776409
+GSM Association,6,16776408
+GStatic,6,16776407
+GTP,6,16776406
+Guardian Media Services,6,16776405
+Guildwars,6,16776404
+Guildwars,6,16776404
+Guild Wars 2,6,16776403
+Guild Wars 2,6,16776403
+HackerOne,6,16776402
+Hago,6,16776401
+Hago,6,16776401
+Hakuna,6,16776400
+Halfbrick Studios,6,16776399
+HamiVideo,6,16776398
+Handelsblatt,6,16776397
+Handelsblatt Services,6,16776396
+happn,6,16776395
+Hatch Cloud Gaming,6,16776394
+Hatch Cloud Gaming,6,16776394
+Hay Day,6,16776393
+hayu,6,16776392
+HBO Go,6,16776391
+HBO Max,6,16776390
+HBO Now,6,16776389
+HBO Services,6,16776388
+hCaptcha,6,16776387
+HCL Notes and Domino,6,16776386
+hellshare-com,6,16776385
+Helpshift,6,16776384
+Henan Lecen Services,6,16776383
+Henan Pinguo Services,6,16776382
+Here,6,16776381
+Here TV,6,16776380
+Heroes of Camelot,6,16776379
+Hero Hunters,6,16776378
+Hero Wars,6,16776377
+Hexaglobe,6,16776376
+HeyTap,6,16776375
+Heyzap,6,16776374
+hi5,6,16776373
+HideMe VPN,6,16776372
+HideMe VPN,6,16776372
+HIDIVE,6,16776371
+HiDrive,6,16776370
+HighSpeedVPN,6,16776369
+Hightail,6,16776368
+Hike Messenger,6,16776367
+Hike Messenger,6,16776367
+HiNet,6,16776366
+Hinge,6,16776365
+HiPal,6,16776364
+Hi-Rez Services,6,16776363
+Hi-Rez Studios,6,16776362
+HiSLIP,6,16776361
+hitfile-net,6,16776360
+HiveMQ,6,16776359
+Hi VPN,6,16776358
+Hi VPN,6,16776358
+Half-Life 2,6,16776357
+Half-Life 2,6,16776357
+Hola Services,6,16776356
+HolaSpark,6,16776355
+Hola VPN,6,16776354
+Holler,6,16776353
+HOMER,6,16776352
+Homescapes,6,16776351
+Honkai Impact 3rd,6,16776350
+Honkai Star Rail,6,16776349
+hostggg-com,6,16776348
+hotfile-com,6,16776347
+Hotjar,6,16776346
+Hotmail,6,16776345
+Hotspot VPN,6,16776344
+Houseparty,6,16776343
+HTTP/2,6,16776342
+Httpool,6,16776341
+HTTPTunnel,6,16776340
+Huawei Cloud,6,16776339
+Huawei Health,6,16776338
+Huawei Services,6,16776337
+Hubhopper,6,16776336
+Huddle,6,16776335
+hulkshare-com,6,16776334
+Huya,6,16776333
+Hyperconnect,6,16776332
+hyperfileshare-com,6,16776331
+Hypic,6,16776330
+Hyread,6,16776329
+I3D,6,16776328
+IAB Europe,6,16776327
+iApps Technologies,6,16776326
+IBM,6,16776325
+IBM Cloud Video,6,16776324
+IbVPN,6,16776323
+ICA,6,16776322
+Icecast,6,16776321
+Icecast,6,16776321
+IcFlix,6,16776320
+ICF Technology,6,16776319
+iCloud Private Relay,6,16776318
+ICMPv6,6,16776317
+iCrypt,6,16776316
+IdenTrust,6,16776315
+IDrive,6,16776314
+IDrive,6,16776314
+Idviu,6,16776313
+IEC 13818,6,16776312
+IEC 61850,6,16776311
+IEC 61850 GOOSE,6,16776310
+IEC 61850 Sampled Values,6,16776309
+IEC 62056,6,16776308
+IEEE 1703,6,16776307
+IEEE 8021AD,6,16776306
+IEEE 8021AH,6,16776305
+IEEE 8021Q,6,16776304
+IEEE C37118,6,16776303
+ifile-it,6,16776302
+i-filez-com,6,16776301
+iFlix,6,16776300
+ifolder-ru,6,16776299
+IGG,6,16776298
+IGG,6,16776298
+iHeartMedia Services,6,16776297
+iHeartRadio,6,16776296
+iLeader,6,16776295
+iLive-to,6,16776294
+iMesh,6,16776293
+iMesh,6,16776293
+iMessage,6,16776292
+International Management Group,6,16776291
+ImgIX,6,16776290
+IMO,6,16776289
+IMO,6,16776289
+Impact Services,6,16776288
+IMplus,6,16776287
+IMplus,6,16776287
+Improve Digital,6,16776286
+Indeed,6,16776285
+Index Exchange,6,16776284
+Indigitall,6,16776283
+Infinitas Services,6,16776282
+Infinite Lagrange,6,16776281
+Infobip,6,16776280
+ING Banking,6,16776279
+Ingress Prime,6,16776278
+InMobi,6,16776277
+InnoGames,6,16776276
+Innovative Connecting,6,16776275
+Innovative Connecting,6,16776275
+Innovid,6,16776274
+Inshorts,6,16776273
+Instabug,6,16776272
+Intel Services,6,16776271
+Intercom,6,16776270
+Internet Archive,6,16776269
+IntraLinks,6,16776268
+Intsig Services,6,16776267
+Inventive VPN Services,6,16776266
+Investing-com Services,6,16776265
+iO,6,16776264
+iOS App Store,6,16776263
+iPlayer,6,16776262
+iPlayer,6,16776262
+IPMI,6,16776261
+IPTV,6,16776260
+IPv4,6,16776259
+IPv6,6,16776258
+IPVanish,6,16776257
+IPVanish,6,16776257
+IQ Digital,6,16776256
+Iqiyi,6,16776255
+Iqiyi,6,16776255
+IRIAM,6,16776254
+IronSource,6,16776253
+Iskoot,6,16776252
+iSpot,6,16776251
+Iterable,6,16776250
+iTunes Radio,6,16776249
+iTunesU,6,16776248
+ITV,6,16776247
+Ivacy VPN,6,16776246
+Ivi-Ru,6,16776245
+IVPN,6,16776244
+iWow systex,6,16776243
+IXL,6,16776242
+Jackpot Party,6,16776241
+jakfile-com,6,16776240
+Jam City Games,6,16776239
+JAP,6,16776238
+JAP,6,16776238
+JAUMO,6,16776237
+JBK3000,6,16776236
+Jingdong,6,16776235
+Jio Ads,6,16776234
+JioChat,6,16776233
+JioCinema,6,16776232
+JioCloud,6,16776231
+JioHealthHub,6,16776230
+JioMart,6,16776229
+JioMeet,6,16776228
+JioSaavn,6,16776227
+Jio Services,6,16776226
+JivoChat,6,16776225
+Joom,6,16776224
+Josh,6,16776223
+Joyn,6,16776222
+JOYY Services,6,16776221
+JPMorgan Chase,6,16776220
+jQuery,6,16776219
+JSDelivr,6,16776218
+JSON-RPC,6,16776217
+jumbofiles-com,6,16776216
+Juspay,6,16776215
+Just Proxy VPN,6,16776214
+JW Player,6,16776213
+Kafka,6,16776212
+Kakao,6,16776211
+Kakao Map,6,16776210
+KakaoStory,6,16776209
+KakaoTV Live,6,16776208
+Kakao Webtoon,6,16776207
+Kaltura,6,16776206
+KanKan,6,16776205
+Kaola Haigou,6,16776204
+Kape Services,6,16776203
+KartRider Rush,6,16776202
+Kaspersky Antivirus,6,16776201
+Kaspersky Services,6,16776200
+Kaspersky Services,6,16776200
+KaZaa/Fasttrack,6,16776199
+keepmyfile-com,6,16776198
+KeepSolid Services,6,16776197
+kewlshare-com,6,16776196
+KeyCDN,6,16776195
+Khan Academy,6,16776194
+kickload-com,6,16776193
+Kik Messenger,6,16776192
+Kik Messenger,6,16776192
+Kill Shot Bravo,6,16776191
+Kingdom Age,6,16776190
+Kingdoms of Camelot Battle,6,16776189
+King Gaming,6,16776188
+King of Avalon,6,16776187
+King of Pirates,6,16776186
+Kingsoft Cloud,6,16776185
+Kingsoft Services,6,16776184
+Kinopoisk,6,16776183
+KION,6,16776182
+Knighthood,6,16776181
+Knights and Dragons,6,16776180
+Knotch,6,16776179
+Kobo,6,16776178
+Kochava,6,16776177
+Kollect Book,6,16776176
+Kongregate,6,16776175
+Kono,6,16776174
+Kontiki,6,16776173
+KTPlay,6,16776172
+Kuaishou,6,16776171
+Kustomer,6,16776170
+Kwai,6,16776169
+Lanet TV,6,16776168
+Lark,6,16776167
+Last-fm,6,16776166
+Last Level Games,6,16776165
+LaunchDarkly,6,16776164
+Lazada,6,16776163
+Lazy Audio,6,16776162
+League of Legends,6,16776161
+League of Legends,6,16776161
+Leanplum,6,16776160
+Leap Fitness Group,6,16776159
+LearningHub-online,6,16776158
+Learnosity,6,16776157
+Lemino,6,16776156
+Lemon8,6,16776155
+Lenovo Services,6,16776154
+leteckaposta-cz,6,16776153
+letitbit-net,6,16776152
+LetsEncrypt,6,16776151
+LeTV,6,16776150
+LeTV,6,16776150
+Level3 Cloud,6,16776149
+LG Electronics Services,6,16776148
+Libsyn,6,16776147
+Life360,6,16776146
+Life Church,6,16776145
+Life-Ru,6,16776144
+Liftoff,6,16776143
+LightBox,6,16776142
+Lightsail VPN,6,16776141
+Lightsail VPN,6,16776141
+Lightstep,6,16776140
+LilithGames,6,16776139
+Limelight Cloud,6,16776138
+Line,6,16776137
+Line,6,16776137
+Lineage 2,6,16776136
+Lineage 2,6,16776136
+Line Music,6,16776135
+Line Pay,6,16776134
+Line Rangers,6,16776133
+LINKonLINE,6,16776132
+Litecoin,6,16776131
+LitRes-Ru,6,16776130
+LiveBoard,6,16776129
+live-com,6,16776128
+livedepot-net,6,16776127
+LiveJasmin,6,16776126
+LiveOne,6,16776125
+LiveRamp,6,16776124
+live-share-com,6,16776123
+LiveXLive,6,16776122
+LLC,6,16776121
+LLDP,6,16776120
+loadfiles-in,6,16776119
+load-to,6,16776118
+Locals,6,16776117
+Localytics,6,16776116
+LogRocket,6,16776115
+Lokalise,6,16776114
+LoL Wild Rift,6,16776113
+LoL Wild Rift,6,16776113
+Loop Caribbean Local News,6,16776112
+Loop Pacific Local News,6,16776111
+Loop Trade Classifieds,6,16776110
+Lords Mobile,6,16776109
+Lost Ark,6,16776108
+Lost Ark,6,16776108
+Lotame,6,16776107
+Lord of the Rings War,6,16776106
+LOVEFiLM,6,16776105
+LOVOO,6,16776104
+Local Peer Discovery,6,16776103
+Ludo King,6,16776102
+Lumen Technologies,6,16776101
+Luminati,6,16776100
+Lyft,6,16776099
+Lync,6,16776098
+Lync,6,16776098
+Mabinogi,6,16776097
+Machine Zone,6,16776096
+Magenta TV,6,16776095
+magicJack,6,16776094
+Magine Services,6,16776093
+Magine TV,6,16776092
+Magnite,6,16776091
+MagV,6,16776090
+MagV Kids,6,16776089
+mail-com,6,16776088
+MakeupPlus,6,16776087
+Malwarebytes,6,16776086
+Manga Box,6,16776085
+Manga Up,6,16776084
+Manufacturing Messaging Specification,6,16776083
+Mapbox,6,16776082
+MapMyFitness,6,16776081
+Mapp,6,16776080
+Mario Kart Tour,6,16776079
+MarkMonitor,6,16776078
+Marvel Snap,6,16776077
+MARVEL Strike Force,6,16776076
+Masrawy,6,16776075
+massmirror-com,6,16776074
+Mastodon,6,16776073
+Match Group,6,16776072
+Mathletics,6,16776071
+Matterport,6,16776070
+Max,6,16776069
+Maxdome,6,16776068
+Maxivision,6,16776067
+MBC Services,6,16776066
+McAfee Security,6,16776065
+McAfee Services,6,16776064
+McDonalds,6,16776063
+Measurement Lab,6,16776062
+Medallia,6,16776061
+Mediacorp Services,6,16776060
+mediafire-com,6,16776059
+MediaLab AI Services,6,16776058
+MediaMath,6,16776057
+Media-net,6,16776056
+MediaNova CDN,6,16776055
+Mediaset Espana,6,16776054
+Medium,6,16776053
+Meebo,6,16776052
+Meebo,6,16776052
+Meerkat,6,16776051
+Meesho,6,16776050
+Meet Group Services,6,16776049
+Meetic Group,6,16776048
+MeetMe,6,16776047
+Meetrics,6,16776046
+Meetup,6,16776045
+MEGA,6,16776044
+mega-1280-com,6,16776043
+Megaco,6,16776042
+megafree-kz,6,16776041
+Megaphone,6,16776040
+megaporn-com,6,16776039
+megarapid-eu,6,16776038
+megarotic-com,6,16776037
+megashare-com,6,16776036
+megashares-com,6,16776035
+megashare-vn,6,16776034
+megashare-vnn-vn,6,16776033
+megaupload-com,6,16776032
+Megogo,6,16776031
+Mei Lu,6,16776030
+Meitu,6,16776029
+Meitu Services,6,16776028
+Meizu Services,6,16776027
+Memrise,6,16776026
+Mercado Libre,6,16776025
+Mercado Pago,6,16776024
+Meta Services,6,16776023
+meWATCH,6,16776022
+MicoWorld Services,6,16776021
+MicoWorld Services,6,16776021
+Microsoft Azure,6,16776020
+Microsoft Bing,6,16776019
+Microsoft Defender,6,16776018
+Microsoft Dynamics 365,6,16776017
+Microsoft Excel,6,16776016
+Microsoft Family Safety,6,16776015
+Microsoft OneNote,6,16776014
+Microsoft Outlook,6,16776013
+Microsoft PowerpPoint,6,16776012
+Microsoft Services,6,16776011
+Microsoft Services,6,16776011
+Microsoft SharePoint,6,16776010
+Microsoft Teams,6,16776009
+Microsoft Translator,6,16776008
+Microsoft Word,6,16776007
+Midoki Services,6,16776006
+midupload-com,6,16776005
+Mi Fit,6,16776004
+Mig33,6,16776003
+Mig33,6,16776003
+Might And Magic Chess Royale,6,16776002
+Migu Services,6,16776001
+miHoYo Games,6,16776000
+miHoYo Games,6,16776000
+Minecraft,6,16775999
+Minecraft,6,16775999
+Minutely,6,16775998
+MIOP,6,16775997
+Miro,6,16775996
+missupload-com,6,16775995
+Mitake,6,16775994
+Mitele,6,16775993
+Mitene,6,16775992
+MixChannel,6,16775991
+Mixer,6,16775990
+Mixi Services,6,16775989
+Mixpanel,6,16775988
+MLB,6,16775987
+MLB At Bat,6,16775986
+MMS,6,16775985
+Multimedia Messaging Service Encapsulation,6,16775984
+Moat,6,16775983
+Mobile Strike,6,16775982
+Mobvista,6,16775981
+Modern War,6,16775980
+MoEngage,6,16775979
+mofile-com,6,16775978
+mofile-net,6,16775977
+Mojo,6,16775976
+Mojo,6,16775976
+MOLOCO,6,16775975
+Monopoly GO,6,16775974
+Monster Hunter Now,6,16775973
+Moon Active,6,16775972
+Moonton,6,16775971
+Moonton,6,16775971
+MOOV,6,16775970
+Moovit,6,16775969
+MoPub,6,16775968
+Mortal Kombat,6,16775967
+Move,6,16775966
+Moves,6,16775965
+Movistar Plus,6,16775964
+Movistar Services,6,16775963
+movreel-com,6,16775962
+Mox TV,6,16775961
+Mozilla Services,6,16775960
+Mozilla VPN,6,16775959
+mParticle,6,16775958
+MPEG,6,16775957
+MPLS,6,16775956
+MPlus,6,16775955
+MPlus,6,16775955
+mPulse,6,16775954
+Microsoft Exchange,6,16775953
+Microsoft Exchange,6,16775953
+MSN,6,16775952
+MSN,6,16775952
+Microsoft Dynamics NAV,6,16775951
+Microsoft Dynamics NAV,6,16775951
+MSRP,6,16775950
+MSSQL,6,16775949
+Magic The Gathering Arena,6,16775948
+MTProto,6,16775947
+MTS Services,6,16775946
+MTS TV,6,16775945
+MTV Katsomo,6,16775944
+MUBI,6,16775943
+Mudfish,6,16775942
+Mudfish,6,16775942
+Mullvad VPN,6,16775941
+Multi Media LLC,6,16775940
+multishare-cz,6,16775939
+Mumble,6,16775938
+Mumble,6,16775938
+musical_ly,6,16775937
+Mute,6,16775936
+Mute,6,16775936
+MX Player,6,16775935
+MX TakaTak,6,16775934
+My5,6,16775933
+myBook,6,16775932
+MyCard,6,16775931
+My Digicel,6,16775930
+MyFitnessPal,6,16775929
+MyHeritage,6,16775928
+MyMusic,6,16775927
+MyPeople,6,16775926
+MyPeople,6,16775926
+MySpace,6,16775925
+mytempdir-com,6,16775924
+Mythic Legends,6,16775923
+MyVideo,6,16775922
+MyVideo TW,6,16775921
+Naraka Bladepoint,6,16775920
+Naraka Bladepoint,6,16775920
+Nasdaq Services,6,16775919
+National Baseball,6,16775918
+Naver,6,16775917
+Naver,6,16775917
+Naver Cloud,6,16775916
+Naver Corporation,6,16775915
+Naver Mail,6,16775914
+Naver Map,6,16775913
+Naver NOW,6,16775912
+Naver Works,6,16775911
+Navitime Services,6,16775910
+NBA,6,16775909
+NBC Services,6,16775908
+NBC Sports,6,16775907
+NBC Sports Scores,6,16775906
+NBCUniversal,6,16775905
+NCSoft,6,16775904
+Near,6,16775903
+Nearpod,6,16775902
+Net2Phone,6,16775901
+NetEase,6,16775900
+NetEase,6,16775900
+NetEase Games,6,16775899
+Netflix Games,6,16775898
+Netflix Services,6,16775897
+netload-in,6,16775896
+Netmera,6,16775895
+NetMotion,6,16775894
+netuploaded-com,6,16775893
+Neverwinter,6,16775892
+New Relic,6,16775891
+NewsDog,6,16775890
+New Work SE Services,6,16775889
+New World,6,16775888
+Nexon Corporation,6,16775887
+NextRoll,6,16775886
+Next TV,6,16775885
+Nexus,6,16775884
+Nexx TV,6,16775883
+NFL Services,6,16775882
+NFL Sunday Ticket,6,16775881
+NGenix,6,16775880
+NHK Services,6,16775879
+NHL,6,16775878
+Next Hop Resolution Protocol,6,16775877
+Niantic Labs,6,16775876
+Nickelodeon Play,6,16775875
+Nickelodeon Services,6,16775874
+Niconico,6,16775873
+Nielsen Services,6,16775872
+Nike Plus,6,16775871
+Nike Services,6,16775870
+Nimbuzz,6,16775869
+Ninja Kiwi Services,6,16775868
+Ninja Kiwi Services,6,16775868
+Nintendo Network,6,16775867
+Nintendo Network,6,16775867
+Nintendo Switch Cloud Gaming,6,16775866
+New Office Environment,6,16775865
+NoMachine NX,6,16775864
+Noon VPN,6,16775863
+Noon VPN,6,16775863
+Nordic Entertainment Group,6,16775862
+NordLocker,6,16775861
+Nord Security Services,6,16775860
+Nord VPN,6,16775859
+Nord VPN,6,16775859
+NortonLifeLock Services,6,16775858
+NortonLifeLock VPN Services,6,16775857
+Norton Security,6,16775856
+undetected,6,16775855
+Novatech Core,6,16775854
+nPerf,6,16775853
+National Public Radio,6,16775852
+nProtect GameGuard,6,16775851
+NTLM,6,16775850
+NTT Services,6,16775849
+Nuance,6,16775848
+Nuverse,6,16775847
+Nvidia,6,16775846
+Nvidia GeForce NOW,6,16775845
+Nvidia Services,6,16775844
+New York Public Radio,6,16775843
+Odnoklassniki,6,16775842
+odsiebie-najlepsze-net,6,16775841
+OFF,6,16775840
+OFF,6,16775840
+Office 365,6,16775839
+OGG,6,16775838
+Okko,6,16775837
+Ola,6,16775836
+OLL TV,6,16775835
+ONC-RPC,6,16775834
+OneDrive,6,16775833
+OneplusOne Media Services,6,16775832
+OneplusOne Video,6,16775831
+OneTrust,6,16775830
+Online Radio Box,6,16775829
+OnlyFans,6,16775828
+Ookla,6,16775827
+ooVoo,6,16775826
+ooVoo,6,16775826
+OPC UA,6,16775825
+OpenAI,6,16775824
+OpenFlow,6,16775823
+OpenFT,6,16775822
+OpenJS Foundation,6,16775821
+OpenSignal,6,16775820
+OpenStreetMap,6,16775819
+Open Super Hotspot VPN,6,16775818
+OpenText Services,6,16775817
+OpenWeb,6,16775816
+OpenX,6,16775815
+Opera Mini,6,16775814
+Opera Mini,6,16775814
+Opera News,6,16775813
+Opera News Lite,6,16775812
+Opera Services,6,16775811
+Oppo Mobile Services,6,16775810
+Optimizely,6,16775809
+Oracle Database,6,16775808
+Oracle Database,6,16775808
+Oracle Services,6,16775807
+Ora TV,6,16775806
+Origins Digital,6,16775805
+Orkut,6,16775804
+OrNET,6,16775803
+oron-com,6,16775802
+Oscar,6,16775801
+Octoshape,6,16775800
+Octoshape,6,16775800
+OSN,6,16775799
+OS update,6,16775798
+Ouroboros,6,16775797
+Outfit7,6,16775796
+Overwatch,6,16775795
+PacketHub,6,16775794
+Port Aggregation Protocol,6,16775793
+Paladins,6,16775792
+Paltalk,6,16775791
+Paltalk,6,16775791
+Pangle,6,16775790
+Pantaya,6,16775789
+Papa Pear Saga,6,16775788
+Paramount Plus,6,16775787
+Paramount Services,6,16775786
+Parsely,6,16775785
+Path,6,16775784
+PathFactory,6,16775783
+Path of Exile,6,16775782
+Path of Exile,6,16775782
+Patreon,6,16775781
+Paxful Wallet,6,16775780
+Payback,6,16775779
+Paycentive,6,16775778
+PayEasy,6,16775777
+PayPay,6,16775776
+Pay-Rw,6,16775775
+Paytm,6,16775774
+PBS,6,16775773
+PCCW,6,16775772
+PC Protect,6,16775771
+PdaNet,6,16775770
+PdaNet,6,16775770
+PDProxy,6,16775769
+PDProxy,6,16775769
+Peacock TV,6,16775768
+Peak Games Services,6,16775767
+Peer5,6,16775766
+Penguin Sports,6,16775765
+Penthera,6,16775764
+Perfect Corp Services,6,16775763
+Perfect World Services,6,16775762
+Perfect World Services,6,16775762
+PerimeterX,6,16775761
+Periscope,6,16775760
+Permutive,6,16775759
+Pet Rescue Saga,6,16775758
+Packet Forwarding Control Protocol,6,16775757
+Philo,6,16775756
+Photomath,6,16775755
+Photon,6,16775754
+Photo Wonder,6,16775753
+Phycan VPN Services,6,16775752
+Piano,6,16775751
+Private Internet Access,6,16775750
+Picsart,6,16775749
+Pikmin Bloom,6,16775748
+Pinduoduo,6,16775747
+Pinduoduo,6,16775747
+PinkFong,6,16775746
+Pirate Treasures,6,16775745
+Pixocial,6,16775744
+Pladform,6,16775743
+Plants vs Zombies 2,6,16775742
+Plarium,6,16775741
+platinshare-com,6,16775740
+Playdemic Services,6,16775739
+Playground XYZ,6,16775738
+Playrix,6,16775737
+PlayStation Network,6,16775736
+PlayStation Network,6,16775736
+PlayStation Now,6,16775735
+PlayStation Video,6,16775734
+PlayTales,6,16775733
+Playtika Services,6,16775732
+Plex,6,16775731
+Plurk,6,16775730
+Pluto TV,6,16775729
+PLYmedia,6,16775728
+Pochta Rossii,6,16775727
+Pococha,6,16775726
+Podbean,6,16775725
+Podcast Addict,6,16775724
+Podigee,6,16775723
+Podtrac,6,16775722
+Poison Ivy,6,16775721
+Poison Ivy,6,16775721
+Pokemon Go,6,16775720
+Pokemon Services,6,16775719
+Pokemon TV,6,16775718
+Pokemon Unite,6,16775717
+Polkadot,6,16775716
+Polyfill-io,6,16775715
+POP,6,16775714
+PopCap,6,16775713
+PoPo,6,16775712
+PoPo,6,16775712
+PornHub,6,16775711
+Pornhub Network,6,16775710
+Portmap,6,16775709
+PostgreSQL,6,16775708
+Pou,6,16775707
+PPFilm,6,16775706
+PPFilm,6,16775706
+PPLive,6,16775705
+PPLive,6,16775705
+PPP,6,16775704
+PPPoE,6,16775703
+Premier,6,16775702
+Prende TV,6,16775701
+Primis,6,16775700
+Prisma,6,16775699
+Prismic,6,16775698
+Private Tunnel VPN,6,16775697
+PrivateVPN,6,16775696
+PrivateVPN,6,16775696
+Pro7Sat1 Services,6,16775695
+Profinet,6,16775694
+ProStream-Ru,6,16775693
+PRX Services,6,16775692
+przeklej-pl,6,16775691
+PS3,6,16775690
+Psiphon,6,16775689
+Psiphon,6,16775689
+PlayerUnknowns Battlegrounds,6,16775688
+PUBG Mobile,6,16775687
+PUBG Mobile,6,16775687
+PubMatic,6,16775686
+PubNub,6,16775685
+pubu bookbuffet,6,16775684
+Pugpig,6,16775683
+puhutv,6,16775682
+Pulse Insights,6,16775681
+Purchasely,6,16775680
+PureVPN,6,16775679
+Pusher,6,16775678
+Pushwoosh,6,16775677
+putshare-com,6,16775676
+Pyramid Solitaire Saga,6,16775675
+Q4,6,16775674
+QANDA,6,16775673
+QIP-RU,6,16775672
+Qobuz,6,16775671
+QQ,6,16775670
+QQ,6,16775670
+QQGame,6,16775669
+QQMusic,6,16775668
+qshare-com,6,16775667
+Quake,6,16775666
+Quake,6,16775666
+Qualaroo,6,16775665
+Qualcomm,6,16775664
+Qualified,6,16775663
+Qualtrics,6,16775662
+Qualys,6,16775661
+Quantcast,6,16775660
+QuantumCast,6,16775659
+Quantum Metric,6,16775658
+QUB Services,6,16775657
+Quebecor Services,6,16775656
+quickshare-cz,6,16775655
+quicksharing-com,6,16775654
+QuickTime,6,16775653
+Quizizz,6,16775652
+Quizlet,6,16775651
+Quora,6,16775650
+QVOD,6,16775649
+QVOD,6,16775649
+Qwilt,6,16775648
+Rackspace Cloud,6,16775647
+Radancy,6,16775646
+Radarbot,6,16775645
+Radiko,6,16775644
+Radio-De,6,16775643
+Radioplayer,6,16775642
+Raid Shadow Legends,6,16775641
+Rainbow Six Extraction,6,16775640
+Rainbow Six Siege,6,16775639
+RakNet,6,16775638
+Rakuten Services,6,16775637
+Rakuten Travel,6,16775636
+Rakuten TV,6,16775635
+Rally,6,16775634
+Rambler,6,16775633
+rapidshare-com,6,16775632
+rapidshare-de,6,16775631
+rapidshark-pl,6,16775630
+rapidupload-com,6,16775629
+Rappi,6,16775628
+RawVoice,6,16775627
+Raygun,6,16775626
+RBC News,6,16775625
+Rdio,6,16775624
+RealMa,6,16775623
+Realm Royale,6,16775622
+RealNetworks,6,16775621
+RealVNC,6,16775620
+Receiver Radio,6,16775619
+reddit,6,16775618
+Redfast,6,16775617
+Redfin,6,16775616
+RedHotPie,6,16775615
+Redmine,6,16775614
+RedTube,6,16775613
+Reface,6,16775612
+Relic Entertainment,6,16775611
+Remind,6,16775610
+Renren,6,16775609
+Ren-Tv,6,16775608
+Resilio Sync,6,16775607
+Resi Media,6,16775606
+RESP,6,16775605
+Resso Music,6,16775604
+Reuters News,6,16775603
+Revolut,6,16775602
+rFactor,6,16775601
+rFactor,6,16775601
+Ribbon Communications,6,16775600
+Riley Cillian,6,16775599
+Riley Cillian,6,16775599
+RIM proprietary,6,16775598
+Ring,6,16775597
+Riot Games,6,16775596
+Riot Games,6,16775596
+Rise of Kingdoms,6,16775595
+Riskified,6,16775594
+Roblox,6,16775593
+Rocket League,6,16775592
+Rogue Company,6,16775591
+ROMWE,6,16775590
+Rostelecom,6,16775589
+Rovio Gaming,6,16775588
+Royal Match,6,16775587
+RTPS,6,16775586
+RTVE alacarta,6,16775585
+Rubicon Project,6,16775584
+Ruby Game Studio,6,16775583
+Rumble,6,16775582
+Rumbleverse,6,16775581
+RunKeeper,6,16775580
+Runtastic,6,16775579
+rusfolder,6,16775578
+Ruter Services,6,16775577
+Rutube,6,16775576
+Ruutu,6,16775575
+S7comm,6,16775574
+Safe Family,6,16775573
+SaferVPN,6,16775572
+Sailthru,6,16775571
+Samsung Ads,6,16775570
+Samsung Health,6,16775569
+Samsung Max Privacy VPN,6,16775568
+Samsung Music,6,16775567
+Samsung Pay,6,16775566
+Samsung Services,6,16775565
+Sanoma Services,6,16775564
+sanupload-com,6,16775563
+Sapling Growth VPN Services,6,16775562
+Sapling Growth VPN Services,6,16775562
+Sarahah,6,16775561
+Sarmady Services,6,16775560
+Satisfi Labs,6,16775559
+savefile-com,6,16775558
+Sber,6,16775557
+SCADA,6,16775556
+Schildbach-Wallet,6,16775555
+SciPlay Games,6,16775554
+Scopely Services,6,16775553
+ScorecardResearch,6,16775552
+Scrabble GO,6,16775551
+scribd-com,6,16775550
+Scydo,6,16775549
+Scydo,6,16775549
+Seamless,6,16775548
+Sectigo,6,16775547
+SecureVPN,6,16775546
+Sega,6,16775545
+Segment,6,16775544
+Segmento-ru,6,16775543
+SelfieCity,6,16775542
+Sender,6,16775541
+sendmefile-com,6,16775540
+sendspace-com,6,16775539
+Sentry Functional Software,6,16775538
+SESISOFT Services,6,16775537
+Session,6,16775536
+Shadowsocks,6,16775535
+Shadowsocks,6,16775535
+Shadowverse,6,16775534
+Shahid,6,16775533
+Shalltry Group,6,16775532
+ShapeShift Services,6,16775531
+sharebase-to,6,16775530
+sharebee-com,6,16775529
+sharebig-com,6,16775528
+sharebigfile-com,6,16775527
+sharebigflie-com,6,16775526
+ShareChat,6,16775525
+shareflare-net,6,16775524
+SHAREit,6,16775523
+share-online,6,16775522
+share-online-bz,6,16775521
+share-rapid-cz,6,16775520
+Shazam,6,16775519
+Shein,6,16775518
+Shellfire VPN,6,16775517
+Shopify,6,16775516
+Showmax,6,16775515
+SHOWROOM,6,16775514
+Showtime,6,16775513
+Showtime Anytime,6,16775512
+shragle-com,6,16775511
+Shudder,6,16775510
+Sift Science,6,16775509
+Signal,6,16775508
+Silverlight,6,16775507
+SimCity BuildIt,6,16775506
+Simfy,6,16775505
+Simplecast,6,16775504
+simpleupload-net,6,16775503
+SINATV,6,16775502
+Sina Weibo,6,16775501
+Singular Services,6,16775500
+SiriusXM Services,6,16775499
+Skout,6,16775498
+Skred Messenger,6,16775497
+Sky Go,6,16775496
+Skyking,6,16775495
+Skype for Business,6,16775494
+Skype for Business,6,16775494
+Sky Services,6,16775493
+Sky Sports,6,16775492
+Slacker,6,16775491
+Sling TV,6,16775490
+Smaato,6,16775489
+Smadex,6,16775488
+SmartAdServer,6,16775487
+Smartclip,6,16775486
+Smart Media Solutions,6,16775485
+Smartstream-tv,6,16775484
+Smart VeePN,6,16775483
+SMB/CIFS,6,16775482
+Smilegate,6,16775481
+Smite,6,16775480
+Smule,6,16775479
+Snail VPN,6,16775478
+Snail VPN,6,16775478
+Snapdeal,6,16775477
+Snap Master VPN,6,16775476
+Snap Services,6,16775475
+Snap VPN,6,16775474
+Snap VPN,6,16775474
+Sniper 3D,6,16775473
+Snow Services,6,16775472
+SOAP,6,16775471
+Socratic,6,16775470
+Softbank Onlineshop,6,16775469
+Softbank Services,6,16775468
+SoftEthernet,6,16775467
+SoftEthernet,6,16775467
+Softonic,6,16775466
+Sohu,6,16775465
+Solitaire Grand Harvest,6,16775464
+Solvvy,6,16775463
+SOMA,6,16775462
+SOMA,6,16775462
+Sony Group Services,6,16775461
+Sony Pictures,6,16775460
+Sophos Services,6,16775459
+Soulseek,6,16775458
+Soulseek,6,16775458
+Soul Hunters,6,16775457
+SoundCloud,6,16775456
+Source Engine,6,16775455
+Source Engine,6,16775455
+Sparkasse Banking,6,16775454
+Sparta War of Empires,6,16775453
+SPB TV,6,16775452
+Speakaboos,6,16775451
+Speakol,6,16775450
+SpeedOf-Me,6,16775449
+speedshare-org,6,16775448
+SpeedSmart,6,16775447
+Speed VPN MobileAppDev,6,16775446
+Speed VPN MobileAppDev,6,16775446
+Spideroak,6,16775445
+Spiegel Services,6,16775444
+Spiegel TV,6,16775443
+Spin The Bottle,6,16775442
+SplashFighter,6,16775441
+SplashFighter,6,16775441
+Split,6,16775440
+SpongyCastle,6,16775439
+Sportbox-Ru,6,16775438
+SportsMax,6,16775437
+SpotHero,6,16775436
+Spotify for Podcasters,6,16775435
+Spot-Im,6,16775434
+SpotX,6,16775433
+Spreaker,6,16775432
+Spreecast,6,16775431
+Spreed,6,16775430
+Sprig,6,16775429
+SpringServe,6,16775428
+Sprinklr,6,16775427
+SPTG TV,6,16775426
+Square,6,16775425
+Square Enix,6,16775424
+Squarespace,6,16775423
+SRTCP,6,16775422
+SRTP,6,16775421
+S Sport Plus,6,16775420
+SSTP,6,16775419
+StackAdapt,6,16775418
+Stackla,6,16775417
+StackPath Cloud,6,16775416
+Stan,6,16775415
+Starbucks,6,16775414
+Stark Games,6,16775413
+StarMaker,6,16775412
+StarTimes ON,6,16775411
+Star Trek Fleet Command,6,16775410
+Star Trek Online,6,16775409
+Start-Ru,6,16775408
+StarWars Galaxy of Heroes,6,16775407
+Starz,6,16775406
+Stats Perform,6,16775405
+StealthNet,6,16775404
+Steganos Online Shield VPN,6,16775403
+Steganos Services,6,16775402
+Stellar,6,16775401
+STOMP,6,16775400
+storage-to,6,16775399
+storyfm-cn,6,16775398
+STP,6,16775397
+Stratum Mining,6,16775396
+Streamable,6,16775395
+Streamcraft,6,16775394
+Streamcraft,6,16775394
+StreamGuys,6,16775393
+Streamio,6,16775392
+Streamlive-to,6,16775391
+Streamotion,6,16775390
+StreamTheWorld,6,16775389
+StreetVoice,6,16775388
+Stripe,6,16775387
+StrongVPN,6,16775386
+Stumble Guys,6,16775385
+STUN,6,16775384
+Subway Surfers,6,16775383
+SUDA Phone,6,16775382
+Sudaphone,6,16775382
+SugarSync,6,16775381
+Sundance Now,6,16775380
+Sun FM Ukraine,6,16775379
+Suning Services,6,16775378
+SuperAwesome,6,16775377
+Supercell,6,16775376
+Supercell,6,16775376
+SuperVPN by Cheng,6,16775375
+Surfshark VPN,6,16775374
+Surfshark VPN,6,16775374
+SurveyMonkey,6,16775373
+Sweet Selfie,6,16775372
+Sweet Selfie Lite,6,16775371
+Sweet TV,6,16775370
+SwiftyBeaver,6,16775369
+Switcherry VPN,6,16775368
+Switch TV,6,16775367
+Swoogo,6,16775366
+Swrve,6,16775365
+SYBO Games,6,16775364
+Sygic GPS Navigation,6,16775363
+Sygic Services,6,16775362
+Sygic Travel Maps,6,16775361
+Symantec,6,16775360
+Symantec VPN Services,6,16775359
+Syncplicity,6,16775358
+Synology,6,16775357
+Synology,6,16775357
+Systex Services,6,16775356
+T120,6,16775355
+T3,6,16775354
+Taaze,6,16775353
+Tableau,6,16775352
+Taboola,6,16775351
+Tagged,6,16775350
+Talkatone,6,16775349
+TAmedia TW,6,16775348
+Tango,6,16775347
+Tango,6,16775347
+Taobao,6,16775346
+Tapad,6,16775345
+Tapclap,6,16775344
+Tapjoy,6,16775343
+Taplytics,6,16775342
+Target Signature,6,16775341
+TASE 2,6,16775340
+TAVR Media,6,16775339
+TCP,6,16775338
+TDS,6,16775337
+Teads,6,16775336
+Tealium,6,16775335
+Team Fortress 2,6,16775334
+Telegram,6,16775333
+Telegram,6,16775333
+Telemetro,6,16775332
+Teleport Media,6,16775331
+Telia Services,6,16775330
+Telia TV,6,16775329
+Temu,6,16775328
+Tencent,6,16775327
+Tencent Cloud,6,16775326
+Tencent Games,6,16775325
+Tencent Music,6,16775324
+Tencent News,6,16775323
+Tencent Services,6,16775322
+Tenor,6,16775321
+terafiles-net,6,16775320
+Teredo,6,16775319
+Terminus,6,16775318
+TestMy-net,6,16775317
+TextNow,6,16775316
+textPlus,6,16775315
+The CW,6,16775314
+The Economist,6,16775313
+The Guardian,6,16775312
+The NBC App,6,16775311
+The New York Times,6,16775310
+theScore,6,16775309
+The Trade Desk,6,16775308
+The Wall Street Journal,6,16775307
+Three Bamboo,6,16775306
+Threema,6,16775305
+Threema,6,16775305
+Thrift,6,16775304
+Thunder/Webthunder,6,16775303
+Thunder/Webthunder,6,16775303
+Tibia,6,16775302
+Tibia,6,16775302
+Tidal,6,16775301
+Tidio,6,16775300
+TigerConnect,6,16775299
+TigerText,6,16775298
+Tiger VPN,6,16775297
+Tigo Services,6,16775296
+TikTok,6,16775295
+TikTok TV,6,16775294
+Tilda,6,16775293
+Timely TV,6,16775292
+Times Internet Services,6,16775291
+Tinder,6,16775290
+Tinkoff,6,16775289
+Tiny Tinas Wonderlands,6,16775288
+Tivibu GO,6,16775287
+TMall,6,16775286
+TMT Broadcasting,6,16775285
+TNT,6,16775284
+TNT-Premier,6,16775283
+Toca Boca,6,16775282
+TokBox,6,16775281
+TomTom,6,16775280
+Toon Blast,6,16775279
+TopBuzz,6,16775278
+TotalAV,6,16775277
+Total War,6,16775276
+ToTok,6,16775275
+ToTok,6,16775275
+Tour Tracker Grand Tours,6,16775274
+Toutiao,6,16775273
+Tower of Fantasy,6,16775272
+Tower of Saviors,6,16775271
+Township,6,16775270
+TrackMania,6,16775269
+TrafficFactory,6,16775268
+TrafficJunky,6,16775267
+Transperth,6,16775266
+Tremor International,6,16775265
+Tremor Video,6,16775264
+Trend Micro Worry-Free,6,16775263
+Tribes of Midgard,6,16775262
+Tricolor TV,6,16775261
+Tripadvisor,6,16775260
+TripleLift,6,16775259
+Triton Digital,6,16775258
+Trivago,6,16775257
+True Key,6,16775256
+Truphone,6,16775255
+TrustArc,6,16775254
+Trust Wallet,6,16775253
+Truth Social,6,16775252
+TTPod,6,16775251
+Tubi,6,16775250
+tunabox-net,6,16775249
+TUNE,6,16775248
+TuneIn Radio,6,16775247
+TunnelBear,6,16775246
+TunnelGuru,6,16775245
+TunnelGuru,6,16775245
+TunVPN,6,16775244
+turbobit-net,6,16775243
+turbobit-ru,6,16775242
+turboupload-com,6,16775241
+Turbo VPN,6,16775240
+Turbo VPN,6,16775240
+Turkcell Services,6,16775239
+Turner,6,16775238
+TvAnts,6,16775237
+TVBS,6,16775236
+TVNZ,6,16775235
+TVPlayer,6,16775234
+TVPlus,6,16775233
+TVUPlayer,6,16775232
+TVUPlayer,6,16775232
+TwicPics,6,16775231
+Twilio Services,6,16775230
+TwitCasting,6,16775229
+Twitch,6,16775228
+Twitch,6,16775228
+u-115-com,6,16775227
+Uber,6,16775226
+Uber Eats,6,16775225
+Ubisoft,6,16775224
+Ubisoft Connect,6,16775223
+Ubisoft Services,6,16775222
+Ubitus,6,16775221
+Ubitus Services,6,16775220
+Ubuntu One,6,16775219
+uCool Services,6,16775218
+uCool Services,6,16775218
+UCWeb,6,16775217
+Udemy,6,16775216
+UDP,6,16775215
+Ufoto Services,6,16775214
+UFTP,6,16775213
+ugotfile-com,6,16775212
+United Internet AG Services,6,16775211
+Uklon,6,16775210
+unknown,6,16775209
+unknown,6,16775209
+uloz-to,6,16775208
+UltraBac,6,16775207
+Ultrashare,6,16775206
+ultrashare-de,6,16775205
+UltraViewer,6,16775204
+UltraVPN,6,16775203
+UltraVPN,6,16775203
+Umeng Plus,6,16775202
+Universal Music Group,6,16775201
+Unative,6,16775200
+Unblock Sites,6,16775199
+unclassified,6,16775198
+Under Armour Services,6,16775197
+unibytes-com,6,16775196
+Unitas Global,6,16775195
+Unity,6,16775194
+Univision Communications,6,16775193
+Univision Now,6,16775192
+unlimit-co-il,6,16775191
+UNO,6,16775190
+UNPKG,6,16775189
+Unreal Engine,6,16775188
+Unreal Engine,6,16775188
+Unruly,6,16775187
+up-4share-vn,6,16775186
+up-file-com,6,16775185
+Uplive,6,16775184
+uploadbox-com,6,16775183
+uploadc-com,6,16775182
+upload-com-ua,6,16775181
+uploaded,6,16775180
+uploaded-to,6,16775179
+uploader-pl,6,16775178
+uploadfloor-com,6,16775177
+uploading-com,6,16775176
+uploadingit-com,6,16775175
+uploadking-com,6,16775174
+uploadpower-com,6,16775173
+uploadstation-com,6,16775172
+uploadyourfiles-de,6,16775171
+upnito-sk,6,16775170
+Upptalk,6,16775169
+uptobox-com,6,16775168
+Uscreen,6,16775167
+Usenet,6,16775166
+Usenet,6,16775166
+Usercentrics,6,16775165
+usershare-net,6,16775164
+UserVoice,6,16775163
+Ustream,6,16775162
+UUSee,6,16775161
+UUSee,6,16775161
+V4,6,16775160
+V4,6,16775160
+Valorant,6,16775159
+Valorant,6,16775159
+Valve Corporation,6,16775158
+Vanilla,6,16775157
+vBulletin,6,16775156
+Vcast,6,16775155
+Verizon Digital Media Services,6,16775154
+VeePN,6,16775153
+VeohTV,6,16775152
+VeohTV,6,16775152
+Vercel,6,16775151
+Verisign,6,16775150
+Verizon Media Services,6,16775149
+Verve Group,6,16775148
+VeVe,6,16775147
+Vevo,6,16775146
+Viacom18 Services,6,16775145
+ViacomCBS Services,6,16775144
+Viafree,6,16775143
+Viasat Ru,6,16775142
+Vibe,6,16775141
+Vidazoo,6,16775140
+videobb-com,6,16775139
+Vidyard,6,16775138
+ViewLift,6,16775137
+Viju,6,16775136
+Viki,6,16775135
+Vikingard,6,16775134
+Vilynx,6,16775133
+Vimeo OTT,6,16775132
+Vimond,6,16775131
+vip-file-com,6,16775130
+ViPNet,6,16775129
+Vippie,6,16775128
+Virtual Minds,6,16775127
+VITA,6,16775126
+Viu,6,16775125
+ViuTV,6,16775124
+VivaVideo,6,16775123
+Vivox,6,16775122
+ViX,6,16775121
+Vizbee,6,16775120
+VK,6,16775119
+VLMedia Services,6,16775118
+VNG Corporation,6,16775117
+Vodafone Services,6,16775116
+VoipSwitch,6,16775115
+VoipSwitch VoIP Tunnel,6,16775114
+VoipSwitch VoIP Tunnel,6,16775114
+VOKA TV,6,16775113
+Volcano Engine,6,16775112
+vonage,6,16775111
+Voot,6,16775110
+Voxer,6,16775109
+VPN 365,6,16775108
+VPN 365,6,16775108
+VPN Area,6,16775107
+VPN Easy,6,16775106
+VPN Gate,6,16775105
+VPN Lite,6,16775104
+VPN Master,6,16775103
+VPN Master by Andro Team,6,16775102
+VPN Master X,6,16775101
+VPN Monster,6,16775100
+VPN Proxy Master,6,16775099
+VPN Proxy Master,6,16775099
+VPN Proxy Master Unlimited,6,16775098
+VPNSecure,6,16775097
+VPN Tor Browser,6,16775096
+VPN Unlimited,6,16775095
+VPN Unlimited,6,16775095
+VPN Unlimited Proxy,6,16775094
+VPN Valley,6,16775093
+VPN-X,6,16775092
+VPN-X,6,16775092
+VR Banking,6,16775091
+VRV,6,16775090
+VS Media,6,16775089
+V-SPEED Services,6,16775088
+VLAN Trunking Protocol,6,16775087
+VTun,6,16775086
+Vuba Vuba,6,16775085
+Vudu,6,16775084
+Vungle,6,16775083
+VXI-11,6,16775082
+VyprVPN,6,16775081
+VyprVPN,6,16775081
+waipu-tv,6,16775080
+Wakanim,6,16775079
+Walmart,6,16775078
+Wangsu CDN,6,16775077
+Want Want Services,6,16775076
+WAP-WTLS,6,16775075
+WAP-WTP-WSP,6,16775074
+Warcraft 3,6,16775073
+Warcraft 3,6,16775073
+Warframe,6,16775072
+Wargaming-net,6,16775071
+Wargaming-Net,6,16775071
+Warhammer Gaming,6,16775070
+Warhammer TV,6,16775069
+War Machines,6,16775068
+Warner Bros Discovery CDN,6,16775067
+Warner Bros Discovery Services,6,16775066
+WarnerMedia Services,6,16775065
+Warpath Ace Shooter,6,16775064
+War Thunder,6,16775063
+Watchever,6,16775062
+Watch iT,6,16775061
+Watch TBS,6,16775060
+Waze,6,16775059
+WB Games,6,16775058
+Wealth God,6,16775057
+Weather Channel,6,16775056
+WebDAV,6,16775055
+WEB-DE,6,16775054
+Webex,6,16775053
+Webex,6,16775053
+Webflow,6,16775052
+WebM,6,16775051
+WebQQ,6,16775050
+WebQQ,6,16775050
+WebSocket,6,16775049
+Webtoon,6,16775048
+WeChat Work,6,16775047
+WeChat Work,6,16775047
+WeGamers,6,16775046
+We Meet,6,16775045
+WetterOnline,6,16775044
+WeTV,6,16775043
+WHOIS,6,16775042
+Wickr,6,16775041
+Wickr,6,16775041
+WideOrbit,6,16775040
+WII,6,16775039
+wiiupload-net,6,16775038
+Wikimedia Foundation,6,16775037
+Wildlife Studios,6,16775036
+WindowsMedia,6,16775035
+Windscribe VPN,6,16775034
+Wink,6,16775033
+Wire Messenger,6,16775032
+Wirtschaftswoche,6,16775031
+Wise,6,16775030
+Wish,6,16775029
+Wistia,6,16775028
+Wix,6,16775027
+Wizards Unite,6,16775026
+WizRocket,6,16775025
+Wizzee,6,16775024
+World of Kung Fu,6,16775023
+World of Kung Fu,6,16775023
+Wordpress,6,16775022
+Workout Trainer,6,16775021
+Workplace,6,16775020
+World Of Tanks,6,16775019
+World Of Tanks Blitz,6,16775018
+World of Warcraft,6,16775017
+World of Warcraft,6,16775017
+World of Warplanes,6,16775016
+World Of Warships,6,16775015
+Wizards of the Coast,6,16775014
+WOW TV,6,16775013
+Wowza,6,16775012
+Wowza,6,16775012
+Wuala,6,16775011
+Wuala,6,16775011
+Wunderkind,6,16775010
+wupload-com,6,16775009
+Wurl,6,16775008
+WWE,6,16775007
+Wynk Music,6,16775006
+X,6,16775005
+x7-to,6,16775004
+Xandr,6,16775003
+XBOX gaming console,6,16775002
+XBOX,6,16775002
+Xbox Game Studios,6,16775001
+xCum-com,6,16775000
+XDCC,6,16774999
+Xender,6,16774998
+Xfinity,6,16774997
+Xfinity Speedtest,6,16774996
+xHamster,6,16774995
+Xiaohongshu,6,16774994
+Xiaomi Services,6,16774993
+Xiaomi ShareMe,6,16774992
+Xiaomi Weather,6,16774991
+Xigua Video,6,16774990
+XING,6,16774989
+Xinhua News,6,16774988
+XMPP,6,16774987
+XMRig,6,16774986
+XNXX,6,16774985
+Xoom,6,16774984
+Xumo,6,16774983
+Xunlei Services,6,16774982
+Xvideos,6,16774981
+X-VPN,6,16774980
+X-VPN,6,16774980
+Yaani,6,16774979
+Yahoo Ad Tech,6,16774978
+Yahoo Analytics,6,16774977
+Yahoo Finance,6,16774976
+Yahoo Sports,6,16774975
+Yallakora,6,16774974
+Yandex Disk,6,16774973
+Yandex Go,6,16774972
+Yandex Mail,6,16774971
+Yandex Maps,6,16774970
+Yandex Market,6,16774969
+Yandex Music,6,16774968
+Yandex Navigator,6,16774967
+Yandex Telemost,6,16774966
+Yandex Translate,6,16774965
+YeeCall,6,16774964
+YeeCall,6,16774964
+Yelp,6,16774963
+Yieldmo,6,16774962
+Yik Yak,6,16774961
+Yle Areena,6,16774960
+Yospace,6,16774959
+Youbora,6,16774958
+YouCam Makeup,6,16774957
+Youdao,6,16774956
+Youku Tudou,6,16774955
+Youku Tudou,6,16774955
+Youm7,6,16774954
+YouPorn,6,16774953
+yourfilehost-com,6,16774952
+yourfiles-biz,6,16774951
+YourFreedom Tunnel,6,16774950
+YourFreedom Tunnel,6,16774950
+youtube-com,6,16774949
+Youtube Go,6,16774948
+Youtube Kids,6,16774947
+Youtube Music,6,16774946
+Youtube TV,6,16774945
+Yuanta Web,6,16774944
+Yuilop,6,16774943
+Yunfile,6,16774942
+yunfile-to,6,16774941
+YuppTV,6,16774940
+Zalo,6,16774939
+Zalo,6,16774939
+Zangi,6,16774938
+Zangi Messenger,6,16774937
+Zapya,6,16774936
+ZEE5,6,16774935
+Zego,6,16774934
+Zenlayer,6,16774933
+Zenmate VPN,6,16774932
+Zepeto,6,16774931
+Zero,6,16774930
+ZeroMQ,6,16774929
+Zero VPN,6,16774928
+Zero VPN,6,16774928
+Zeus Network,6,16774927
+ziddu-com,6,16774926
+ZIOP,6,16774925
+Zoho Work Online,6,16774924
+Zomato,6,16774923
+zomgupload-to,6,16774922
+ZONER AntiVirus,6,16774921
+ZONER Services,6,16774920
+ZOOGVPN,6,16774919
+Zoom,6,16774918
+Zoom,6,16774918
+ZPN,6,16774917
+ZPN VPN,6,16774916
+ZRTP,6,16774915
+zshare-net,6,16774914
+Zynga,6,16774913
+Zynn,6,16774912
+Zynn,6,16774912
+Zype,6,16774911
+zz123 Music,6,16774910
+4Game,6,16774909
+All Nippon Airways,6,16774908
+Amazon Photos,6,16774907
+American Airlines,6,16774906
+Apple Advertising,6,16774905
+Apple Podcasts,6,16774904
+Apple Remote Desktop,6,16774903
+Arkose Labs,6,16774902
+Black Desert,6,16774901
+BLK Dating,6,16774900
+Cherry-tv,6,16774899
+China Mobile Services,6,16774898
+Citrix Virtual Apps and Desktops,6,16774897
+Coca Cola Services,6,16774896
+Cogent,6,16774895
+Connected2me,6,16774894
+Crazy Egg,6,16774893
+Crazy Maple Studio,6,16774892
+Cupid Media Services,6,16774891
+DanMachi Memoria Freese,6,16774890
+DataCamp Services,6,16774889
+Delta Air Lines Services,6,16774888
+Dynatrace,6,16774887
+Emirates Group,6,16774886
+Font Plus,6,16774885
+Geneve,6,16774884
+Google Lens,6,16774883
+Gravity Services,6,16774882
+GroupMe,6,16774881
+Headspace,6,16774880
+Helldivers 2,6,16774879
+HykeComic,6,16774878
+INCA Internet Services,6,16774877
+Jaco,6,16774876
+Japan Airlines,6,16774875
+J-Stream,6,16774874
+KARTE,6,16774873
+LexisNexis Services,6,16774872
+Lufthansa Services,6,16774871
+Manchester City,6,16774870
+Mango TV,6,16774869
+Marco Polo,6,16774868
+Meituan Services,6,16774867
+Motorola Services,6,16774866
+Network Service Header,6,16774865
+OneSignal,6,16774864
+OVHCloud,6,16774863
+Palworld,6,16774862
+Pearl Abyss,6,16774861
+Pearl Abyss,6,16774861
+Pixfuture,6,16774860
+Plenty of Fish,6,16774859
+Pocket FM,6,16774858
+Pocketpair Games,6,16774857
+Proton Services,6,16774856
+Quad9,6,16774855
+Ragnarok,6,16774854
+RaiPlay,6,16774853
+RaiPlay Sound,6,16774852
+RAI Services,6,16774851
+Rakuten Link,6,16774850
+Recruit Services,6,16774849
+ReelShort,6,16774848
+Repro,6,16774847
+RevenueCat,6,16774846
+Roberts Communications Network,6,16774845
+RongCloud,6,16774844
+Seven and i Holdings Services,6,16774843
+SmartFoxServer,6,16774842
+Southwest Airlines Services,6,16774841
+Street Fighter,6,16774840
+SuperLive,6,16774839
+Taiwan Mobile Services,6,16774838
+Telefonica Services,6,16774837
+TrafficGuard,6,16774836
+TRDP,6,16774835
+Turkish Airlines,6,16774834
+Twinme,6,16774833
+Unidirectional Link Detection,6,16774832
+United Airlines,6,16774831
+WPS Office,6,16774830
+Yalla Services,6,16774829
+YoHo,6,16774828

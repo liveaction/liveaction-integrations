@@ -1,0 +1,261 @@
+<form version="1.1" theme="dark">
+  <label>LiveNX Alerts</label>
+  <description>Alerts forwarded from your LiveNX using OTel.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-6h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="nx_source" searchWhenChanged="true" defaultValue="*">
+      <label>LiveNX Sources</label>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <search>
+        <query>sourcetype="httpevent" receiver_type="livenx"| dedup host | table host</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <delimiter>,</delimiter>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Alerts Over Time</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) | timechart count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="multiselect" token="hostname_search" searchWhenChanged="true" defaultValue="*">
+        <label>Device Names</label>
+        <fieldForLabel>sinfo.DEVICE.deviceName</fieldForLabel>
+        <fieldForValue>sinfo.DEVICE.deviceName</fieldForValue>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) | dedup "sinfo.DEVICE.deviceName" | table "sinfo.DEVICE.deviceName"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <default>*</default>
+        <choice value="*">All</choice>
+        <delimiter>,</delimiter>
+      </input>
+      <input type="multiselect" token="severity_search" searchWhenChanged="true" defaultValue="*">
+        <label>Severities</label>
+        <fieldForLabel>severity</fieldForLabel>
+        <fieldForValue>severity</fieldForValue>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) | dedup severity | table severity</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <default>*</default>
+        <choice value="*">All</choice>
+        <delimiter>,</delimiter>
+      </input>
+      <table>
+        <title>Most Recent Alerts</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) "sinfo.DEVICE.deviceName" IN($hostname_search$) severity IN($severity_search$) NOT mitrecategory="*" | table _time,alertId,severity,summary,"sinfo.DEVICE.deviceName",host.login.url | sort -_time</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <fields>_time,alertId,severity,summary,"sinfo.DEVICE.deviceName"</fields>
+        <option name="drilldown">all</option>
+        <drilldown>
+          <link target="_blank">$row.host.login.url|n$/alerts?alertId=$row.alertId$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Devices with no Recent Flows</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) alertState=ACTIVE "No flows for" IN(*) | table _time,sinfo.DEVICE.deviceName,sinfo.DEVICE.deviceSerial,desc.sinfo.siteName,"No flows for" | sort -_time</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Alert Types</title>
+      <chart>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) NOT mitrecategory="*" | top alertType</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Alert Titles</title>
+      <chart>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) NOT mitrecategory="*" | top title</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Alert States</title>
+      <chart>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) NOT mitrecategory="*" | top alertState</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Top Alert Type, Alert State, Summary</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) | stats count by alertType,alertState,summary | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Top Alarming Devices</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) | stats count by desc.sinfo.deviceName,desc.sinfo.deviceSerial | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Top Alarming Sites</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) | stats count by desc.sinfo.siteName | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+</form>

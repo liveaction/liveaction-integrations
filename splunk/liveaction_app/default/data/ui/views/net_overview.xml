@@ -1,0 +1,640 @@
+<form version="1.1" theme="dark">
+  <label>Network Overview</label>
+  <description>Provides a customized view of your network's health.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-1h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="dataspan" searchWhenChanged="true">
+      <label>Data Span</label>
+      <default>10m</default>
+      <choice value="1m">1 min</choice>
+      <choice value="5m">5 min</choice>
+      <choice value="10m">10 min</choice>
+      <choice value="30m">30 min</choice>
+      <choice value="60m">60 min</choice>
+      <initialValue>10m</initialValue>
+    </input>
+    <input type="multiselect" token="lw_source" searchWhenChanged="true" defaultValue="*">
+      <label>LiveWire Sources</label>
+      <fieldForLabel>exporter_ip</fieldForLabel>
+      <fieldForValue>exporter_ip</fieldForValue>
+      <search>
+        <query>source="stream:livewire_livewire_netflow" netflowdata | dedup exporter_ip | table exporter_ip</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <delimiter>,</delimiter>
+    </input>
+    <input type="dropdown" token="fs_type">
+      <label>Forensic Search Click-Through</label>
+      <default>Local Forensic Search</default>
+      <choice value="lfs">Local Forensic Search</choice>
+      <choice value="dfs">Distributed Forensic Search</choice>
+      <initialValue>Local Forensic Search</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Number of Packets</title>
+      <single>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats sum(packets_in)</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="fs_choice">if($fs_type$="lfs","omnipeek/forensics","omnipeek/distributed-forensic-searches/new-distributed-forensic-search")</eval>
+          <link target="_blank">http://$lw_source$/$fs_choice|n$?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;showDialog=true</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Megabytes Ingested</title>
+      <single>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats sum(bytes_in) as "bytes_" | eval MB=bytes_/1000000 | stats avg(MB)</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="fs_choice">if($fs_type$="lfs","omnipeek/forensics","omnipeek/distributed-forensic-searches/new-distributed-forensic-search")</eval>
+          <link target="_blank">http://$lw_source$/$fs_choice|n$?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;showDialog=true</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Number of Splunk Events</title>
+      <single>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <link target="_blank">http://$lw_source$/omnipeek/forensics?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;showDialog=true</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Number of Unique Flows</title>
+      <single>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | table src_ip,src_port,dest_ip,dest_port | dedup src_ip,src_port,dest_ip,dest_port | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="fs_choice">if($fs_type$="lfs","omnipeek/forensics","omnipeek/distributed-forensic-searches/new-distributed-forensic-search")</eval>
+          <link target="_blank">http://$lw_source$/$fs_choice|n$?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;showDialog=true</link>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Network Usage</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats sum(bytes_in) as "mb_in" by _time | eval MB = mb_in / 1000000 | timechart sum(MB) span=$dataspan$ as "Megabytes"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Average Network latency</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats avg(NetworkLatencyAvg) as "latency_avg" by _time | timechart avg(latency_avg) span=$dataspan$ as "Latency in ms"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Maximum Network Latency</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats max(NetworkLatencyMax) as "latency_max" by _time | timechart max(latency_max) span=$dataspan$ as "Latency in ms"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Average Application Latency</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats avg(ApplicationLatencyAvg) as "latency_avg" by _time | timechart max(latency_avg) span=$dataspan$ as "Latency in ms"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Max Application Latency</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats avg(ApplicationLatencyMax) as "latency_max" by _time | timechart max(latency_max) span=$dataspan$ as "Latency in ms"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Recent Flows</title>
+      <table>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | eval datetime=strptime(exporter_time, "%Y-%b-%d %H:%M:%S") | stats latest(datetime) as "latest_time" by src_ip,src_port,dest_ip,dest_port | eval latest_dt=strftime(latest_time, "%Y-%b-%d %H:%M:%S") | dedup src_ip,src_port,dest_ip,dest_port sortby +_time | table latest_dt,src_ip,src_port,dest_ip,dest_port</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">all</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="src_ip">$src_ip$</eval>
+          <eval token="src_port">$src_port$</eval>
+          <eval token="dest_ip">$dest_ip$</eval>
+          <eval token="dest_port">$dest_port$</eval>
+          <eval token="fs_choice">if($fs_type$="lfs","omnipeek/forensics","omnipeek/distributed-forensic-searches/new-distributed-forensic-search")</eval>
+          <link target="_blank">http://$lw_source$/$fs_choice|n$?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;slopTime=10&amp;filter=%28%28addr%28ip%3A%20%27$row.src_ip|n$%27%29%20%26%20port%28$row.src_port|n$%29%29%20%26%20%28addr%28ip%3A%20%27$row.dest_ip|n$%27%29%20%26%20port%28$row.dest_port|n$%29%29%29&amp;showDialog=true</link>
+        </drilldown>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Rare Web Servers</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | rare cisco_app_ssl_common_name</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Rare Destination IPs</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | rare dest_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Rare Server Ports</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | rare dest_port</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Maximum Response Time (ms)</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | stats max(ResponseTimeMax) as "Response Time Max" by _time | timechart max("Response Time Max") as "Maximum Response Time"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Common Destination IP Locations</title>
+      <map>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | table dest_ip | iplocation dest_ip | geostats count by dest_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="mapping.type">marker</option>
+      </map>
+    </panel>
+    <panel>
+      <title>Common Source IP Locations</title>
+      <map>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | table src_ip | iplocation src_ip | geostats count by src_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="mapping.type">marker</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="multiselect" token="country_choices_dst" searchWhenChanged="true" defaultValue="[\w ]*">
+        <label>Countries</label>
+        <fieldForLabel>Country</fieldForLabel>
+        <fieldForValue>Country</fieldForValue>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata | table dest_ip | iplocation dest_ip | top Country</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <delimiter>|</delimiter>
+        <valuePrefix>(</valuePrefix>
+        <valueSuffix>)</valueSuffix>
+        <prefix>"</prefix>
+        <suffix>"</suffix>
+        <choice value="([\w ]*)">All</choice>
+        <default>([\w ]*)</default>
+      </input>
+      <title>Common Destination IP Location List</title>
+      <table>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata | stats count by dest_ip | iplocation dest_ip | table Country,dest_ip,count | where Country!="" | where match(Country, $country_choices_dst$) | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">all</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="fs_choice">if($fs_type$="lfs","omnipeek/forensics","omnipeek/distributed-forensic-searches/new-distributed-forensic-search")</eval>
+          <link target="_blank">http://$lw_source$/$fs_choice|n$?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;showDialog=true</link>
+        </drilldown>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <input type="multiselect" token="country_choices_src" searchWhenChanged="true" defaultValue="[\w ]*">
+        <label>Countries</label>
+        <fieldForLabel>Country</fieldForLabel>
+        <fieldForValue>Country</fieldForValue>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata | table dest_ip | iplocation dest_ip | top Country</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <delimiter>|</delimiter>
+        <valuePrefix>(</valuePrefix>
+        <valueSuffix>)</valueSuffix>
+        <prefix>"</prefix>
+        <suffix>"</suffix>
+        <choice value="([\w ]*)">All</choice>
+        <default>([\w ]*)</default>
+      </input>
+      <title>Common Source IP Location List</title>
+      <table>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata | stats count by src_ip | iplocation src_ip | table Country,src_ip,count | where Country!="" | where match(Country, $country_choices_src$) | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">all</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="fs_choice">if($fs_type$="lfs","omnipeek/forensics","omnipeek/distributed-forensic-searches/new-distributed-forensic-search")</eval>
+          <link target="_blank">http://$lw_source$/$fs_choice|n$?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;showDialog=true</link>
+        </drilldown>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Destinations</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | top dest_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Sources</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | top src_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+</form>

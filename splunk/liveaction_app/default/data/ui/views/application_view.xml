@@ -1,0 +1,197 @@
+<form version="1.1" theme="dark">
+  <label>Application View</label>
+  <description>Provides a customized view of applications running on your network.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-1h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="dataspan" searchWhenChanged="true">
+      <label>Data Span</label>
+      <default>10m</default>
+      <choice value="1m">1 min</choice>
+      <choice value="5m">5 min</choice>
+      <choice value="10m">10 min</choice>
+      <choice value="30m">30 min</choice>
+      <choice value="60m">60 min</choice>
+      <initialValue>10m</initialValue>
+    </input>
+    <input type="multiselect" token="lw_source" searchWhenChanged="true" defaultValue="*">
+      <label>LiveWire Sources</label>
+      <fieldForLabel>exporter_ip</fieldForLabel>
+      <fieldForValue>exporter_ip</fieldForValue>
+      <search>
+        <query>source="stream:livewire_livewire_netflow" netflowdata | dedup exporter_ip | table exporter_ip</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <delimiter>,</delimiter>
+    </input>
+    <input type="dropdown" token="fs_type">
+      <label>Forensic Search Click-Through</label>
+      <default>Local Forensic Search</default>
+      <choice value="lfs">Local Forensic Search</choice>
+      <choice value="dfs">Distributed Forensic Search</choice>
+      <initialValue>Local Forensic Search</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Traffic by Application</title>
+      <input type="multiselect" token="app_choices" searchWhenChanged="true" defaultValue="\d*">
+        <label>Applications</label>
+        <fieldForLabel>Application</fieldForLabel>
+        <fieldForValue>app_t</fieldForValue>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | eval Name=replace(app_tag, " : .*", "") | lookup classification_engine_mappings Name OUTPUT ID as cl_eng_id | eval sel_id=tonumber(replace(app_tag, ".* : ", ""),16) | lookup livewire_mappings cl_eng_id sel_id OUTPUT Application | chart values(sel_id) as app_t, values(cl_eng_id) as classifier, count by Application | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <delimiter>|</delimiter>
+        <valuePrefix>(</valuePrefix>
+        <valueSuffix>)</valueSuffix>
+        <prefix>"</prefix>
+        <suffix>"</suffix>
+        <choice value="(\d*)">All</choice>
+        <default>(\d*)</default>
+      </input>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | eval Name=replace(app_tag, " : .*", "") | lookup classification_engine_mappings Name OUTPUT ID as cl_eng_id | eval sel_id=tonumber(replace(app_tag, ".* : ", ""),16)| where match(sel_id, $app_choices$) | lookup livewire_mappings cl_eng_id sel_id OUTPUT Application | timechart span=$dataspan$ sum(bytes_in) by Application</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Application Counts</title>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | eval Name=replace(app_tag, " : .*", "") | lookup classification_engine_mappings Name OUTPUT ID as cl_eng_id | eval sel_id=tonumber(replace(app_tag, ".* : ", ""),16) | lookup livewire_mappings cl_eng_id sel_id OUTPUT Application | chart count by Application | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <eval token="early_window">strftime($earliest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="late_window">strftime($latest$, "%Y-%m-%dT%H:%M:%S.%Q%z")</eval>
+          <eval token="fs_choice">if($fs_type$="lfs","omnipeek/forensics","omnipeek/distributed-forensic-searches/new-distributed-forensic-search")</eval>
+          <link target="_blank">http://$lw_source$/$fs_choice|n$?startTime=$early_window|n$&amp;endTime=$late_window|n$&amp;filter=app($click.value|n$)&amp;showDialog=true</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Rare Applications</title>
+      <table>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | eval Name=replace(app_tag, " : .*", "") | lookup classification_engine_mappings Name OUTPUT ID as cl_eng_id | eval sel_id=tonumber(replace(app_tag, ".* : ", ""),16) | lookup livewire_mappings cl_eng_id sel_id OUTPUT Application | rare Application</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Application Breakdown</title>
+      <chart>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | eval Name=replace(app_tag, " : .*", "") | lookup classification_engine_mappings Name OUTPUT ID as cl_eng_id | eval sel_id=tonumber(replace(app_tag, ".* : ", ""),16) | lookup livewire_mappings cl_eng_id sel_id OUTPUT Application | top Application</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Applications</title>
+      <table>
+        <search>
+          <query>source="stream:livewire_livewire_netflow" netflowdata exporter_ip IN($lw_source$) | eval Name=replace(app_tag, " : .*", "") | lookup classification_engine_mappings Name OUTPUT ID as cl_eng_id | eval sel_id=tonumber(replace(app_tag, ".* : ", ""),16) | lookup livewire_mappings cl_eng_id sel_id OUTPUT Application | top Application</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

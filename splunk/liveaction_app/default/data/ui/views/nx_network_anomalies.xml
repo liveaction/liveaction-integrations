@@ -1,0 +1,123 @@
+<form version="1.1" theme="dark">
+  <label>LiveNX Network Anomalies</label>
+  <description>Events forwarded from your LiveNX using OTel.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-6h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="nx_source" searchWhenChanged="true" defaultValue="*">
+      <label>LiveNX Sources</label>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <search>
+        <query>sourcetype="httpevent" receiver_type="livenx"| dedup host | table host</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <delimiter>,</delimiter>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Total Network LiveNX Events</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) event_type="anomaly" | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Critical Network Event Count</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) event_type="anomaly" | where severity == "Critical" | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Network Events Over Time</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) event_type="anomaly" | timechart count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Recent Network Findings</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) event_type="anomaly" | table _time,description,message,severity | sort -_time</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Top Network Messages</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) event_type="anomaly"  | stats count by message | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Top Network Descriptions</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) event_type="anomaly"  | stats count by description | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Severities</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) event_type="anomaly"  | stats count by severity</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>

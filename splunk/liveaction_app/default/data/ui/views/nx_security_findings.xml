@@ -1,0 +1,250 @@
+<form version="1.1" theme="dark">
+  <label>LiveNX Security Findings</label>
+  <description>Events forwarded from your LiveNX using OTel.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-6h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="nx_source" searchWhenChanged="true" defaultValue="*">
+      <label>LiveNX Sources</label>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <search>
+        <query>sourcetype="httpevent" receiver_type="livenx"| dedup host | table host</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <delimiter>,</delimiter>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Total LiveNX Security Events</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Critical Security Event Count</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | where severity == "Critical" | stats count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Security Events Over Time</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | timechart count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Security Event Types</title>
+      <chart>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | top message</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Event, Description, Indicator</title>
+      <table>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | stats count by message,description,indicator | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Flows by Event Message</title>
+      <input type="multiselect" token="nx_event_choice" searchWhenChanged="true" defaultValue="[\w ]*">
+        <label>LiveNX Events</label>
+        <fieldForLabel>message</fieldForLabel>
+        <fieldForValue>message</fieldForValue>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | table message | dedup message</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <delimiter>|</delimiter>
+        <valuePrefix>(</valuePrefix>
+        <valueSuffix>)</valueSuffix>
+        <prefix>"</prefix>
+        <suffix>"</suffix>
+        <default>([\w ]*)</default>
+        <choice value="([\w ]*)">All</choice>
+      </input>
+      <input type="multiselect" token="nx_saddr_choice" searchWhenChanged="true" defaultValue="[\s\S ]*">
+        <label>Source Address</label>
+        <fieldForLabel>saddr</fieldForLabel>
+        <fieldForValue>saddr</fieldForValue>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | table saddr | dedup saddr</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <delimiter>|</delimiter>
+        <valuePrefix>(</valuePrefix>
+        <valueSuffix>)</valueSuffix>
+        <prefix>"</prefix>
+        <suffix>"</suffix>
+        <default>([\s\S ]*)</default>
+        <choice value="([\s\S ]*)">All</choice>
+      </input>
+      <input type="multiselect" token="nx_daddr_choice" searchWhenChanged="true" defaultValue="[\s\S ]*">
+        <label>Destination Address</label>
+        <fieldForLabel>daddr</fieldForLabel>
+        <fieldForValue>daddr</fieldForValue>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | table daddr | dedup daddr</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <delimiter>|</delimiter>
+        <valuePrefix>(</valuePrefix>
+        <valueSuffix>)</valueSuffix>
+        <prefix>"</prefix>
+        <suffix>"</suffix>
+        <default>([\s\S ]*)</default>
+        <choice value="([\s\S ]*)">All</choice>
+      </input>
+      <table>
+        <title>Cross-Launch to LiveNX Available</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | table message,saddr,sport,daddr,dport,_time,host.login.url | where match(message,$nx_event_choice$) | where match(saddr,$nx_saddr_choice$) | where match(daddr,$nx_daddr_choice$) | eval epoch=_time | table message,saddr,sport,daddr,dport,_time,epoch,host.login.url | sort -_time</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <fields>message,saddr,sport,daddr,dport,_time</fields>
+        <drilldown>
+          <eval token="epoch_end_ms">tonumber($row.epoch$)*1000</eval>
+          <link target="_blank">$row.host.login.url|n$/flow-path-analysis-story?tabId=basic&amp;endTime=$epoch_end_ms$&amp;flow.ip.src={"operator":"%3D","values":["$row.saddr|n$"]}&amp;flow.ip.dst={"operator":"%3D","values":["$row.daddr|n$"]}</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Mitre Categories</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | stats count by mitrecategory</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Severities</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | stats count by severity</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Most Common Description</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | top description</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Most Common Indicator</title>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | top indicator</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Common Client Locations</title>
+      <map>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | table saddr | iplocation saddr | geostats count by saddr globallimit=0 | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="mapping.type">marker</option>
+      </map>
+    </panel>
+    <panel>
+      <title>Common Server Locations</title>
+      <map>
+        <search>
+          <query>sourcetype="httpevent" receiver_type="livenx" host IN($nx_source$) mitrecategory!="" | table daddr | iplocation daddr | geostats count by daddr globallimit=0 | sort -count</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="mapping.type">marker</option>
+      </map>
+    </panel>
+  </row>
+</form>

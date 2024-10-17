@@ -1,0 +1,65 @@
+{
+  "modelName": "LiveWire_Netflow",
+  "displayName": "LiveWire Netflow",
+  "description": "IPFIX traffic ingested from a LiveWire.",
+  "objectSummary": {
+    "Event-Based": 1,
+    "Transaction-Based": 0,
+    "Search-Based": 0
+  },
+  "objects": [
+    {
+      "objectName": "LiveWire_Netflow",
+      "displayName": "LiveWire Netflow",
+      "parentName": "BaseEvent",
+      "comment": "",
+      "fields": [
+        {
+          "fieldName": "ApplicationLatencyAvg",
+          "owner": "LiveWire_Netflow",
+          "type": "number",
+          "fieldSearch": "",
+          "required": false,
+          "multivalue": false,
+          "hidden": false,
+          "editable": true,
+          "displayName": "ApplicationLatencyAvg",
+          "comment": ""
+        },
+        {
+          "fieldName": "netflow_elements",
+          "owner": "LiveWire_Netflow",
+          "type": "string",
+          "fieldSearch": "",
+          "required": false,
+          "multivalue": false,
+          "hidden": false,
+          "editable": true,
+          "displayName": "netflow_elements",
+          "comment": ""
+        },
+        {
+          "fieldName": "_time",
+          "owner": "BaseEvent",
+          "type": "timestamp",
+          "fieldSearch": "",
+          "required": false,
+          "multivalue": false,
+          "hidden": false,
+          "editable": true,
+          "displayName": "_time",
+          "comment": ""
+        }
+      ],
+      "calculations": [],
+      "constraints": [
+        {
+          "search": "source=\"stream:livewire_livewire_netflow\" sourcetype=\"stream:netflow\"",
+          "owner": "LiveWire_Netflow"
+        }
+      ],
+      "lineage": "LiveWire_Netflow"
+    }
+  ],
+  "objectNameList": ["LiveWire_Netflow"]
+}

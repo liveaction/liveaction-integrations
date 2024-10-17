@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: alerts from netld to livenx",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--alerts", "--fromproduct", "netld", "--toproduct", "livenx"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
+        },        
+        {
+            "name": "Python Debugger: alerts from livenx to netld",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--alerts", "--fromproduct", "livenx", "--toproduct", "netld"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
+        },
+        {
+            "name": "Python Debugger: inventory from netld to livenx",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--inventory", "--fromproduct", "netld", "--toproduct", "livenx"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
+        },
+        {
+            "name": "Python Debugger: inventory from livenx to netld",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--inventory", "--fromproduct", "livenx", "--toproduct", "netld", "--logstdout"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
+        }
+    ]
+}

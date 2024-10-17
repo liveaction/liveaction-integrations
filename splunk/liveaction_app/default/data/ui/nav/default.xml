@@ -1,0 +1,20 @@
+<nav color="#1c6fec">
+
+  <collection label="LiveWire Dashboards">
+    <view name="net_overview"  default='true'/>
+    <view name="application_view" />
+  </collection>
+
+  <collection label="LiveNX Dashboards">
+    <view name="nx_alerts"/>
+    <view name="nx_network_anomalies"/>
+    <view name="nx_security_findings"/>
+  </collection>
+
+  <view name="search" />
+
+  <view name="analytics_workspace" />
+
+  <a href="https://www.liveaction.com/support/technical-support/" target="_blank">LiveAction Support</a>
+
+</nav>
