@@ -6,7 +6,7 @@ Repo Layout
 LiveNX
 -------
 
-Contains all the LiveNX documentation and integration code
+Contains all the LiveNX documentation, diagnostics and integration code
 
 LiveWire
 ---------
@@ -18,3 +18,9 @@ Splunk
 ---------
 
 Contains all the LiveAction Splunk documentation and Splunk Application
+
+
+
+## License
+
+This project is licensed under the MIT License.
