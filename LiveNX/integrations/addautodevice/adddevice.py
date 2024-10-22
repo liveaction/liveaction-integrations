@@ -5,6 +5,7 @@ import os
 import ssl
 import json
 import urllib.request, urllib.parse
+import time
 
 local_logger = logging.getLogger(__name__)
 
@@ -64,22 +65,25 @@ def get_livenx_nodes():
   ]
 }
     '''
-    api_url = "/v1/nodes"
-    request, ctx = create_request(api_url)
-    request.add_header("accept", "application/json")
+    try:
+      api_url = "/v1/nodes"
+      request, ctx = create_request(api_url)
+      request.add_header("accept", "application/json")
 
-    ## TO DO Try Except to handle http request timeout or exception
-    with urllib.request.urlopen(request, context=ctx) as response:
-        response_data = response.read().decode('utf-8')
-        # Parse the JSON response
-        json_data = json.loads(response_data)
-        
-        # Return the nodes field if it exists
-        if 'nodes' in json_data:
-            return json_data['nodes']
-        else:
-            # Handle the case where 'nodes' doesn't exist
-            return []
+      ## TO DO Try Except to handle http request timeout or exception
+      with urllib.request.urlopen(request, context=ctx) as response:
+          response_data = response.read().decode('utf-8')
+          # Parse the JSON response
+          json_data = json.loads(response_data)
+          
+          # Return the nodes field if it exists
+          if 'nodes' in json_data:
+              return json_data['nodes']
+          else:
+              # Handle the case where 'nodes' doesn't exist
+              return []
+    except Exception as err:
+        print("Error api nodes call", err)
     
     return []
 
@@ -238,21 +242,23 @@ def add_to_livenx_inventory(livenx_inventory):
   
     '''
 
+    try:
+      # Convert the device list to a JSON string and encode it to bytes
+      data = json.dumps(livenx_inventory).encode('utf-8')
 
-    # Convert the device list to a JSON string and encode it to bytes
-    data = json.dumps(livenx_inventory).encode('utf-8')
-
-    # Create the request and add the Content-Type header
-    request, ctx = create_request("/v1/devices/virtual", data)
-    local_logger.info(data)
-    request.add_header("Content-Type", "application/json")
-    request.add_header("accept", "application/json")
-    # Specify the request method as POST
-    request.method = "POST"
-    
-    with urllib.request.urlopen(request, context=ctx) as response:
-        response_data = response.read().decode('utf-8')
-        local_logger.info(response_data)
+      # Create the request and add the Content-Type header
+      request, ctx = create_request("/v1/devices/virtual", data)
+      local_logger.info(data)
+      request.add_header("Content-Type", "application/json")
+      request.add_header("accept", "application/json")
+      # Specify the request method as POST
+      request.method = "POST"
+      
+      with urllib.request.urlopen(request, context=ctx) as response:
+          response_data = response.read().decode('utf-8')
+          local_logger.info(response_data)
+    except Exception as err:
+        print("Error call API call", err)
 
 
 def main(args):
@@ -263,15 +269,22 @@ def main(args):
         local_logger.info("Missing log file")
         exit(1)
 
-    ## Get list of IPs from log file  
-    ip_list = readFile(args.logfile)
-    ## Map IP to Linenx Inventory 
-    livenx_invenory = map_ip_to_livenx_inventory(ip_list)
-    ## Add IP to LiveNX 
-    add_to_livenx_inventory(livenx_invenory)
+    while True:
+      ## Get list of IPs from log file  
+      ip_list = readFile(args.logfile)
+      ## Map IP to Linenx Inventory 
+      livenx_invenory = map_ip_to_livenx_inventory(ip_list)
+      ## Add IP to LiveNX 
+      add_to_livenx_inventory(livenx_invenory)
+
+      if args.continuous is False:
+        break
+
+      time.sleep(1)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
+    parser.add_argument('--continuous', action="store_true", help='Run it continuously')
     args = parser.parse_args()
     main(args)
