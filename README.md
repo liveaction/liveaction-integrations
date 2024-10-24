@@ -1,26 +1,31 @@
-# LiveAction-Integrations
+# LiveAction Integrations
 
-Repo Layout
-------------
+This repository contains integration components for various LiveAction products, designed to enhance functionality through third-party tools and platforms.
 
-LiveNX
--------
+## Repository Structure
 
-Contains all the LiveNX documentation, diagnostics and integration code
+- **LiveNX**  
+  Contains documentation, diagnostic tools, and integration code for LiveNX, a network monitoring platform that provides deep visibility into network performance and application traffic.
 
-LiveWire
----------
+- **LiveWire**  
+  Contains documentation and integration code for LiveWire, which captures and analyzes network traffic to provide detailed insights into network behavior.
 
-Contains all the LiveWire documentation and integration code
+- **Splunk**  
+  Contains all the documentation and components required to integrate LiveAction products with Splunk, facilitating data analysis and visualization within the Splunk ecosystem.
 
+## Getting Started
 
-Splunk
----------
+To use any of the integrations, refer to the respective folder for detailed setup instructions and usage examples.
 
-Contains all the LiveAction Splunk documentation and Splunk Application
-
-
+### Prerequisites
+- [LiveNX](https://www.liveaction.com/livenx/)
+- [LiveWire](https://www.liveaction.com/livewire/)
+- [Splunk](https://www.splunk.com/)
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License
+
+## Contributions
+
+We welcome contributions. Please refer to the contributing guidelines in the repository.
