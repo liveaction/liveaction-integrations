@@ -6,8 +6,10 @@ import ssl
 import json
 import urllib.request, urllib.parse
 import time
+import sys
 
 local_logger = logging.getLogger(__name__)
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 liveNxHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
@@ -83,9 +85,29 @@ def get_livenx_nodes():
               # Handle the case where 'nodes' doesn't exist
               return []
     except Exception as err:
-        print("Error api nodes call", err)
+        local_logger.error(f"Error while call /v1/nodes: {err}")
     
     return []
+
+
+def get_livenx_inventory():
+
+    api_url = "/v1/devices"
+
+    request, ctx = create_request(api_url)
+    request.add_header("Content-Type", "application/json")
+    request.add_header("accept", "application/json")
+    
+    # Specify the request method as POST
+    request.method = "GET"
+
+    json_data = None
+    with urllib.request.urlopen(request, context=ctx) as response:
+        response_data = response.read().decode('utf-8')
+        # Parse the JSON response
+        json_data = json.loads(response_data)
+    
+    return json_data
 
 def create_livenx_interface_from_ip(address):
     '''
@@ -148,10 +170,14 @@ def create_livenx_device_from_ip(nodeid, ip_address):
          },
     """
     livenx_device = {}
+    ipNameRepresentation = ip_address.replace('.', '-')
     livenx_device['nodeId'] = nodeid
     livenx_device['interfaces'] = create_livenx_interface_from_ip(ip_address)
-    livenx_device['hostName'] = ip_address
-    livenx_device['systemName'] = ip_address
+    livenx_device['hostName'] = ipNameRepresentation
+    livenx_device['systemName'] = ipNameRepresentation
+    livenx_device['displaySystemName'] = ipNameRepresentation
+    livenx_device['hostName'] = ipNameRepresentation
+    livenx_device['displayHostName'] = ipNameRepresentation
     livenx_device['systemDescription'] = ''
     livenx_device['address'] = ip_address
     livenx_device['site'] = ''
@@ -168,11 +194,13 @@ def map_ip_to_livenx_inventory(ip_list):
     livenx_devices = []
     nodes = get_livenx_nodes()
     node = None
+    nodeid = None
     for node in nodes:
       if node['ipAddress'] == liveNxTargetIP:
         nodeid = node['id']
         break
-    if node == None:
+    if nodeid == None:
+        local_logger.info(f"Node Id doesnot match with liveNx Target IP")
         return 
     for ip in ip_list:
         livenx_devices.append(create_livenx_device_from_ip(nodeid, ip))
@@ -195,7 +223,7 @@ def readFile(filename=None):
 
         with open(filename) as rf:
             for line in rf.readlines():                
-                if "Flow packet received from unknown device" in line:
+                if "received flow packet for unknown device" in line or "Flow packet received from unknown device" in line:
                     ip = ip_pattern.search(line)
                     if ip:
                         ip_list.append(ip[0])
@@ -258,7 +286,7 @@ def add_to_livenx_inventory(livenx_inventory):
           response_data = response.read().decode('utf-8')
           local_logger.info(response_data)
     except Exception as err:
-        print("Error call API call", err)
+        local_logger.error(f"Error on /v1/devices/virtual API Call {err}")
 
 
 def main(args):
@@ -268,14 +296,30 @@ def main(args):
     if args.logfile is None:
         local_logger.info("Missing log file")
         exit(1)
+    
+    if liveNxHost is None or liveNxApiPort is None or liveNxToken is None or liveNxTargetIP is None:
+        local_logger.info("Missing env any of parameters: [LIVENX_API_HOST, LIVENX_API_PORT, LIVENX_API_TOKEN, LIVENX_TARGET_IP] ")
+        exit(1)
 
     while True:
       ## Get list of IPs from log file  
       ip_list = readFile(args.logfile)
       ## Map IP to Linenx Inventory 
-      livenx_invenory = map_ip_to_livenx_inventory(ip_list)
-      ## Add IP to LiveNX 
-      add_to_livenx_inventory(livenx_invenory)
+      orginal_livenx_inventory = get_livenx_inventory()
+      for livenx_device in orginal_livenx_inventory['devices']:          
+        try:
+          ip_list.remove(livenx_device['address'])
+        except Exception as err:
+            pass
+      if len(ip_list) < 1:
+        local_logger.info("No IP to add")
+      else:    
+        livenx_invenory = map_ip_to_livenx_inventory(ip_list[:5])
+        # Add IP to LiveNX
+        if isinstance(livenx_invenory, dict) and len(livenx_invenory.get('devices',[])) > 0:
+          add_to_livenx_inventory(livenx_invenory)
+        else:
+          local_logger.info("No device to add") 
 
       if args.continuous is False:
         break
