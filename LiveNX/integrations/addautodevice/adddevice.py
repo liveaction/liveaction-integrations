@@ -226,7 +226,9 @@ def readFile(filename=None):
                 if "received flow packet for unknown device" in line or "Flow packet received from unknown device" in line:
                     ip = ip_pattern.search(line)
                     if ip:
-                        ip_list.append(ip[0])
+                        ipAddress = ip[0]
+                        if ipAddress not in ip_list:
+                          ip_list.append(ipAddress)
         local_logger.info(f"List of IPs {ip_list}")
         return ip_list
     except Exception as err:
@@ -306,15 +308,16 @@ def main(args):
       ip_list = readFile(args.logfile)
       ## Map IP to Linenx Inventory 
       orginal_livenx_inventory = get_livenx_inventory()
-      for livenx_device in orginal_livenx_inventory['devices']:          
+      for livenx_device in orginal_livenx_inventory.get('devices',[]):          
         try:
           ip_list.remove(livenx_device['address'])
         except Exception as err:
             pass
       if len(ip_list) < 1:
         local_logger.info("No IP to add")
-      else:    
-        livenx_invenory = map_ip_to_livenx_inventory(ip_list[:5])
+      else:
+        local_logger.info(f"List of IPs to add: {ip_list}")   
+        livenx_invenory = map_ip_to_livenx_inventory(ip_list)
         # Add IP to LiveNX
         if isinstance(livenx_invenory, dict) and len(livenx_invenory.get('devices',[])) > 0:
           add_to_livenx_inventory(livenx_invenory)
