@@ -15,6 +15,10 @@ This repository contains the integrations from LiveAction's LiveNX to third part
 
 This repository contains support for streaming data from LiveAction's LiveNX to Apache Kafka.
 
+## grafana
+
+This repository contains Grafana Dashboards for the LiveNX product.
+
 ## Features
 
 

@@ -1,0 +1,415 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "description": "",
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 34,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Traffic"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "decbytes"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 2,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "TotalBytes"
+            }
+          ]
+        },
+        "pluginVersion": "11.1.4",
+        "targets": [
+          {
+            "database": "default",
+            "datasource": {
+              "type": "grafana-clickhouse-datasource",
+              "uid": "PDEE91DDB90597936"
+            },
+            "dateColDataType": "date",
+            "dateLoading": false,
+            "dateTimeColDataType": "timeslot",
+            "dateTimeType": "TIMESTAMP",
+            "datetimeLoading": false,
+            "editorType": "sql",
+            "extrapolate": false,
+            "format": 1,
+            "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+            "group": [],
+            "interval": "",
+            "intervalFactor": 1,
+            "meta": {},
+            "metricColumn": "none",
+            "pluginVersion": "4.0.5",
+            "queryType": "table",
+            "rawQuery": "SELECT \n    ApplicationName,\n    d.name AS Dscp,\n    SUM(SumOctets)/5 AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets)/5 AS TotalPackets,\n    SUM(SumOctets)*8/5/60 AS AverageBitRate,\n    AVG(SumPackets)/5/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/5/60 AS PeakBitRate,\n    MAX(SumPackets)/5/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_5m_dist as f\nJOIN livenx_flowdb.dscp AS d ON toUInt8(f.Dscp) = d.dscp\nWHERE\n    time >= 1708095989 AND time <= 1708096889 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND  \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName, Dscp\nLIMIT 1000",
+            "rawSql": "SELECT\n    COUNT(DISTINCT(DeviceSerial)) AS NumberOfDevices, COUNT(DISTINCT(ApplicationName)) AS NumberOfApplications\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\n",
+            "refId": "A",
+            "round": "0s",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "skip_comments": true,
+            "tableLoading": false,
+            "timeColumn": "time",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Devices Sending Basic Traffic  (#)",
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Traffic"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "decbytes"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 7
+        },
+        "id": 3,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "TotalBytes"
+            }
+          ]
+        },
+        "pluginVersion": "11.1.4",
+        "targets": [
+          {
+            "database": "default",
+            "datasource": {
+              "type": "grafana-clickhouse-datasource",
+              "uid": "PDEE91DDB90597936"
+            },
+            "dateColDataType": "date",
+            "dateLoading": false,
+            "dateTimeColDataType": "timeslot",
+            "dateTimeType": "TIMESTAMP",
+            "datetimeLoading": false,
+            "editorType": "sql",
+            "extrapolate": false,
+            "format": 1,
+            "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+            "group": [],
+            "interval": "",
+            "intervalFactor": 1,
+            "meta": {},
+            "metricColumn": "none",
+            "pluginVersion": "4.3.2",
+            "queryType": "table",
+            "rawQuery": "SELECT \n    ApplicationName,\n    d.name AS Dscp,\n    SUM(SumOctets)/5 AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets)/5 AS TotalPackets,\n    SUM(SumOctets)*8/5/60 AS AverageBitRate,\n    AVG(SumPackets)/5/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/5/60 AS PeakBitRate,\n    MAX(SumPackets)/5/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_5m_dist as f\nJOIN livenx_flowdb.dscp AS d ON toUInt8(f.Dscp) = d.dscp\nWHERE\n    time >= 1708095989 AND time <= 1708096889 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND  \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName, Dscp\nLIMIT 1000",
+            "rawSql": "SELECT\n    COUNT(DISTINCT(COALESCE(IPv4NumToString(SourceIpv4), IPv6NumToString(SourceIpv6)))) AS NumberOfSourceIPs, COUNT(DISTINCT(COALESCE(IPv4NumToString(DestIpv4), IPv6NumToString(DestIpv6)))) AS NumberOfDestinationIPs,\n    COUNT(DISTINCT(SourcePort)) AS NumberOfSourcePorts,COUNT(DISTINCT(DestPort)) AS NumberOfDestPorts\nFROM livenx_flowdb.basic_raw_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\n",
+            "refId": "A",
+            "round": "0s",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "skip_comments": true,
+            "tableLoading": false,
+            "timeColumn": "time",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Number of IPs/Ports Sending Basic Traffic  (#)",
+        "type": "table"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 39,
+    "tags": [
+      "npm"
+    ],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": true,
+            "text": "5m",
+            "value": "5"
+          },
+          "hide": 0,
+          "includeAll": false,
+          "label": "Granularity",
+          "multi": false,
+          "name": "Granularity",
+          "options": [
+            {
+              "selected": false,
+              "text": "1m",
+              "value": "1"
+            },
+            {
+              "selected": true,
+              "text": "5m",
+              "value": "5"
+            },
+            {
+              "selected": false,
+              "text": "60m",
+              "value": "60"
+            },
+            {
+              "selected": false,
+              "text": "360m",
+              "value": "160"
+            }
+          ],
+          "query": "1m : 1, 5m : 5, 60m : 60, 360m : 160",
+          "queryValue": "",
+          "rawSql": "1m : 1,5m : 60m : 60,360m : 360",
+          "skipUrlSync": false,
+          "type": "custom"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "definition": "",
+          "hide": 0,
+          "includeAll": true,
+          "label": "DeviceSerial",
+          "multi": false,
+          "name": "DeviceSerial",
+          "options": [],
+          "query": "SELECT DISTINCT DeviceSerial FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+          "rawSql": "SELECT DISTINCT DeviceSerial FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "definition": "",
+          "hide": 0,
+          "includeAll": true,
+          "label": "ApplicationName",
+          "multi": false,
+          "name": "Application",
+          "options": [],
+          "query": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+          "rawSql": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "allValue": "All",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "definition": "SELECT DISTINCT Dscp AS Dscp FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist as f\nWHERE\n       $__timeFilter(time)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Dscp",
+          "multi": false,
+          "name": "Dscp",
+          "options": [],
+          "query": "SELECT DISTINCT Dscp AS Dscp FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist as f\nWHERE\n       $__timeFilter(time)",
+          "rawSql": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Network Audit",
+    "uid": "a9479ecb-5f78-4f15-9a68-2a2706e",
+    "version": 4,
+    "weekStart": ""
+  }
