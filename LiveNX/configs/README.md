@@ -14,4 +14,4 @@ The configuration recommendations are created as a guideline.  We strive to keep
 
 ## ASR1000x
 
-The repository contains configs for ISR/ASR100x series.
+The repository contains configs for ISR/ASR1000x series.
