@@ -19,6 +19,10 @@ This repository contains support for streaming data from LiveAction's LiveNX to 
 
 This repository contains Grafana Dashboards for the LiveNX product.
 
+## configs
+
+This repository contains recommended router configurations to be applied in order for provide the nescessary requirements for the LiveNX product.
+
 ## Features
 
 
