@@ -1,3 +1,3 @@
-## These are configs for Cisco ASR
+## These are recommended configs for Cisco ISR/ASR devices
 
-ASR1001-X, ASR1002-X
+Models: ISR/ASR1001-X, ISR/ASR1002-X
