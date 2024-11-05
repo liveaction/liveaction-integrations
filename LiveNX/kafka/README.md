@@ -66,7 +66,7 @@ The Kafka engine table uses the following settings:
 - `kafka_broker_list`: Set to the provided `<kafka_broker>` argument.
 - `kafka_topic_list`: Set to the provided `<kafka_topic>` argument.
 - `kafka_group_name`: Set to the provided `<kafka_group>` argument.
-- `kafka_format`: Uses `JSONEachRow` format for reading JSON messages.
+- `kafka_format`: Uses `JSON` format for reading JSON messages.
 
 ## Notes
 
