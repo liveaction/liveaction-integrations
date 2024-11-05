@@ -23,7 +23,7 @@ Ensure that:
 
 Run the script with the following syntax:
 ```bash
-./script_name.sh <kafka_broker> <kafka_topic> <kafka_group>
+./start_kafka_stream.sh <kafka_broker> <kafka_topic> <kafka_group>
 ```
 
 ### Arguments
@@ -33,7 +33,7 @@ Run the script with the following syntax:
 
 ### Example
 ```bash
-./script_name.sh localhost:9092 my_topic my_consumer_group
+./start_kafka_stream.sh localhost:9092 my_topic my_consumer_group
 ```
 
 ## Table Schema

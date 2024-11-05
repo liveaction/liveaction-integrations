@@ -48,7 +48,7 @@ SETTINGS
     kafka_broker_list = '$KAFKA_BROKER',
     kafka_topic_list = '$KAFKA_TOPIC',
     kafka_group_name = '$KAFKA_GROUP',
-    kafka_format = 'JSONEachRow';
+    kafka_format = 'JSON';
 
 -- Create the materialized view
 CREATE MATERIALIZED VIEW IF NOT EXISTS livenx_flowdb.basic_entity_1m_stream_mv
@@ -74,6 +74,6 @@ SELECT
     SumPackets,
     SumOctets,
     Sampled
-FROM livenx_flowdb.basic_entity_1m_stream;
+FROM livenx_flowdb.basic_entity_1m;
 
 EOSQL
