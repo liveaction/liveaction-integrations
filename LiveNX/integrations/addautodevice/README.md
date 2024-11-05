@@ -31,6 +31,9 @@ export LIVENX_TARGET_IP="your-target-node-ip"
 
 ### Basic Command
 ```bash
+# Run monitor script 
+python3 monitor_logfile_adddevice.py
+
 # Run once
 python3 script.py --logfile /path/to/your/logfile.log
 
