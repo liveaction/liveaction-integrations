@@ -2,9 +2,9 @@
 
 LiveNX requires 3 unique templates (1) Traffic (2) Voice, Video, Performance, and (3) Application Response time.  
 
-Customer Assumptions
+# Customer Assumptions
 
-These configuration files assume logging to the device via SSH and applying a partial configuration.
+These configuration files assume logging into the device via SSH and applying a partial configuration.
 
 Customer will modify interfaces to match their environment.
 
