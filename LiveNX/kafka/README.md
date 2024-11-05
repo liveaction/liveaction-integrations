@@ -1,6 +1,4 @@
-Here is a `README.md` file describing the functionality of the SQL file.
 
-```markdown
 # ClickHouse Kafka Table and Materialized View Creation Script
 
 This script automates the creation of a Kafka table and a materialized view in a ClickHouse database. It uses Docker to execute SQL commands on a running `clickhouse-server` container.
