@@ -76,6 +76,4 @@ The Kafka engine table uses the following settings:
 ## License
 
 This script is open-source and can be modified as needed.
-```
 
-This `README.md` should help users understand how to use and what to expect from the script. Let me know if you need further customization!
