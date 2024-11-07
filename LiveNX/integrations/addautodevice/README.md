@@ -124,3 +124,12 @@ Running Docker Image
 --------------------
 
 docker run -v /data/livenx-server/data/log:/data/livenx-server/data/log -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOKEN=your_token_here -e LIVENX_TARGET_IP=10.0.0.2 your_image_name
+
+Using Docker Compose
+--------------------
+
+Edit the docker-compose.yml with the nescessary parameters.
+
+then execute:
+
+docker compose up -d
