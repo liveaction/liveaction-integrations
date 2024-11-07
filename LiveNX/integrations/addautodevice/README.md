@@ -113,3 +113,14 @@ The program uses Python's logging module to provide detailed operation informati
 ## License
 
 This project is licensed under the MIT License.
+
+
+Building Docker Image
+---------------------
+
+docker build -t addautodevice-app .
+
+Running Docker Image
+--------------------
+
+docker run -v /data/livenx-server/data/log:/data/livenx-server/data/log -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOKEN=your_token_here -e LIVENX_TARGET_IP=10.51.6.82 your_image_name
