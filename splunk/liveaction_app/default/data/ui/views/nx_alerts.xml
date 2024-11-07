@@ -72,10 +72,9 @@
           <earliest>$earliest$</earliest>
           <latest>$latest$</latest>
         </search>
-        <fields>_time,alertId,severity,summary,"sinfo.DEVICE.deviceName"</fields>
-        <option name="drilldown">all</option>
+        <fields>["_time","alertId","severity","summary","sinfo.DEVICE.deviceName"]</fields>
         <drilldown>
-          <link target="_blank">$row.host.login.url|n$/alerts?alertId=$row.alertId$</link>
+          <link target="_blank">$row.host.login.url|n$/alerts?alertId=$row.alertId$&amp;tabId=history</link>
         </drilldown>
       </table>
     </panel>
