@@ -1,10 +1,6 @@
-# Netscout CSV Custom Application Upload/Sync Script
+# Netscout CSV Custom Applications Import Script
 
 A Python utility that imports CSV files exported from Netscout into LiveNX as custom applications.
-
-## Overview
-
-This tool scans Raw file registers them as custom application devices in LiveNX.
 
 ## Prerequisites
 
@@ -29,46 +25,16 @@ export LIVENX_API_TOKEN="your-api-token"
 
 ### Basic Command
 ```bash
-# Run add device script 
-python3 adddevice.py --rawfile /path/to/your/rawfile.csv
+# Run import script 
+python3 import_applications.py --rawfile /path/to/your/rawfile.csv
 ```
 
 ### Command Line Arguments
 
 | Argument | Description | Required | Default |
 |----------|-------------|----------|----------|
-| `--rawfile` | Path to the raw file | Yes | Null |
+| `--rawfile` | Path to the netscout application CSV file | Yes | Null |
 | `--delimiter` | Column separator to access values | No | ; |
-
-## Features
-
-### Raw File Access
-- Parses raw files for List of IPs
-- Extracts Raw id Address Type present
-
-### Custom Application Registration
-- Creates custom applications entries in LiveNX
-
-### API Integration
-- Secure HTTPS communication with LiveNX API
-- Bearer token authentication
-- Automatic node discovery and selection
-- SSL certificate verification bypass for internal networks
-
-## Error Handling
-
-- SSL certificate verification disabled for internal networks
-- Robust error handling for file operations
-- API communication error logging
-- Input validation for command line arguments
-
-## Logging
-
-The program uses Python's custom application module to provide detailed operation information, including:
-- Command line arguments
-- Discovered Valid Row addresses
-- API responses
-- Error conditions
 
 ## Security Considerations
 

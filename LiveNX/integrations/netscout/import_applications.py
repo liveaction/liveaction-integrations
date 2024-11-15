@@ -143,7 +143,7 @@ def create_custom_applications_from_ip(data):
           ]
         }
     """
-    livenx_device = {
+    livenx_app = {
           "rank": 0,
           "name": data.get('Application Name'),
           "description": data.get('Display Name'),
@@ -174,7 +174,7 @@ def create_custom_applications_from_ip(data):
             0
           ]
         }
-    return livenx_device
+    return livenx_app
 
 
 def map_ip_to_custom_applications(raw_list):
