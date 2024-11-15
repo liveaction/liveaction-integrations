@@ -1,4 +1,4 @@
-# Create/formalize Custom Application Upload/Sync Script (USPS)
+# Create/formalize Custom Application Upload/Sync Script
 
 A Python utility that Create/formalize Custom Application them in LiveNX.
 
