@@ -29,7 +29,7 @@ export LIVENX_API_TOKEN="your-api-token"
 
 ### Basic Command
 ```bash
-# Run monitor script 
+# Run add device script 
 python3 adddevice.py --rawfile /path/to/your/rawfile.csv
 ```
 
@@ -37,8 +37,8 @@ python3 adddevice.py --rawfile /path/to/your/rawfile.csv
 
 | Argument | Description | Required | Default |
 |----------|-------------|----------|----------|
-| `--rawfile` | Path to the log file to monitor | Yes | Null |
-| `--delimiter` | Monitor the log file continuously | No | ; |
+| `--rawfile` | Path to the raw file | Yes | Null |
+| `--delimiter` | Column separator to access values | No | ; |
 
 ## Features
 
