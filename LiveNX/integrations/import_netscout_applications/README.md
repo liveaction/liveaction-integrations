@@ -1,6 +1,6 @@
-# Create/formalize Custom Application Upload/Sync Script
+# Netscout CSV Custom Application Upload/Sync Script
 
-A Python utility that Create/formalize Custom Application them in LiveNX.
+A Python utility that imports CSV files exported from Netscout into LiveNX as custom applications.
 
 ## Overview
 
