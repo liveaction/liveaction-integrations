@@ -16,6 +16,9 @@ The configuration recommendations are created as a guideline.  We strive to keep
 
 The repository contains configs for ISR/ASR1000x series.
 
+## Catalyst8k
+
+The repository contains configs for Cisco Catalyst 9k (8300 and 8500) series.
 
 ## Catalyst9k
 
