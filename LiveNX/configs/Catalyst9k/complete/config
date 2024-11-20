@@ -1,0 +1,195 @@
+enable
+config t
+! FNF configuration
+interface GigabitEthernet1/0/6
+ip nbar protocol-discovery
+ exit
+flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
+description DO NOT MODIFY. USED BY LIVEACTION.
+export-protocol ipfix
+destination 1.1.1.1
+source GigabitEthernet1/0/6
+transport udp 2055
+template data timeout 600
+option interface-table
+option application-table
+option sampler-table
+option vrf-table
+option application-attributes
+exit
+flow record LIVEACTION-FLOWRECORD-INGRESS
+description DO NOT MODIFY. USED BY LIVEACTION.
+match flow direction
+match interface input
+match ipv4 destination address
+match ipv4 protocol
+match ipv4 source address
+match ipv4 tos
+match transport destination-port
+match transport source-port
+collect counter bytes layer2 long
+collect counter bytes long
+collect counter packets long
+collect interface output
+collect timestamp absolute first
+collect timestamp absolute last
+collect transport tcp flags
+exit
+flow record LIVEACTION-FLOWRECORD-EGRESS
+description DO NOT MODIFY. USED BY LIVEACTION.
+match flow direction
+match interface output
+match ipv4 destination address
+match ipv4 protocol
+match ipv4 source address
+match ipv4 tos
+match transport destination-port
+match transport source-port
+collect counter bytes layer2 long
+collect counter bytes long
+collect counter packets long
+collect interface input
+collect timestamp absolute first
+collect timestamp absolute last
+collect transport tcp flags
+exit
+flow monitor LIVEACTION-FLOWMONITOR-INGRESS
+description DO NOT MODIFY. USED BY LIVEACTION.
+exporter LIVEACTION-FLOWEXPORTER-IPFIX
+cache timeout inactive 10
+cache timeout active 60
+record LIVEACTION-FLOWRECORD-INGRESS
+exit
+flow monitor LIVEACTION-FLOWMONITOR-EGRESS
+description DO NOT MODIFY. USED BY LIVEACTION.
+exporter LIVEACTION-FLOWEXPORTER-IPFIX
+cache timeout inactive 10
+cache timeout active 60
+record LIVEACTION-FLOWRECORD-EGRESS
+exit
+interface GigabitEthernet1/0/6
+ip flow monitor LIVEACTION-FLOWMONITOR-INGRESS input
+ip flow monitor LIVEACTION-FLOWMONITOR-EGRESS output
+exit
+! AVC application response time configuration
+ip access-list extended LIVEACTION-ACL-AVC
+permit tcp any any
+exit
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+exit
+class-map match-any LIVEACTION-CLASS-AVC
+exit
+class-map LIVEACTION-CLASS-AVC
+match access-group name LIVEACTION-ACL-AVC
+exit
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+class LIVEACTION-CLASS-AVC
+exit
+exit
+interface GigabitEthernet1/0/6
+ip nbar protocol-discovery
+exit
+flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
+description DO NOT MODIFY. USED BY LIVEACTION.
+export-protocol ipfix
+destination 1.1.1.1
+source GigabitEthernet1/0/6
+transport udp 2055
+template data timeout 600
+option interface-table
+option application-table
+option sampler-table
+option vrf-table
+option application-attributes
+exit
+flow record type performance-monitor LIVEACTION-FLOWRECORD-AVC
+description DO NOT MODIFY. USED BY LIVEACTION.
+collect application name
+collect interface input
+collect interface output
+collect ipv4 dscp
+exit
+flow monitor type performance-monitor LIVEACTION-FLOWMONITOR-AVC
+description DO NOT MODIFY. USED BY LIVEACTION.
+exporter LIVEACTION-FLOWEXPORTER-IPFIX
+cache entries 6500
+record LIVEACTION-FLOWRECORD-AVC
+exit
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+class LIVEACTION-CLASS-AVC
+flow monitor LIVEACTION-FLOWMONITOR-AVC
+exit
+exit
+! Medianet Configuration
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+exit
+class-map match-any LIVEACTION-CLASS-MEDIANET
+exit
+class-map LIVEACTION-CLASS-MEDIANET
+match protocol rtp
+exit
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+class LIVEACTION-CLASS-MEDIANET
+exit
+exit
+interface GigabitEthernet1/0/6
+service-policy type performance-monitor input LIVEACTION-POLICY-UNIFIED
+service-policy type performance-monitor output LIVEACTION-POLICY-UNIFIED
+ip nbar protocol-discovery
+exit
+flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
+description DO NOT MODIFY. USED BY LIVEACTION.
+export-protocol ipfix
+destination 1.1.1.1
+source GigabitEthernet1/0/6
+transport udp 2055
+template data timeout 600
+option interface-table
+option application-table
+option sampler-table
+option vrf-table
+option application-attributes
+exit
+flow record type performance-monitor LIVEACTION-FLOWRECORD-MEDIANET
+description DO NOT MODIFY. USED BY LIVEACTION.
+match flow direction
+match ipv4 destination address
+match ipv4 protocol
+match ipv4 source address
+match transport destination-port
+match transport rtp ssrc
+match transport source-port
+collect application media bytes counter
+collect application media bytes rate
+collect application media event
+collect application media packets counter
+collect application media packets rate
+collect application name
+collect counter bytes
+collect counter bytes rate
+collect counter packets
+collect interface input
+collect interface output
+collect ipv4 dscp
+collect ipv4 ttl
+collect monitor event
+collect routing forwarding-status
+collect timestamp interval
+collect transport event packet-loss counter
+collect transport packets expected counter
+collect transport packets lost counter
+collect transport packets lost rate
+collect transport rtp jitter maximum
+collect transport rtp jitter mean
+collect transport rtp jitter minimum
+exit
+flow monitor type performance-monitor LIVEACTION-FLOWMONITOR-MEDIANET
+description DO NOT MODIFY. USED BY LIVEACTION.
+exporter LIVEACTION-FLOWEXPORTER-IPFIX
+record LIVEACTION-FLOWRECORD-MEDIANET
+exit
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+class LIVEACTION-CLASS-MEDIANET
+flow monitor LIVEACTION-FLOWMONITOR-MEDIANET
+exit
+exit

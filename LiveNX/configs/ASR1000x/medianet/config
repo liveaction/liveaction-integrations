@@ -1,0 +1,75 @@
+config t
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+exit
+class-map match-any class-default
+exit
+class-map match-any LIVEACTION-CLASS-MEDIANET
+exit
+class-map LIVEACTION-CLASS-MEDIANET !replace with your real time qos class map settings
+match protocol rtp 
+exit
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+class LIVEACTION-CLASS-MEDIANET
+exit
+exit
+interface GigabitEthernet0/0
+service-policy type performance-monitor input LIVEACTION-POLICY-UNIFIED
+service-policy type performance-monitor output LIVEACTION-POLICY-UNIFIED
+ip nbar protocol-discovery
+exit
+flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
+description DO NOT MODIFY. USED BY LIVEACTION.
+export-protocol ipfix
+destination 1.1.1.1
+source GigabitEthernet0/1
+transport udp 2055
+template data timeout 600
+!option c3pl-policy-table
+option interface-table
+option application-table
+!option c3pl-class-table
+option sampler-table
+option vrf-table
+option application-attributes
+exit
+flow record type performance-monitor LIVEACTION-FLOWRECORD-MEDIANET
+description DO NOT MODIFY. USED BY LIVEACTION.
+match flow direction
+match ipv4 destination address
+match ipv4 protocol
+match ipv4 source address
+match transport destination-port
+match transport rtp ssrc
+match transport source-port
+collect application media bytes counter
+collect application media bytes rate
+collect application media event
+collect application media packets counter
+collect application media packets rate
+collect application name
+collect counter bytes
+collect counter bytes rate
+collect counter packets
+collect interface input
+collect interface output
+collect ipv4 dscp
+collect ipv4 ttl
+collect monitor event
+collect routing forwarding-status
+collect timestamp interval
+collect transport event packet-loss counter
+collect transport packets expected counter
+collect transport packets lost counter
+collect transport packets lost rate
+collect transport rtp jitter maximum
+collect transport rtp jitter mean
+collect transport rtp jitter minimum
+exit
+flow monitor type performance-monitor LIVEACTION-FLOWMONITOR-MEDIANET
+description DO NOT MODIFY. USED BY LIVEACTION.
+exporter LIVEACTION-FLOWEXPORTER-IPFIX
+record LIVEACTION-FLOWRECORD-MEDIANET
+exit
+policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
+class LIVEACTION-CLASS-MEDIANET 
+flow monitor LIVEACTION-FLOWMONITOR-MEDIANET
