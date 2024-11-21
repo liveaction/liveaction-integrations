@@ -23,3 +23,7 @@ The repository contains configs for Cisco Catalyst 9k (8300 and 8500) series.
 ## Catalyst9k
 
 The repository contains configs for Cisco Catalyst 9k (9300 and 9500) series.
+
+## Fortigate
+
+The repository contains information for Fortigate firewall configuration.
