@@ -14,7 +14,7 @@ This tool scans log files for messages about unknown devices sending flow packet
   - `LIVENX_API_HOST`: LiveNX server hostname
   - `LIVENX_API_PORT`: LiveNX API port
   - `LIVENX_API_TOKEN`: Authentication token for LiveNX API
-  - `LIVENX_TARGET_IP`: Target LiveNX node IP address
+  - `LIVENX_TARGET_NODE_NAME`: Target LiveNX node IP address
 
 ## Installation
 
@@ -24,7 +24,7 @@ This tool scans log files for messages about unknown devices sending flow packet
 export LIVENX_API_HOST="your.livenx.host"
 export LIVENX_API_PORT="8093"
 export LIVENX_API_TOKEN="your-api-token"
-export LIVENX_TARGET_IP="your-target-node-ip"
+export LIVENX_TARGET_NODE_NAME="your-target-node-ip"
 ```
 
 ## Usage
@@ -123,7 +123,7 @@ docker build -t addautodevice-app .
 Running Docker Image
 --------------------
 
-docker run -v /data/livenx-server/data/log:/data/livenx-server/data/log -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOKEN=your_token_here -e LIVENX_TARGET_IP=10.0.0.2 your_image_name
+docker run -v /data/livenx-server/data/log:/data/livenx-server/data/log -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOKEN=your_token_here -e LIVENX_TARGET_NODE_NAME=Local your_image_name
 
 Using Docker Compose
 --------------------

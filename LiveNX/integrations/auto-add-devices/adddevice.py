@@ -14,7 +14,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 liveNxHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxToken = os.getenv("LIVENX_API_TOKEN")
-liveNxTargetIP = os.getenv("LIVENX_TARGET_IP")
+liveNxTargetIP = os.getenv("LIVENX_TARGET_NODE_NAME")
 
 def create_request(url, data = None):
     ctx = ssl.create_default_context()
@@ -300,7 +300,7 @@ def main(args):
         exit(1)
     
     if liveNxHost is None or liveNxApiPort is None or liveNxToken is None or liveNxTargetIP is None:
-        local_logger.info("Missing env any of parameters: [LIVENX_API_HOST, LIVENX_API_PORT, LIVENX_API_TOKEN, LIVENX_TARGET_IP] ")
+        local_logger.info("Missing env any of parameters: [LIVENX_API_HOST, LIVENX_API_PORT, LIVENX_API_TOKEN, LIVENX_TARGET_NODE_NAME] ")
         exit(1)
 
     while True:
