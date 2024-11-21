@@ -27,3 +27,7 @@ The repository contains configs for Cisco Catalyst 9k (9300 and 9500) series.
 ## Fortigate
 
 The repository contains information for Fortigate firewall configuration.
+
+## vEdge2000
+
+The repository contains information for Cisco vEdge 2000 SDWAN configuration.
