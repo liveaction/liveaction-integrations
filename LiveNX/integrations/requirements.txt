@@ -5,3 +5,4 @@ python-dotenv==1.0.1
 requests==2.32.3
 urllib3==2.2.2
 pytest==8.3.2
+clickhouse-driver==0.2.9

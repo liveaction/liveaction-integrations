@@ -3,6 +3,8 @@ import urllib.request, urllib.parse
 import os
 import json
 import logging
+from helper.clickhouse import connect_with_tls
+
 local_logger = logging.getLogger(__name__)
 
 
@@ -11,6 +13,10 @@ liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxToken = os.getenv("LIVENX_API_TOKEN")
 liveNxTargetIP = os.getenv("LIVENX_TARGET_IP")
 thirdEyeHost = os.getenv("THIRDEYE_API_HOST")
+clickHouseHost = os.getenv("CLICKHOUSE_HOST")
+clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME")
+clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD")
+clickHouseApiPort = os.getenv("CLICKHOUSE_PORT")
 
 THIRD_EYE_URL = "https://" + thirdEyeHost
 
@@ -63,6 +69,244 @@ def get_livenx_inventory():
         json_data = json.loads(response_data)
     
     return json_data
+
+def get_livenx_ch_inventory():
+
+    # Connect to ClickHouse
+    livenx_ch_inventory = {}
+    client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+
+    # Define the query to retrieve all contents of the Device_Inventory table
+    query = "SELECT * FROM Device_Inventory"
+
+    try:
+        # Execute the query
+        results = client.execute(query)
+
+        # Process and display results
+        for row in results:
+            print(row)
+
+    except Exception as e:
+        print(f"An error occurred while querying ClickHouse: {e}")
+    finally:
+        client.disconnect()
+
+
+def create_livenx_ch_device_from_livenx_device(livenx_device):
+    '''
+    
+    {
+  "meta": {
+    "href": "string",
+    "queryParameters": {
+      "additionalProp1": [
+        "string"
+      ],
+      "additionalProp2": [
+        "string"
+      ],
+      "additionalProp3": [
+        "string"
+      ]
+    },
+    "http": {
+      "method": "string",
+      "statusCode": 0,
+      "statusReason": "string"
+    }
+  },
+  "href": "https://10.10.10.10:8093/v1/devices/9IRVE649AQF",
+  "id": "9IRVE649AQF",
+  "serial": "9IRVE649AQF",
+  "address": "1.1.1.1",
+  "clientIp": "10.10.10.10",
+  "systemName": "device.test.com",
+  "displaySystemName": "device.test.com [10.10.10.10 | Node1 | 9IRVE649AQF]",
+  "hostName": "device",
+  "displayHostName": "device [10.10.10.10 | Node1 | 9IRVE649AQF]",
+  "systemLocation": "West Coast Office",
+  "systemDescription": "Gigabit Routing Switch",
+  "nodeId": "843bf835-e330-45fc-a363-c407237ef4d7",
+  "osVersion": {
+    "majorNumber": 12,
+    "minorNumber": 1,
+    "indivNumber": null,
+    "indivNumberSuffix": null,
+    "newFeatureIdentifier": null,
+    "newFeatureVersion": null,
+    "versionString": null,
+    "osType": "IOS_XE"
+  },
+  "osVersionString": "12.1",
+  "vendorProduct": {
+    "model": "ciscoCSR1000v",
+    "displayName": "ciscoCSR1000v",
+    "description": "ciscoCSR1000v",
+    "vendor": {
+      "vendorName": "Cisco",
+      "vendorOid": {
+        "displayName": ".1.3.6.1.4.1.9"
+      },
+      "vendorSerialOid": {
+        "displayName": ".1.3.6.1.4.1.9.3.6.3"
+      }
+    },
+    "objectOID": {
+      "displayName": ".1.3.6.1.4.1.9.1.1537"
+    },
+    "objectOIDString": ".1.3.6.1.4.1.9.1.1537",
+    "asrModel": false
+  },
+  "site": "Western Division",
+  "isDataCenterSite": false,
+  "tags": [
+    "Corp",
+    "West"
+  ],
+  "taggedOmni": false,
+  "interfaces": {
+    "name": "Null0",
+    "abbreviatedName": "Nu0",
+    "ifIndex": 5,
+    "description": "",
+    "speed": 10000000000,
+    "type": "other",
+    "wan": false,
+    "xcon": false,
+    "interfaceState": "UP"
+  },
+  "monitorOnly": false,
+  "settings": {
+    "pollInterval": 60000,
+    "enablePoll": true,
+    "enableQosPoll": true,
+    "enableNetflowPoll": true,
+    "enableIpslaPoll": true,
+    "enableLanPoll": true,
+    "enableRoutingPoll": true,
+    "virtualDevice": false
+  },
+  "capabilities": {
+    "nbarCapable": true,
+    "netflowCollectorCapable": true,
+    "mediatraceCapable": true,
+    "extendedTraceRouteCapable": true,
+    "nbar2Capable": true,
+    "flexibleNetflowCapable": true,
+    "perfmonCapable": true,
+    "avcCapable": false,
+    "unifiedPerfmonCapable": true,
+    "hqfSupportDetected": true,
+    "ipslaCapable": true
+  },
+  "pollingSupported": {
+    "netflowPollingSupported": true,
+    "ipslaPollingSupported": true,
+    "lanPollingSupported": true,
+    "routingPollingSupported": true,
+    "qosPollingSupported": true
+  },
+  "group": {
+    "idString": "7e3cf778-770d-41fe-932d-f3cf12902e61"
+  },
+  "linkInfo": {
+    "type": "OMNI_PEEK",
+    "label": "Packet Inspection",
+    "displayValue": "Peek",
+    "rawValue": {
+      "name": "OmniPeek Web",
+      "host": "10.4.201.132",
+      "path": "/omnipeek/forensics",
+      "startTime": "2023-03-08T02:08:10.000Z",
+      "endTime": "2023-03-08T02:13:10.000Z",
+      "showDialog": true
+    }
+  },
+  "analyticsNode": "Analytics Node",
+  "state": "NOT_AVAILABLE",
+  "userDefinedSampleRatio": 100,
+  "deviceLoadedState": "NOT_AVAILABLE"
+}
+    
+    '''
+    return livenx_device
+
+def map_livenx_inventory_to_livenx_ch_inventory(livenx_inventory):
+    livenx_ch_inventory = {}
+    livenx_devices = []
+    for livenx_device in livenx_inventory:
+        livenx_devices.append(create_livenx_ch_device_from_livenx_device(livenx_device))
+    
+    livenx_ch_inventory['devices'] = livenx_devices
+    return livenx_inventory
+
+def diff_livenx_ch_inventory(livenx_inventory_1, livenx_inventory_2):
+    livenx_inventory_diff_list = []
+
+    for livenx_device_1 in livenx_inventory_1['devices']:
+        livenx_device_found = False
+        for livenx_device_2 in livenx_inventory_2['devices']:
+            if compare_livenx_device(livenx_device_1, livenx_device_2):
+                livenx_device_found = True
+                break
+        if livenx_device_found == False:
+            livenx_inventory_diff_list.append(livenx_device_1)    
+    return livenx_inventory_diff_list
+
+def add_to_livenx_ch_inventory(livenx_inventory):
+
+  # Connect to ClickHouse
+  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+
+  # Prepare the INSERT statement
+  insert_query = """
+  INSERT INTO Device_Inventory (
+      Href, ID, Serial, Client_IP, System_Name, Display_System_Name, Host_Name, Display_Host_Name, 
+      System_Location, System_Description, OS_Version.Major_Number, OS_Version.Minor_Number,
+      OS_Version.OS_Type, OS_Version_String, Vendor_Product.Model, Vendor_Product.Vendor.Vendor_Name, 
+      Site, Is_Data_Center_Site, Tags, Tagged_Omni
+  ) VALUES
+  """
+
+  for data in livenx_inventory['devices']:
+    # Extract required values from the JSON data
+    values = (
+        data["href"], data["id"], data["serial"], data["clientIp"], data["systemName"], 
+        data["displaySystemName"], data["hostName"], data["displayHostName"], data["systemLocation"], 
+        data["systemDescription"], data["osVersion"]["majorNumber"], data["osVersion"]["minorNumber"], 
+        data["osVersion"]["osType"], data["osVersionString"], data["vendorProduct"]["model"], 
+        data["vendorProduct"]["vendor"]["vendorName"], data["site"], data["isDataCenterSite"], 
+        data["tags"], data["taggedOmni"]
+    )
+
+    try:
+        # Execute the INSERT statement
+        client.execute(insert_query + " (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %s, %s, %s, %s, %s, %b, %s, %b)", values)
+        print("Data inserted successfully.")
+    except Exception as e:
+        print(f"Error inserting data: {e}")
+
+def remove_from_livenx_ch_inventory(livenx_inventory):
+    # Connect to ClickHouse
+    client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+
+    # Prepare the DELETE statement template
+    delete_query = """
+    ALTER TABLE Device_Inventory DELETE WHERE ID = %s
+    """
+
+    for data in livenx_inventory['devices']:
+        try:
+            # Use the ID from each device to identify and remove the entry
+            device_id = data["id"]
+            
+            # Execute the DELETE statement
+            client.execute(delete_query, (device_id,))
+            print(f"Device with ID {device_id} removed successfully.")
+        except Exception as e:
+            print(f"Error removing device with ID {data['id']}: {e}")
+
 
 def get_livenx_nodes():
     '''
