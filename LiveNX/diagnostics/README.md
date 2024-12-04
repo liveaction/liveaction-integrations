@@ -40,7 +40,7 @@ This Python script is designed to perform various network diagnostic tasks such 
 To run the diagnostics script, use the following command syntax:
 
 ```bash
-python3 diagnostics.py [OPTIONS]
+python3 diag.py [OPTIONS]
 ```
 
 ### Options
@@ -68,27 +68,27 @@ python3 diagnostics.py [OPTIONS]
 
 - **Run an SNMP v2 walk:**
   ```bash
-  python3 diagnostics.py --target_ip 192.168.1.1 --snmpv2walkcommunity public
+  python3 diag.py --target_ip 192.168.1.1 --snmpv2walkcommunity public
   ```
 
 - **Perform a packet capture for 60 seconds:**
   ```bash
-  python3 diagnostics.py --capture
+  python3 diag.py --capture
   ```
 
 - **Retrieve data from vManage:**
   ```bash
-  python3 diagnostics.py --vmanage_ip 10.10.10.1 --vmanage_username admin --vmanage_password password --vmanage_mins 10 --vmanage_max_count 100
+  python3 diag.py --vmanage_ip 10.10.10.1 --vmanage_username admin --vmanage_password password --vmanage_mins 10 --vmanage_max_count 100
   ```
 
 - **Ping a target IP:**
   ```bash
-  python3 diagnostics.py --target_ip 8.8.8.8 --ping
+  python3 diag.py --target_ip 8.8.8.8 --ping
   ```
 
 - **Run tracepath to a target IP:**
   ```bash
-  python3 diagnostics.py --target_ip 8.8.8.8 --trace
+  python3 diag.py --target_ip 8.8.8.8 --trace
   ```
 
 ## Output
