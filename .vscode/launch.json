@@ -58,6 +58,17 @@
                 "--inventory", "--fromproduct", "livenx", "--toproduct", "livenxch", "--logstdout"
             ],
             "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
+        },
+        {
+            "name": "Python Debugger: config-audit",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--devicefile", "${workspaceFolder}/LiveNX/config-audit/config/device-list.csv"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/config-audit/.env"
         }
     ]
 }
