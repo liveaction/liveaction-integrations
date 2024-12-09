@@ -8,15 +8,15 @@ from helper.clickhouse import connect_with_tls
 local_logger = logging.getLogger(__name__)
 
 
-liveNxHost = os.getenv("LIVENX_API_HOST")
-liveNxApiPort = os.getenv("LIVENX_API_PORT")
-liveNxToken = os.getenv("LIVENX_API_TOKEN")
-liveNxTargetIP = os.getenv("LIVENX_TARGET_IP")
-thirdEyeHost = os.getenv("THIRDEYE_API_HOST")
-clickHouseHost = os.getenv("CLICKHOUSE_HOST")
-clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME")
-clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD")
-clickHouseApiPort = os.getenv("CLICKHOUSE_PORT")
+liveNxHost = os.getenv("LIVENX_API_HOST","")
+liveNxApiPort = os.getenv("LIVENX_API_PORT","")
+liveNxToken = os.getenv("LIVENX_API_TOKEN","")
+liveNxTargetIP = os.getenv("LIVENX_TARGET_IP","")
+thirdEyeHost = os.getenv("THIRDEYE_API_HOST","")
+clickHouseHost = os.getenv("CLICKHOUSE_HOST","")
+clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","")
+clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","")
+clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","")
 
 THIRD_EYE_URL = "https://" + thirdEyeHost
 
@@ -33,7 +33,7 @@ def create_request(url, data = None):
     return request, ctx
 
 def compare_livenx_device(livenx_device_1, livenx_device_2):
-    is_same = livenx_device_1['hostName'] == livenx_device_2['hostName'] and livenx_device_1['address'] == livenx_device_2['address']
+    is_same = livenx_device_1['hostName'] == livenx_device_2['hostName'] and (livenx_device_1.get('address','') == livenx_device_2.get('address','') or livenx_device_1.get('clientIp','') == livenx_device_2.get('clientIp',''))
     return is_same
 
 def diff_livenx_inventory(livenx_inventory_1, livenx_inventory_2):
@@ -72,25 +72,29 @@ def get_livenx_inventory():
 
 def get_livenx_ch_inventory():
 
-    # Connect to ClickHouse
-    livenx_ch_inventory = {}
-    client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+  # Connect to ClickHouse
+  livenx_ch_inventory = []
+  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
 
-    # Define the query to retrieve all contents of the Device_Inventory table
-    query = "SELECT * FROM Device_Inventory"
+  # Define the query to retrieve all contents of the Device_Inventory table
+  query = "SELECT Host_Name, Client_IP FROM Device_Inventory"
 
-    try:
-        # Execute the query
-        results = client.execute(query)
+  try:
+      # Execute the query
+      results = client.execute(query)
 
-        # Process and display results
-        for row in results:
-            print(row)
+      # Process and display results
+      for result in results:
+          formatted_result = dict(zip(["hostName", "clientIp"], result))
+          livenx_ch_inventory.append(formatted_result)
 
-    except Exception as e:
-        print(f"An error occurred while querying ClickHouse: {e}")
-    finally:
-        client.disconnect()
+  except Exception as e:
+      local_logger.error(f"An error occurred while querying ClickHouse: {e}")
+      print(f"An error occurred while querying ClickHouse: {e}")
+  finally:
+      client.disconnect()
+  return {"devices": livenx_ch_inventory}
+  
 
 
 def create_livenx_ch_device_from_livenx_device(livenx_device):
@@ -264,28 +268,30 @@ def add_to_livenx_ch_inventory(livenx_inventory):
   INSERT INTO Device_Inventory (
       Href, ID, Serial, Client_IP, System_Name, Display_System_Name, Host_Name, Display_Host_Name, 
       System_Location, System_Description, OS_Version.Major_Number, OS_Version.Minor_Number,
-      OS_Version.OS_Type, OS_Version_String, Vendor_Product.Model, Vendor_Product.Vendor.Vendor_Name, 
+      OS_Version.OS_Type, OS_Version_String, Vendor_Product.Model, Vendor_Product.Vendor,
       Site, Is_Data_Center_Site, Tags, Tagged_Omni
   ) VALUES
   """
-
-  for data in livenx_inventory['devices']:
-    # Extract required values from the JSON data
+  clickhouse_data = []
+  for data in livenx_inventory:
     values = (
-        data["href"], data["id"], data["serial"], data["clientIp"], data["systemName"], 
-        data["displaySystemName"], data["hostName"], data["displayHostName"], data["systemLocation"], 
-        data["systemDescription"], data["osVersion"]["majorNumber"], data["osVersion"]["minorNumber"], 
-        data["osVersion"]["osType"], data["osVersionString"], data["vendorProduct"]["model"], 
-        data["vendorProduct"]["vendor"]["vendorName"], data["site"], data["isDataCenterSite"], 
-        data["tags"], data["taggedOmni"]
+        data.get("href",""), data.get("id",""), data.get("serial",""), data.get("clientIp",""), data.get("systemName",""), 
+        data.get("displaySystemName",""), data.get("hostName",""), data.get("displayHostName",""), data.get("systemLocation",""), 
+        data.get("systemDescription",""), (data.get("osVersion",{}).get("majorNumber",""),), (data.get("osVersion",{}).get("minorNumber",""),),
+        (data.get("osVersion",{}).get("osType",""),), data.get("osVersionString",""), (data.get("vendorProduct",{}).get("model",""),),
+        ([[(data.get("vendorProduct",{}).get("vendor",{}).get("vendorName",""),data.get("vendorProduct",{}).get("vendor",{}).get("vendorOid",{}).get("displayName",''),data.get("vendorProduct",{}).get("vendor",{}).get("vendorSerialOid",{}).get("displayName",''))]]),
+        data.get("site",""), data.get("isDataCenterSite",""), data.get("tags",""), data.get("taggedOmni","")
     )
+    clickhouse_data.append(values)
 
-    try:
-        # Execute the INSERT statement
-        client.execute(insert_query + " (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %s, %s, %s, %s, %s, %b, %s, %b)", values)
-        print("Data inserted successfully.")
-    except Exception as e:
-        print(f"Error inserting data: {e}")
+  try:
+      # Execute the INSERT statement
+      client.execute(insert_query, clickhouse_data)
+      local_logger.info("Data inserted successfully.")
+      print("Data inserted successfully.")
+  except Exception as e:
+      local_logger.error(f"Error inserting data: {e}")
+      print(f"Error inserting data: {e}")
 
 def remove_from_livenx_ch_inventory(livenx_inventory):
     # Connect to ClickHouse
@@ -303,8 +309,10 @@ def remove_from_livenx_ch_inventory(livenx_inventory):
             
             # Execute the DELETE statement
             client.execute(delete_query, (device_id,))
+            local_logger.info(f"Device with ID {device_id} removed successfully.")
             print(f"Device with ID {device_id} removed successfully.")
         except Exception as e:
+            local_logger.error(f"Device with ID {device_id} removed successfully.")
             print(f"Error removing device with ID {data['id']}: {e}")
 
 
