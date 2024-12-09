@@ -10,10 +10,10 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(script_dir, 'common'))
 sys.path.insert(0, os.path.join(script_dir, 'netld'))
 
-from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventory, remove_from_livenx_inventory, diff_livenx_inventory
+from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventory, remove_from_livenx_inventory, diff_livenx_inventory, get_livenx_ch_inventory, map_livenx_inventory_to_livenx_ch_inventory, diff_livenx_ch_inventory, add_to_livenx_ch_inventory, remove_from_livenx_ch_inventory
+from netld.incidents import push_netld_incidents, get_netld_incidents
 from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts
 from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory, get_netld_inventory, map_livenx_inventory_to_netld_inventory, map_netld_inventory_to_livenx_inventory
-from netld.incidents import push_netld_incidents, get_netld_incidents
 from helper.timer import get_top_of_current_minute_epoch
 from helper.prompt import query_yes_no
 from servicenow.incidents import get_servicenow_incidents, push_servicenow_incidents
@@ -83,6 +83,24 @@ def main(args):
                 if len(livenx_inventory_diff_to_remove) > 0:
                     if args.noprompt == True or query_yes_no("This inventory will be removed: " + str(livenx_inventory_diff_to_remove)):
                         remove_from_livenx_inventory(livenx_inventory_diff_to_remove)
+            elif args.fromproduct == "livenx" and args.toproduct == "livenxch":
+                ## sync the LiveNX inventory to the Clickhouse inventory
+                ## figure out which devices to add
+                orig_livenx_inventory = get_livenx_inventory()
+                orig_livenx_ch_inventory = get_livenx_ch_inventory()
+                new_livenx_ch_inventory = map_livenx_inventory_to_livenx_ch_inventory(orig_livenx_inventory)
+                livenx_ch_inventory_diff_to_add = diff_livenx_ch_inventory(new_livenx_ch_inventory, orig_livenx_ch_inventory)
+
+                if len(livenx_ch_inventory_diff_to_add) > 0:
+                    if args.noprompt == True or query_yes_no("This inventory will be added: " + str(livenx_ch_inventory_diff_to_add)):
+                        add_to_livenx_ch_inventory(livenx_ch_inventory_diff_to_add)
+
+                ## figure out which devices to remove
+                livenx_ch_inventory_diff_to_remove = diff_livenx_ch_inventory(orig_livenx_ch_inventory, new_livenx_ch_inventory)
+
+                if len(livenx_ch_inventory_diff_to_remove) > 0:
+                    if args.noprompt == True or query_yes_no("This inventory will be removed: " + str(livenx_ch_inventory_diff_to_remove)):
+                        remove_from_livenx_ch_inventory(livenx_ch_inventory_diff_to_remove)
 
         elif args.alerts:
             if args.fromproduct == "livenx" and args.toproduct == "servicenow":

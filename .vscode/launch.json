@@ -47,6 +47,17 @@
                 "--inventory", "--fromproduct", "livenx", "--toproduct", "netld", "--logstdout"
             ],
             "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
+        },
+        {
+            "name": "Python Debugger: inventory from livenx to livenxch",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--inventory", "--fromproduct", "livenx", "--toproduct", "livenxch", "--logstdout"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
         }
     ]
 }
