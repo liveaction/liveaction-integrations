@@ -1,17 +1,18 @@
 # LiveNX Integration Tool
 
-A Python3 utility for synchronizing inventory and alerts between LiveNX, NetLD, and ServiceNow platforms.
+A Python3 utility for synchronizing inventory and alerts between LiveNX, NetLD, BlueCat and ServiceNow platforms.
 
 ## Overview
 
 This tool provides bidirectional synchronization capabilities for:
-- Device inventory between LiveNX and NetLD
+- Device inventory between LiveNX, NetLD and BlueCat
 - Alerts/incidents between LiveNX, NetLD, and ServiceNow
+- Sites between LiveNX and BlueCat
 
 ## Prerequisites
 
 - Python 3.x
-- Access to LiveNX, NetLD, and/or ServiceNow APIs
+- Access to LiveNX, NetLD, BlueCat and/or ServiceNow APIs
 - Required Python packages (install via pip):
   - `argparse`
   - Additional dependencies from the `common`, `netld`, and `servicenow` modules
@@ -50,6 +51,9 @@ python3 main.py --alerts --fromproduct livenx --toproduct servicenow
 
 # Run continuously with no prompts
 python3 main.py --alerts --fromproduct livenx --toproduct servicenow --continuous --noprompt
+
+# Sync sites from BlueCat to Linenx
+python3 main.py --sites --fromproduct bluecat_integrity --toproduct livenx
 ```
 
 ### Command Line Arguments
@@ -58,7 +62,8 @@ python3 main.py --alerts --fromproduct livenx --toproduct servicenow --continuou
 |----------|-------------|---------|
 | `--inventory` | Enable inventory synchronization | False |
 | `--alerts` | Enable alerts synchronization | False |
-| `--fromproduct` | Source platform (livenx/netld) | '' |
+| `--sites` | Enable sites synchronization | False |
+| `--fromproduct` | Source platform (livenx/netld/bluecat_integrity) | '' |
 | `--toproduct` | Destination platform (livenx/netld/servicenow) | '' |
 | `--starttimesecs` | Start time in epoch seconds | 0 |
 | `--endtimesecs` | End time in epoch seconds | 0 |
@@ -70,7 +75,7 @@ python3 main.py --alerts --fromproduct livenx --toproduct servicenow --continuou
 ## Features
 
 ### Inventory Synchronization
-- Bidirectional sync between LiveNX and NetLD
+- Bidirectional sync between LiveNX, BlueCat and NetLD
 - Differential updates (only changed devices)
 - Interactive prompts for additions/removals (unless --noprompt is used)
 - Hostname-based verification
@@ -78,6 +83,12 @@ python3 main.py --alerts --fromproduct livenx --toproduct servicenow --continuou
 ### Alert/Incident Synchronization
 - Support for LiveNX → ServiceNow incident creation
 - Alert ID matching to prevent duplicates
+- Continuous monitoring mode with configurable delay
+- Time-based synchronization windows
+
+### Sites Synchronization
+- Support for BlueCat → LiveNX sites creation
+- SiteName matching to prevent duplicates
 - Continuous monitoring mode with configurable delay
 - Time-based synchronization windows
 
@@ -141,6 +152,9 @@ THIRDEYE_API_HOST=10.100.155.150
 THIRDEYE_API_USER=netlduser
 THIRDEYE_API_PASSWORD="netldpass"
 THIRDEYE_NETWORK=Default
+BLUECAT_API_HOST=1.0.0.1
+BLUECAT_API_USER="username"
+BLUECAT_API_PASSWORD="password"
 
 
 Push inventory continuously from LiveAction LiveNX to LogicVein NetLD:
