@@ -9,12 +9,13 @@ import argparse
 import boto3
 import json
 
+import urllib.parse
 from datetime import datetime
 from netmiko import ConnectHandler
 
 # Configuration for database
 DB_FILE = "netflow_audit.db"
-GITHUB_REPO_URL = "https://raw.githubusercontent.com/liveaction/liveaction-integrations/configs/"
+GITHUB_REPO_URL = "https://raw.githubusercontent.com/liveaction/liveaction-integrations/refs/heads/main/LiveNX/configs/"
 
 def create_netmiko_list(original_devices):
     device_list_copy = [
@@ -97,15 +98,23 @@ def get_device_info(device, model = '', ios_version = ''):
     return model, ios_version
 
 
+
 # Pull Golden Config from GitHub
 def fetch_golden_config(model, ios_version):
-    url = f"{GITHUB_REPO_URL}{model}/{ios_version}.cfg"
+    # Encode model and ios_version to handle spaces and special characters
+    encoded_model = urllib.parse.quote(model)
+    encoded_ios_version = urllib.parse.quote(ios_version)
+    
+    # Construct the URL with encoded components
+    url = f"{GITHUB_REPO_URL}{encoded_model}/{encoded_ios_version}.cfg"
+    
     response = requests.get(url)
     if response.status_code == 200:
         return response.text
     else:
         print(f"Golden config for {model}/{ios_version} not found in repo at URL {url}.")
         return None
+
 
 # Compare configs
 def compare_configs(running_config, golden_config):
