@@ -1,4 +1,1 @@
-host,username,password,device_type
-192.168.1.1,admin,password,cisco_ios
-192.168.1.2,admin,password,cisco_ios
-10.0.0.1,netops_user,secure_pass,cisco_nxos
+host,username,password,device_type,model,ios_version
