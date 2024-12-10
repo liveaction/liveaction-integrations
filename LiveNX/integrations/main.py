@@ -17,6 +17,7 @@ from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory,
 from helper.timer import get_top_of_current_minute_epoch
 from helper.prompt import query_yes_no
 from servicenow.incidents import get_servicenow_incidents, push_servicenow_incidents
+from common.livenx_sites import get_bluecat_blocks, get_livenx_sites, map_bluecat_blocks_to_livenx_sites, diff_bluecat_sites, add_to_livenx_sites
 
 from config.logger import setup_logger
 local_logger = None
@@ -132,6 +133,20 @@ def main(args):
             elif args.toproduct == "livenx":
                     push_livenx_alerts(alerts)
 
+        elif args.sites:
+            if args.fromproduct == "bluecat_integrity" and args.toproduct == "livenx":
+                ## sync the Bluecat blocks to the livenx sites
+                ## figure out which sites to add
+                orig_livenx_sites = get_livenx_sites()
+                orig_bluecat_sites = get_bluecat_blocks()                
+                new_livenx_sites = map_bluecat_blocks_to_livenx_sites(orig_bluecat_sites)
+                bluecat_blocks_diff_to_add = diff_bluecat_sites(new_livenx_sites, orig_livenx_sites)
+                if len(bluecat_blocks_diff_to_add) > 0:
+                    if args.noprompt == True or query_yes_no("This sites will be added: " + str(bluecat_blocks_diff_to_add)):
+                        add_to_livenx_sites(bluecat_blocks_diff_to_add)
+                else:
+                    local_logger.info("Bluecat blocks is already sync with livenx sites")
+
         if args.continuous is False:
             break
 
@@ -146,6 +161,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process LiveNX data.")
     parser.add_argument("--inventory", action="store_true", help="Get and push inventory data.")
     parser.add_argument("--alerts", action="store_true", help="Get and push alerts data.")
+    parser.add_argument("--sites", action="store_true", help="Get and push sites data.")
     parser.add_argument('--toproduct', type=str, default='', help='The product to push to')
     parser.add_argument('--fromproduct', type=str, default='', help='The product to push from')
     parser.add_argument('--starttimesecs', type=int, default=0, help='The start time in seconds')
