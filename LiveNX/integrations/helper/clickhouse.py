@@ -1,5 +1,7 @@
 from clickhouse_driver import Client
 import ssl
+import logging
+local_logger = logging.getLogger(__name__)
 
 def connect_with_tls(host, port, user, password, database):
 
@@ -29,11 +31,10 @@ def connect_with_tls(host, port, user, password, database):
             certfile=tls_params.get("certfile"),
             keyfile=tls_params.get("keyfile"),
         )
-        
-        print("Connected to ClickHouse with TLS successfully!")
+        local_logger.info("Connected to ClickHouse with TLS successfully!")
         return client
 
     except Exception as e:
-        print(f"Error connecting to ClickHouse: {e}")
+        local_logger.error(f"Error connecting to ClickHouse: {e}")
         return None
 
