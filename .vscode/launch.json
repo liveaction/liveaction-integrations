@@ -66,7 +66,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--devicefile", "${workspaceFolder}/LiveNX/config-audit/config/device-list.csv"
+                "--devicefile", "${workspaceFolder}/LiveNX/config-audit/config/device-list.csv", "--bedrock"
             ],
             "envFile": "${workspaceFolder}/LiveNX/config-audit/.env"
         }

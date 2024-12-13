@@ -51,7 +51,8 @@ def read_device_list(device_csv):
                 "password": row["password"],
                 "device_type": row["device_type"],
                 "model": row["model"],
-                "ios_version": row["ios_version"]
+                "ios_version": row["ios_version"],
+                "golden_file": row["golden_file"]
             })
     return devices
 
@@ -100,8 +101,16 @@ def get_device_info(device, model = '', ios_version = ''):
 
 
 # Pull Golden Config from GitHub
-def fetch_golden_config(model, ios_version):
+def fetch_golden_config(model, ios_version, golden_file):
     # Encode model and ios_version to handle spaces and special characters
+
+    if golden_file != '':
+        if os.path.exists(golden_file):
+            with open(golden_file, "r") as file:
+                return file.read()
+        else:
+            print(f"Golden config file {golden_file} not found.")
+            return None
     encoded_model = urllib.parse.quote(model)
     encoded_ios_version = urllib.parse.quote(ios_version)
     
@@ -161,12 +170,16 @@ def compare_configs_claude(running_config, golden_config):
     Returns:
         str: Comparison analysis from Claude
     """
-    # Create a Bedrock Runtime client
+    # Create a Bedrock Runtime client with credentials from environment
     bedrock_runtime = boto3.client(
         service_name='bedrock-runtime', 
-        region_name=os.getenv('AWS_REGION', 'us-east-1')
+        region_name=os.getenv('AWS_REGION', 'us-east-1'),
+        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+        # Optional: AWS Session Token if using temporary credentials
+        # aws_session_token=os.getenv('AWS_SESSION_TOKEN')
     )
-
+        
     # Construct the prompt for Claude
     prompt = (
         "Compare the following running configuration and golden configuration to see if there are any differences:\n"
@@ -174,7 +187,7 @@ def compare_configs_claude(running_config, golden_config):
         f"{running_config}\n\n"
         "Golden Configuration:\n"
         f"{golden_config}\n\n"
-        "Highlight any differences and potential issues."
+        "Highlight any differences and potential issues. Also generate a diff that the network user can apply on the running config for the flow monitoring related settings."
     )
 
     # Prepare the request payload for Claude 3.5 Sonnet
@@ -190,10 +203,11 @@ def compare_configs_claude(running_config, golden_config):
         "temperature": 0
     })
 
+    response = ""
     try:
         # Invoke Claude 3.5 Sonnet model
         response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20240620",
+            modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
             contentType="application/json",
             body=request_body
         )
@@ -202,25 +216,33 @@ def compare_configs_claude(running_config, golden_config):
         response_body = json.loads(response['body'].read())
         
         # Extract and return the text response
-        return response_body['content'][0]['text']
+        response = response_body['content'][0]['text']
 
     except Exception as e:
         return f"An error occurred: {str(e)}"
+    
+    return response
 
 
 def compare_configs_liveassist(running_config, golden_config):
     # Define the host and port
-    host = os.getenv('LIVEASSIST_HOST', 'api.000000000000000007-test.threateye.io')
+    host = os.getenv('LIVEASSIST_HOST')
     port = os.getenv('LIVEASSIST_PORT', '443')
+    username = os.getenv('LIVEASSIST_USERNAME')
+    password = os.getenv('LIVEASSIST_PASSWORD')
 
     # Login endpoint
     login_url = f"https://{host}:{port}/api/v1/login"
     login_payload = {
-        "username": "your_username",
-        "password": "your_password"
+        "username": username,
+        "password": password
     }
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Host" : host,
+        "Accept" : "*/*",
+        "Connection" : "keep-alive",
+        "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
     }
 
     # Log in to obtain tokens
@@ -238,10 +260,22 @@ def compare_configs_liveassist(running_config, golden_config):
     # Use AccessToken to call the AI chain endpoint
     chain_url = f"https://{host}:{port}/api/v1/ai/chain"
     auth_headers = {
-        "Authorization": f"Bearer {access_token}"
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Host" : host,
+        "Accept" : "*/*",
+        "Connection" : "keep-alive",
+        "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
     }
 
-    chain_response = requests.get(chain_url, headers=auth_headers, verify=False)
+    message_payload = {
+        "name": "Test token",
+        "table_names": "structured_events",
+        "db": "flows",
+        "response_format": "json"
+    }
+
+    chain_response = requests.post(chain_url, json=message_payload, headers=auth_headers, verify=False)
     if chain_response.status_code == 200:
         chain_data = chain_response.json()
         chain_id = chain_data.get("chain_id")
@@ -251,14 +285,9 @@ def compare_configs_liveassist(running_config, golden_config):
 
         # Call the chain message endpoint
     message_url = f"https://{host}:{port}/api/v1/ai/chain/{chain_id}/message"
-    message_payload = (
-        "Compare the following running configuration and golden configuration to see if there are any differences:\n"
-        "Running Configuration:\n"
-        f"{running_config}\n\n"
-        "Golden Configuration:\n"
-        f"{golden_config}\n\n"
-        "Highlight any differences and potential issues."
-    )
+    message_payload = {
+        "query": f"Compare the following running configuration and golden configuration to see if there are any differences:\nRunning Configuration:\n{running_config}\nGolden Configuration:\n{golden_config}\nHighlight any differences and potential issues."
+    }
 
     message_response = requests.post(message_url, json=message_payload, headers=auth_headers, verify=False)
     if message_response.status_code == 200:
@@ -290,7 +319,7 @@ def main(args):
         save_config_if_changed(netmiko_device['host'], running_config)
         
         model, ios_version = get_device_info(netmiko_device, device['model'], device['ios_version'])
-        golden_config = fetch_golden_config(model, ios_version)
+        golden_config = fetch_golden_config(model, ios_version, device['golden_file'])
 
         if golden_config:
             diff = compare_configs(running_config, golden_config)
@@ -308,11 +337,27 @@ def main(args):
                 else:
                     print(f"No differences found for device {netmiko_device['host']}.")
 
+            if args.bedrock:
+                diff = compare_configs_claude(running_config, golden_config)
+                if diff:
+                    print(f"Differences found for device {netmiko_device['host']}:")
+                    print(diff)
+                else:
+                    print(f"No differences found for device {netmiko_device['host']}.")
+
+            if args.liveassist:
+                diff = compare_configs_liveassist(running_config, golden_config)
+                if diff:
+                    print(f"Differences found for device {netmiko_device['host']}:")
+                    print(diff)
+                else:
+                    print(f"No differences found for device {netmiko_device['host']}.")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Audit config files.")
     parser.add_argument("--devicefile",  type=str, required=True, default='', help='The device list to read in CSV')
-    parser.add_argument("--bedrock", action="store_false", help="Ask Amazon Bedrock to resolve differences between configs")
-    parser.add_argument("--chatgpt", action="store_false", help="Ask ChatGPT to resolve differences between configs")
-    parser.add_argument("--liveassist", action="store_false", help="Ask LiveAssist to resolve differences between configs")
+    parser.add_argument("--bedrock", default=False, action="store_true", help="Ask Amazon Bedrock to resolve differences between configs")
+    parser.add_argument("--chatgpt", default=False, action="store_true", help="Ask ChatGPT to resolve differences between configs")
+    parser.add_argument("--liveassist", default=False, action="store_true", help="Ask LiveAssist to resolve differences between configs")
     args = parser.parse_args()
     main(args)
