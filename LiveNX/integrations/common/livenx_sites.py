@@ -50,7 +50,7 @@ def compare_livenx_site(livenx_site_1, livenx_site_2):
 
 def get_livenx_sites():
 
-    api_url = "/v1/sites"
+    api_url = "/v1/sites?excludeUnspecifiedSite=true"
 
     request, ctx = create_request(api_url)
     request.add_header("Content-Type", "application/json")
