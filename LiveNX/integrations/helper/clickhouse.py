@@ -3,7 +3,7 @@ import ssl
 import logging
 local_logger = logging.getLogger(__name__)
 
-def connect_with_tls(host, port, user, password, database):
+def connect_with_tls(host, port, user, password, database, ca_certs='/path/to/ca.pem', certfile='/etc/clickhouse-server/cacerts/ca.crt', keyfile='/etc/clickhouse-server/cacerts/ca.key'):
 
 
     # TLS configuration
@@ -11,9 +11,9 @@ def connect_with_tls(host, port, user, password, database):
         "secure": True,                  # Enable TLS
         "verify": False,                  # Verify server's certificate
         "ssl_version": ssl.PROTOCOL_SSLv23,        # Optional: Set specific TLS version (e.g., TLSv1.2)
-        "ca_certs": "/path/to/ca.pem",   # Optional: Path to CA certificate file
-        "certfile": "/etc/clickhouse-server/cacerts/ca.crt", # Optional: Path to client certificate file
-        "keyfile": "/etc/clickhouse-server/cacerts/ca.key",   # Optional: Path to client private key file
+        "ca_certs": ca_certs,   # Optional: Path to CA certificate file
+        "certfile": certfile, # Optional: Path to client certificate file
+        "keyfile": keyfile,   # Optional: Path to client private key file
     }
 
     try:

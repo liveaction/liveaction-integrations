@@ -17,6 +17,10 @@ clickHouseHost = os.getenv("CLICKHOUSE_HOST","")
 clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","")
 clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","")
 clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","")
+clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
+clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
+clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
+
 
 THIRD_EYE_URL = "https://" + thirdEyeHost
 
@@ -74,7 +78,7 @@ def get_livenx_ch_inventory():
 
   # Connect to ClickHouse
   livenx_ch_inventory = []
-  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
 
   # Define the query to retrieve all contents of the Device_Inventory table
   query = "SELECT Host_Name, Client_IP FROM Device_Inventory"
@@ -261,7 +265,7 @@ def diff_livenx_ch_inventory(livenx_inventory_1, livenx_inventory_2):
 def add_to_livenx_ch_inventory(livenx_inventory):
 
   # Connect to ClickHouse
-  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
 
   # Prepare the INSERT statement
   insert_query = """
@@ -295,7 +299,7 @@ def add_to_livenx_ch_inventory(livenx_inventory):
 
 def remove_from_livenx_ch_inventory(livenx_inventory):
     # Connect to ClickHouse
-    client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+    client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
 
     # Prepare the DELETE statement template
     delete_query = """

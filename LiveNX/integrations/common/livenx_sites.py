@@ -22,6 +22,9 @@ clickHouseHost = os.getenv("CLICKHOUSE_HOST","")
 clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","")
 clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","")
 clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","")
+clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
+clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
+clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
 
 def create_request(url, data = None):
     if not liveNxHost or not liveNxApiPort or not liveNxToken:
@@ -634,7 +637,7 @@ def get_clickhouse_sites():
 
   # Connect to ClickHouse
   livenx_ch_sites = []
-  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+  client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
 
   # Define the query to retrieve all contents of the Network_Sites table
   query = "SELECT ID FROM Network_Sites"
@@ -670,7 +673,7 @@ def diff_clickhouse_sites(livenx_sites_1, livenx_sites_2):
 def add_to_clickhouse_sites(livenx_sites):
 
     # Connect to ClickHouse
-    client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db')
+    client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
     
     for data in livenx_sites:
 

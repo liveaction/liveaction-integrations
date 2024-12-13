@@ -33,7 +33,7 @@ def main(args):
     starttimesecs = args.starttimesecs
     endtimesecs = args.endtimesecs
 
-    if args.continuous is not None and starttimesecs == 0 and endtimesecs == 0:
+    if args.continuous and starttimesecs == 0 and endtimesecs == 0:
         num_minutes_behind = args.num_minutes_behind
         starttimesecs = get_top_of_current_minute_epoch() - (60 * (num_minutes_behind + 1))
         endtimesecs = get_top_of_current_minute_epoch() - (60 * num_minutes_behind)
