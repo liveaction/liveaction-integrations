@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(script_dir, 'netld'))
 
 from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventory, remove_from_livenx_inventory, diff_livenx_inventory, get_livenx_ch_inventory, map_livenx_inventory_to_livenx_ch_inventory, diff_livenx_ch_inventory, add_to_livenx_ch_inventory, remove_from_livenx_ch_inventory
 from netld.incidents import push_netld_incidents, get_netld_incidents
-from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts
+from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts, get_clickhouse_alerts, add_to_clickhouse_alerts, diff_clickhouse_alerts
 from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory, get_netld_inventory, map_livenx_inventory_to_netld_inventory, map_netld_inventory_to_livenx_inventory
 from helper.timer import get_top_of_current_minute_epoch
 from helper.prompt import query_yes_no
@@ -107,6 +107,7 @@ def main(args):
             if args.fromproduct == "livenx" and args.toproduct == "servicenow":
                 ## Alerts from LiveNX and servicenow sync
                 livenx_alerts = get_livenx_alerts(starttimesecs, endtimesecs)
+                livenx_alerts = livenx_alerts["alerts"]
                 local_logger.info(livenx_alerts)
                 servicenow_alerts = get_servicenow_incidents()
                 livenx_alerts = {
@@ -124,7 +125,17 @@ def main(args):
                 } for alertId in found_livenx_in_servicenow_alerts | notfound_livenx_in_servicenow_alerts]
                 if args.noprompt == True or query_yes_no("These alerts will be added: " + str(add_livenx_alerts_prompt)):
                     push_servicenow_incidents(notfound_livenx_in_servicenow_alerts.values())
-                    
+            elif args.fromproduct == "livenx" and args.toproduct == "livenxch":
+                ## sync the LiveNX alerts to the clickhouse alerts
+                ## figure out which alerts to add
+                orig_livenx_alerts = get_livenx_alerts(starttimesecs, endtimesecs)
+                orig_clickhouse_alerts = get_clickhouse_alerts()
+                clickhouse_alerts_diff_to_add = diff_clickhouse_alerts(orig_livenx_alerts, orig_clickhouse_alerts)
+                if len(clickhouse_alerts_diff_to_add) > 0:
+                    if args.noprompt == True or query_yes_no("This alerts will be added: " + str(clickhouse_alerts_diff_to_add)):
+                        add_to_clickhouse_alerts(clickhouse_alerts_diff_to_add)
+                else:
+                    local_logger.info("Clickhouse is already sync with livenx alerts")      
             elif args.fromproduct == "netld":
                 alerts = get_netld_incidents()
             
