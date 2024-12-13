@@ -60,6 +60,17 @@
             "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
         },
         {
+            "name": "Python Debugger: sites from livenx to livenxch",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sites", "--fromproduct", "livenx", "--toproduct", "livenxch", "--logstdout"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/integrations/.env"
+        },
+        {
             "name": "Python Debugger: config-audit",
             "type": "debugpy",
             "request": "launch",
