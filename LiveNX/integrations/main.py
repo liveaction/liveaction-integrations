@@ -17,7 +17,7 @@ from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory,
 from helper.timer import get_top_of_current_minute_epoch
 from helper.prompt import query_yes_no
 from servicenow.incidents import get_servicenow_incidents, push_servicenow_incidents
-from common.livenx_sites import get_bluecat_blocks, get_livenx_sites, map_bluecat_blocks_to_livenx_sites, diff_bluecat_sites, add_to_livenx_sites
+from common.livenx_sites import get_bluecat_blocks, get_livenx_sites, map_bluecat_blocks_to_livenx_sites, diff_bluecat_sites, add_to_livenx_sites, get_clickhouse_sites, diff_clickhouse_sites, add_to_clickhouse_sites
 
 from config.logger import setup_logger
 local_logger = None
@@ -146,6 +146,17 @@ def main(args):
                         add_to_livenx_sites(bluecat_blocks_diff_to_add)
                 else:
                     local_logger.info("Bluecat blocks is already sync with livenx sites")
+            elif args.fromproduct == "livenx" and args.toproduct == "livenxch":
+                ## sync the Bluecat blocks to the livenx sites
+                ## figure out which sites to add
+                orig_livenx_sites = get_livenx_sites()
+                orig_clickhouse_sites = get_clickhouse_sites()
+                clickhouse_sites_diff_to_add = diff_clickhouse_sites(orig_livenx_sites, orig_clickhouse_sites)
+                if len(clickhouse_sites_diff_to_add) > 0:
+                    if args.noprompt == True or query_yes_no("This sites will be added: " + str(clickhouse_sites_diff_to_add)):
+                        add_to_clickhouse_sites(clickhouse_sites_diff_to_add)
+                else:
+                    local_logger.info("Clickhouse is already sync with livenx sites")
 
         if args.continuous is False:
             break
