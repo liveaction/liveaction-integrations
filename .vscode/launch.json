@@ -77,7 +77,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "--devicefile", "${workspaceFolder}/LiveNX/config-audit/config/device-list.csv", "--bedrock"
+                "--devicefile", "${workspaceFolder}/LiveNX/config-audit/config/device-list.csv", "--clickhouse"
             ],
             "envFile": "${workspaceFolder}/LiveNX/config-audit/.env"
         }
