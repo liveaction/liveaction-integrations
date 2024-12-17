@@ -8,36 +8,67 @@ import csv
 import argparse
 import boto3
 import json
+from clickhouse_driver import Client
+from datetime import datetime
 
 import urllib.parse
 from datetime import datetime
 from netmiko import ConnectHandler
 
 # Configuration for database
-DB_FILE = "netflow_audit.db"
+SQLITE_DB_FILE = "netflow_audit.db"
 GITHUB_REPO_URL = "https://raw.githubusercontent.com/liveaction/liveaction-integrations/refs/heads/main/LiveNX/configs/"
 
 def create_netmiko_list(original_devices):
     device_list_copy = [
-        {key: value for key, value in device.items() if key not in {"model", "ios_version"}}
+        {key: value for key, value in device.items() if key in {"device_type", "host", "username", "password"}}
         for device in original_devices
     ]
     return device_list_copy
         
 # Database setup
-def setup_database():
-    conn = sqlite3.connect(DB_FILE)
+def setup_database_sqlite3():
+    conn = sqlite3.connect(SQLITE_DB_FILE)
     cursor = conn.cursor()
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS audit_log (
         id INTEGER PRIMARY KEY,
         device_host TEXT,
         fetch_time TIMESTAMP,
-        config_hash TEXT
+        config_hash TEXT,
+        config_content TEST
     )
     """)
     conn.commit()
     conn.close()
+
+from clickhouse_driver import Client
+
+def setup_database_clickhouse():
+    client = Client('localhost')  # Adjust host/credentials as needed
+    
+    # Create the audit_log table if it doesn't exist
+    create_table_query = """
+    CREATE TABLE IF NOT EXISTS audit_log (
+        id UInt32,
+        device_host String,
+        fetch_time DateTime,
+        config_hash String,
+        config_content String
+    ) ENGINE = MergeTree()
+    ORDER BY (device_host, fetch_time)
+    SETTINGS index_granularity = 8192
+    """
+    
+    
+    try:
+        client.execute(create_table_query)
+        print("Database setup completed successfully")
+    except Exception as e:
+        print(f"Error setting up database: {e}")
+        raise
+
+import csv
 
 # Read device list from CSV
 def read_device_list(device_csv):
@@ -45,15 +76,51 @@ def read_device_list(device_csv):
     with open(device_csv, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            # Skip rows where "ADD/UPDATE" is not "true"
+            if row["ADD/UPDATE"].strip().lower() != "true" or row["TYPE"].strip().lower() == "interface" or row["TYPE"].strip().lower() == "group":
+                continue
+
+            device_type = row.get("VENDOR", "").strip().lower()
+
+            if device_type == "cisco":
+                device_type = "cisco_ios"
+            elif device_type == "arista":
+                device_type = "arista_eos"
+            elif device_type == "juniper":
+                device_type = "juniper_junos"
+            else:
+                if row.get("MODEL", "").strip().lower() == "ex":
+                    device_type = "juniper"
+                else:
+                    device_type = "cisco_ios"                       
+
+            # Append the device with selected fields
             devices.append({
-                "host": row["host"],
-                "username": row["username"],
-                "password": row["password"],
-                "device_type": row["device_type"],
-                "model": row["model"],
-                "ios_version": row["ios_version"],
-                "golden_file": row["golden_file"]
+                "name": row.get("NAME", "").strip(),
+                "device_type": device_type,
+                "device_serial": row.get("DEVICE SERIAL", "").strip(),
+                "host": row.get("IP ADDRESS", "").strip(),
+                "vendor": row.get("VENDOR", "").strip(),
+                "model": row.get("MODEL", "").strip(),
+                "ios_version": row.get("IOS VERSION", "").strip(),
+                "description": row.get("DESCRIPTION", "").strip(),
+                "wan": row.get("WAN", "").strip(),
+                "service_provider": row.get("SERVICE PROVIDER", "").strip(),
+                "site": row.get("SITE", "").strip(),
+                "site_cidr": row.get("SITE CIDR", "").strip(),
+                "poll": row.get("POLL", "").strip().lower() == "true",
+                "poll_qos": row.get("POLL QOS", "").strip().lower() == "true",
+                "poll_flow": row.get("POLL FLOW", "").strip().lower() == "true",
+                "poll_ip_sla": row.get("POLL IP SLA", "").strip().lower() == "true",
+                "poll_routing": row.get("POLL ROUTING", "").strip().lower() == "true",
+                "poll_lan": row.get("POLL LAN", "").strip().lower() == "true",
+                "poll_interval_msec": int(row.get("POLL INTERVAL (MSEC)", "0").strip() or 0),
+                "username": row.get("USERNAME", "admin").strip(),
+                "password": row.get("PASSWORD", "admin").strip(),
+                "golden_file": row.get("GOLDEN FILE", "").strip(),
             })
+
+            
     return devices
 
 # Fetch running configuration
@@ -64,10 +131,10 @@ def fetch_running_config(device):
     return running_config
 
 # Save configuration if changed
-def save_config_if_changed(device_host, running_config):
+def save_config_if_changed_sqlite3(device_host, running_config):
     config_hash = hashlib.sha256(running_config.encode()).hexdigest()
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(SQLITE_DB_FILE)
     cursor = conn.cursor()
     cursor.execute("SELECT config_hash FROM audit_log WHERE device_host = ? ORDER BY fetch_time DESC LIMIT 1", (device_host,))
     result = cursor.fetchone()
@@ -79,10 +146,66 @@ def save_config_if_changed(device_host, running_config):
         with open(filename, "w") as file:
             file.write(running_config)
 
-        cursor.execute("INSERT INTO audit_log (device_host, fetch_time, config_hash) VALUES (?, ?, ?)", (device_host, datetime.now(), config_hash))
+        cursor.execute("INSERT INTO audit_log (device_host, fetch_time, config_hash, config_content) VALUES (?, ?, ?)", (device_host, datetime.now(), config_hash, running_config))
         conn.commit()
 
     conn.close()
+
+def save_config_if_changed_clickhouse(device_host, running_config):
+    # Hash the running configuration
+    config_hash = hashlib.sha256(running_config.encode()).hexdigest()
+
+    # Connect to ClickHouse (you might want to parameterize the host/credentials)
+    client = Client('localhost')  # Adjust host/credentials as needed
+
+    # Check for existing config hash
+    query = """
+        SELECT config_hash 
+        FROM audit_log 
+        WHERE device_host = %(device_host)s 
+        ORDER BY fetch_time DESC 
+        LIMIT 1
+    """
+    result = client.execute(query, {'device_host': device_host})
+
+    if not result or result[0][0] != config_hash:
+        # Save to file system as backup if the config is different
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"configs/{device_host}_{timestamp}.cfg"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w") as file:
+            file.write(running_config)
+
+        # Insert new record with config content
+        insert_query = """
+            INSERT INTO audit_log 
+            (device_host, fetch_time, config_hash, config_content)
+            VALUES
+        """
+        
+        # Prepare the data to be inserted
+        data = [{
+            'device_host': device_host,
+            'fetch_time': datetime.now(),
+            'config_hash': config_hash,
+            'config_content': running_config
+        }]
+        
+        # Execute the insert query
+        client.execute(insert_query, data)
+
+
+# Updated table creation SQL:
+"""
+CREATE TABLE IF NOT EXISTS audit_log (
+    device_host String,
+    fetch_time DateTime,
+    config_hash String,
+    config_content String
+) ENGINE = MergeTree()
+ORDER BY (device_host, fetch_time);
+"""
+
 
 # Determine model/IOS version
 def get_device_info(device, model = '', ios_version = ''):
@@ -124,17 +247,43 @@ def fetch_golden_config(model, ios_version, golden_file):
         print(f"Golden config for {model}/{ios_version} not found in repo at URL {url}.")
         return None
 
+import difflib
+import re
 
-# Compare configs
-def compare_configs(running_config, golden_config):
+def compare_configs(running_config, golden_config, skip_regex_file=None):
+    # Load the skip regexes from the provided file (one regex per line)
+    if skip_regex_file:
+        try:
+            with open(skip_regex_file, "r") as file:
+                skip_regexes = [re.compile(line.strip()) for line in file.readlines() if line.strip()]
+        except FileNotFoundError:
+            raise FileNotFoundError(f"The skip regex file '{skip_regex_file}' was not found.")
+    else:
+        skip_regexes = []
+
+    # Filter lines to exclude those that are empty or match any of the skip_regexes
+    def filter_lines(config_lines):
+        return [
+            line for line in config_lines
+            if line.strip() and not any(regex.match(line) for regex in skip_regexes)
+        ]
+
+    # Apply filtering to both running_config and golden_config
+    running_config_lines = filter_lines(running_config.splitlines())
+    golden_config_lines = filter_lines(golden_config.splitlines())
+
+    # Perform the diff comparison
     diff = difflib.unified_diff(
-        running_config.splitlines(),
-        golden_config.splitlines(),
+        running_config_lines,
+        golden_config_lines,
         fromfile="Running Config",
         tofile="Golden Config",
         lineterm=""
     )
+
     return "\n".join(diff)
+
+
 
 # Compare configs using ChatGPT
 def compare_configs_chatgpt(running_config, golden_config):
@@ -306,8 +455,13 @@ def compare_configs_liveassist(running_config, golden_config):
 
 # Main workflow
 def main(args):
-    setup_database()
+    if args.sqlite3 == True:
+        setup_database_sqlite3()
+    if args.clickhouse == True:
+        setup_database_clickhouse()
+
     devices = read_device_list(args.devicefile)
+    skip_prefix_file = os.getcwd() + "/LiveNX/config-audit/config/skip-prefixes.txt"
     netmiko_devices = create_netmiko_list(devices)
     
     i = 0
@@ -315,43 +469,49 @@ def main(args):
         device = devices[i]
         i = i + 1
         print(f"Processing device: {netmiko_device['host']}")
-        running_config = fetch_running_config(netmiko_device)
-        save_config_if_changed(netmiko_device['host'], running_config)
-        
-        model, ios_version = get_device_info(netmiko_device, device['model'], device['ios_version'])
-        golden_config = fetch_golden_config(model, ios_version, device['golden_file'])
+        try:
+            running_config = fetch_running_config(netmiko_device)
 
-        if golden_config:
-            diff = compare_configs(running_config, golden_config)
-            if diff:
-                print(f"Differences found for device {netmiko_device['host']}:")
-                print(diff)
-            else:
-                print(f"No differences found for device {netmiko_device['host']}.")
+            if args.sqlite3 == True:
+                save_config_if_changed_sqlite3(netmiko_device['host'], running_config)
+            if args.clickhouse == True:
+                save_config_if_changed_clickhouse(netmiko_device['host'], running_config)
+            model, ios_version = get_device_info(netmiko_device, device['model'], device['ios_version'])
+            golden_config = fetch_golden_config(model, ios_version, device['golden_file'])
 
-            if args.chatgpt:
-                diff = compare_configs_chatgpt(running_config, golden_config)
+            if golden_config:
+                diff = compare_configs(running_config, golden_config, skip_prefix_file)
                 if diff:
                     print(f"Differences found for device {netmiko_device['host']}:")
                     print(diff)
                 else:
                     print(f"No differences found for device {netmiko_device['host']}.")
 
-            if args.bedrock:
-                diff = compare_configs_claude(running_config, golden_config)
-                if diff:
-                    print(f"Differences found for device {netmiko_device['host']}:")
-                    print(diff)
-                else:
-                    print(f"No differences found for device {netmiko_device['host']}.")
+                if args.chatgpt:
+                    diff = compare_configs_chatgpt(running_config, golden_config)
+                    if diff:
+                        print(f"Differences found for device {netmiko_device['host']}:")
+                        print(diff)
+                    else:
+                        print(f"No differences found for device {netmiko_device['host']}.")
 
-            if args.liveassist:
-                diff = compare_configs_liveassist(running_config, golden_config)
-                if diff:
-                    print(f"Differences found for device {netmiko_device['host']}:")
-                    print(diff)
-                else:
-                    print(f"No differences found for device {netmiko_device['host']}.")
+                if args.bedrock:
+                    diff = compare_configs_claude(running_config, golden_config)
+                    if diff:
+                        print(f"Differences found for device {netmiko_device['host']}:")
+                        print(diff)
+                    else:
+                        print(f"No differences found for device {netmiko_device['host']}.")
+
+                if args.liveassist:
+                    diff = compare_configs_liveassist(running_config, golden_config)
+                    if diff:
+                        print(f"Differences found for device {netmiko_device['host']}:")
+                        print(diff)
+                    else:
+                        print(f"No differences found for device {netmiko_device['host']}.")
+        except Exception as e:
+            print(f"Error processing device {netmiko_device['host']}: {str(e)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Audit config files.")
@@ -359,5 +519,7 @@ if __name__ == "__main__":
     parser.add_argument("--bedrock", default=False, action="store_true", help="Ask Amazon Bedrock to resolve differences between configs")
     parser.add_argument("--chatgpt", default=False, action="store_true", help="Ask ChatGPT to resolve differences between configs")
     parser.add_argument("--liveassist", default=False, action="store_true", help="Ask LiveAssist to resolve differences between configs")
+    parser.add_argument("--sqlite3", default=False, action="store_true", help="Save configs to sqlite")
+    parser.add_argument("--clickhouse", default=False, action="store_true", help="Save configs to clickhouse")
     args = parser.parse_args()
     main(args)
