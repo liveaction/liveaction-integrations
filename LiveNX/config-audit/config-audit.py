@@ -146,7 +146,7 @@ def save_config_if_changed_sqlite3(device_host, running_config):
         with open(filename, "w") as file:
             file.write(running_config)
 
-        cursor.execute("INSERT INTO audit_log (device_host, fetch_time, config_hash, config_content) VALUES (?, ?, ?)", (device_host, datetime.now(), config_hash, running_config))
+        cursor.execute("INSERT INTO audit_log (device_host, fetch_time, config_hash, config_content) VALUES (?, ?, ?, ?)", (device_host, datetime.now(), config_hash, running_config))
         conn.commit()
 
     conn.close()
@@ -211,7 +211,7 @@ def get_device_info(device, model = '', ios_version = ''):
 
 
 # Pull Golden Config from GitHub
-def fetch_golden_config(model, ios_version, golden_file):
+def fetch_golden_config(output_file, model, ios_version, golden_file):
     # Encode model and ios_version to handle spaces and special characters
 
     if golden_file != '':
@@ -219,7 +219,7 @@ def fetch_golden_config(model, ios_version, golden_file):
             with open(golden_file, "r") as file:
                 return file.read()
         else:
-            print(f"Golden config file {golden_file} not found.")
+            output_file.write(f"Golden config file {golden_file} not found.")
             return None
     encoded_model = urllib.parse.quote(model)
     encoded_ios_version = urllib.parse.quote(ios_version)
@@ -231,7 +231,7 @@ def fetch_golden_config(model, ios_version, golden_file):
     if response.status_code == 200:
         return response.text
     else:
-        print(f"Golden config for {model}/{ios_version} not found in repo at URL {url}.")
+        output_file.write(f"Golden config for {model}/{ios_version} not found in repo at URL {url}.")
         return None
 
 import difflib
@@ -344,7 +344,7 @@ def compare_configs_claude(running_config, golden_config):
 def main(args):
     devices = read_device_list(args.devicefile)
     netmiko_device_list = create_netmiko_list(devices)
-    skip_regex_file = os.path.join(os.getcwd(), "config/skip_regexes.txt")
+    skip_regex_file = os.path.join(os.getcwd(), "LiveNX/config-audit/config/skip-regexes.txt")
     setup_database_sqlite3()
     setup_database_clickhouse()
 
@@ -367,7 +367,7 @@ def main(args):
             save_config_if_changed_clickhouse(netmiko_device["host"], running_config)
             
             model, ios_version = get_device_info(netmiko_device)
-            golden_config = fetch_golden_config(model, ios_version, device['golden_file'])
+            golden_config = fetch_golden_config(output_file, model, ios_version, device['golden_file'])
             
             if golden_config:
                 diff = compare_configs(running_config, golden_config, skip_regex_file)
