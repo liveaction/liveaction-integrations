@@ -1,0 +1,60 @@
+^\s*!
+^\s*interface
+^\s*Building configuration\.\.\.
+^\s*Current configuration
+^\s*version
+^\s*service timestamps debug datetime msec
+^\s*service timestamps log datetime msec
+^\s*no platform
+^\s*platform console auto
+^\s*hostname
+^\s*boot^\s*start^\s*marker
+^\s*boot^\s*end^\s*marker
+^\s*enable secret
+^\s*no aaa new^\s*model
+^\s*no process cpu autoprofile hog
+^\s*subscriber templating
+^\s*multilink bundle^\s*name authenticated
+^\s*crypto
+^\s*enrollment
+^\s*subject^\s*name
+^\s*revocation^\s*check
+^\s*rsakeypair
+^\s*certificate
+^\s*quit
+^\s*license
+^\s*ip route
+^\s*ip ssh
+^\s*ntp
+^\s*virtual^\s*service
+^\s*ip forward
+^\s*no ip http server
+^\s*snmp
+^\s*control
+^\s*line con
+^\s* stopbits
+^\s*line vty
+^\s*login local
+^\s*transport input
+^\s*boot-
+^\s*no aaa
+^\s*multilink 
+^\s*subject-name
+^\s*revocation-check
+^\s*([0-9A-Fa-f]{8}(\s[0-9A-Fa-f]{8})*)$
+^\s*([0-9A-Fa-f]{2}\s*)+
+^\s*diagnostic
+^\s*spanning-tree
+^\s*username
+^\s*redundancy
+^\s*ip tftp
+^\s*class-map match-any
+^\s*match not protocol
+^\s*ip address 
+^\s*negotiation auto
+^\s*encapsulation dot1Q 10
+^\s*virtual-service csr_mgmt
+^\s*no ip
+^\s*length
+^\s*end
+^\s*config t

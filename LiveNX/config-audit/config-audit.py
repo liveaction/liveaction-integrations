@@ -142,6 +142,7 @@ def save_config_if_changed_sqlite3(device_host, running_config):
     if not result or result[0] != config_hash:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"configs/{device_host}_{timestamp}.cfg"
+        filename = f"/dev/configs/{device_host}_{timestamp}.cfg"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, "w") as file:
             file.write(running_config)
@@ -172,6 +173,7 @@ def save_config_if_changed_clickhouse(device_host, running_config):
         # Save to file system as backup if the config is different
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"configs/{device_host}_{timestamp}.cfg"
+        filename = f"/dev/configs/{device_host}_{timestamp}.cfg"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, "w") as file:
             file.write(running_config)
@@ -363,8 +365,12 @@ def main(args):
         output_file = open(output_file_path, "w")
         try:
             running_config = fetch_running_config(netmiko_device)
-            save_config_if_changed_sqlite3(netmiko_device["host"], running_config)
-            save_config_if_changed_clickhouse(netmiko_device["host"], running_config)
+
+            if args.sqlite3:
+                save_config_if_changed_sqlite3(netmiko_device["host"], running_config)
+             
+            if args.clickhouse:
+                save_config_if_changed_clickhouse(netmiko_device["host"], running_config)
             
             model, ios_version = get_device_info(netmiko_device)
             golden_config = fetch_golden_config(output_file, model, ios_version, device['golden_file'])
@@ -389,3 +395,4 @@ if __name__ == "__main__":
     parser.add_argument("--clickhouse", default=False, action="store_true", help="Save configs to clickhouse")
     args = parser.parse_args()
     main(args)
+
