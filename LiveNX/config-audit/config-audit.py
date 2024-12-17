@@ -195,18 +195,6 @@ def save_config_if_changed_clickhouse(device_host, running_config):
         client.execute(insert_query, data)
 
 
-# Updated table creation SQL:
-"""
-CREATE TABLE IF NOT EXISTS audit_log (
-    device_host String,
-    fetch_time DateTime,
-    config_hash String,
-    config_content String
-) ENGINE = MergeTree()
-ORDER BY (device_host, fetch_time);
-"""
-
-
 # Determine model/IOS version
 def get_device_info(device, model = '', ios_version = ''):
     connection = ConnectHandler(**device)
@@ -220,7 +208,6 @@ def get_device_info(device, model = '', ios_version = ''):
             model = line.split()[1]
     
     return model, ios_version
-
 
 
 # Pull Golden Config from GitHub
@@ -284,7 +271,6 @@ def compare_configs(running_config, golden_config, skip_regex_file=None):
     return "\n".join(diff)
 
 
-
 # Compare configs using ChatGPT
 def compare_configs_chatgpt(running_config, golden_config):
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -336,182 +322,62 @@ def compare_configs_claude(running_config, golden_config):
         f"{running_config}\n\n"
         "Golden Configuration:\n"
         f"{golden_config}\n\n"
-        "Highlight any differences and potential issues. Also generate a diff that the network user can apply on the running config for the flow monitoring related settings."
+        "Highlight any differences and potential issues."
     )
 
-    # Prepare the request payload for Claude 3.5 Sonnet
-    request_body = json.dumps({
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 500,
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        "temperature": 0
-    })
-
-    response = ""
     try:
-        # Invoke Claude 3.5 Sonnet model
+        # Request a completion from Claude
         response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
-            contentType="application/json",
-            body=request_body
+            modelId="anthropic.claude-v2",
+            body=json.dumps({"inputs": prompt}),
+            contentType='application/json'
         )
-
-        # Parse the response
-        response_body = json.loads(response['body'].read())
         
-        # Extract and return the text response
-        response = response_body['content'][0]['text']
+        result = json.loads(response['body'].read())
+        return result.get('generatedText', 'No comparison result available.')
 
     except Exception as e:
-        return f"An error occurred: {str(e)}"
-    
-    return response
+        return f"Error: {str(e)}"
 
 
-def compare_configs_liveassist(running_config, golden_config):
-    # Define the host and port
-    host = os.getenv('LIVEASSIST_HOST')
-    port = os.getenv('LIVEASSIST_PORT', '443')
-    username = os.getenv('LIVEASSIST_USERNAME')
-    password = os.getenv('LIVEASSIST_PASSWORD')
-
-    # Login endpoint
-    login_url = f"https://{host}:{port}/api/v1/login"
-    login_payload = {
-        "username": username,
-        "password": password
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "Host" : host,
-        "Accept" : "*/*",
-        "Connection" : "keep-alive",
-        "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
-    }
-
-    # Log in to obtain tokens
-    response = requests.post(login_url, json=login_payload, headers=headers, verify=False)
-    if response.status_code == 200:
-        tokens = response.json()
-        access_token = tokens.get("AccessToken")
-        refresh_token = tokens.get("RefreshToken")
-        id_token = tokens.get("IdToken")
-        print("Login successful. Tokens received.")
-    else:
-        print(f"Login failed. Status code: {response.status_code}, Response: {response.text}")
-        exit(1)
-
-    # Use AccessToken to call the AI chain endpoint
-    chain_url = f"https://{host}:{port}/api/v1/ai/chain"
-    auth_headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-        "Host" : host,
-        "Accept" : "*/*",
-        "Connection" : "keep-alive",
-        "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
-    }
-
-    message_payload = {
-        "name": "Test token",
-        "table_names": "structured_events",
-        "db": "flows",
-        "response_format": "json"
-    }
-
-    chain_response = requests.post(chain_url, json=message_payload, headers=auth_headers, verify=False)
-    if chain_response.status_code == 200:
-        chain_data = chain_response.json()
-        chain_id = chain_data.get("chain_id")
-        print(f"Chain ID: {chain_id}")
-    else:
-        print(f"Failed to fetch chain data. Status code: {chain_response.status_code}, Response: {chain_response.text}")
-
-        # Call the chain message endpoint
-    message_url = f"https://{host}:{port}/api/v1/ai/chain/{chain_id}/message"
-    message_payload = {
-        "query": f"Compare the following running configuration and golden configuration to see if there are any differences:\nRunning Configuration:\n{running_config}\nGolden Configuration:\n{golden_config}\nHighlight any differences and potential issues."
-    }
-
-    message_response = requests.post(message_url, json=message_payload, headers=auth_headers, verify=False)
-    if message_response.status_code == 200:
-        message_data = message_response.json()
-        query = message_data.get("query")
-        response_description = message_data.get("response", {}).get("description")
-        values = message_data.get("response", {}).get("values", [])
-
-        print(f"Query: {query}")
-        print(f"Response Description: {response_description}")
-        print(f"Values: {values}")
-    else:
-        print(f"Failed to fetch message data. Status code: {message_response.status_code}, Response: {message_response.text}")
-
-
-
-# Main workflow
+# Main execution logic
 def main(args):
-    if args.sqlite3 == True:
-        setup_database_sqlite3()
-    if args.clickhouse == True:
-        setup_database_clickhouse()
-
     devices = read_device_list(args.devicefile)
-    skip_prefix_file = os.getcwd() + "/LiveNX/config-audit/config/skip-prefixes.txt"
-    netmiko_devices = create_netmiko_list(devices)
-    
-    i = 0
-    for netmiko_device in netmiko_devices:
-        device = devices[i]
-        i = i + 1
-        print(f"Processing device: {netmiko_device['host']}")
+    netmiko_device_list = create_netmiko_list(devices)
+    skip_regex_file = os.path.join(os.getcwd(), "config/skip_regexes.txt")
+    setup_database_sqlite3()
+    setup_database_clickhouse()
+
+
+    for netmiko_device in netmiko_device_list:
+        device = devices[netmiko_device_list.index(netmiko_device)]
+        # Create subdirectories and file for each device
+        device_host = netmiko_device['host']
+        output_dir = os.path.join(os.getcwd(), f"LiveNX/config-audit/output/{device_host}")
+
+        # Create the directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Now, open the output file for appending
+        output_file_path = os.path.join(output_dir, "output.txt")
+        output_file = open(output_file_path, "w")
         try:
             running_config = fetch_running_config(netmiko_device)
-
-            if args.sqlite3 == True:
-                save_config_if_changed_sqlite3(netmiko_device['host'], running_config)
-            if args.clickhouse == True:
-                save_config_if_changed_clickhouse(netmiko_device['host'], running_config)
-            model, ios_version = get_device_info(netmiko_device, device['model'], device['ios_version'])
+            save_config_if_changed_sqlite3(netmiko_device["host"], running_config)
+            save_config_if_changed_clickhouse(netmiko_device["host"], running_config)
+            
+            model, ios_version = get_device_info(netmiko_device)
             golden_config = fetch_golden_config(model, ios_version, device['golden_file'])
-
+            
             if golden_config:
-                diff = compare_configs(running_config, golden_config, skip_prefix_file)
-                if diff:
-                    print(f"Differences found for device {netmiko_device['host']}:")
-                    print(diff)
-                else:
-                    print(f"No differences found for device {netmiko_device['host']}.")
+                diff = compare_configs(running_config, golden_config, skip_regex_file)
+                output_file.write(f"Device: {netmiko_device['host']}\n")
+                output_file.write(diff + "\n\n")
+            else:
+                output_file.write(f"Device: {netmiko_device['host']} - Golden config not found.\n\n")
 
-                if args.chatgpt:
-                    diff = compare_configs_chatgpt(running_config, golden_config)
-                    if diff:
-                        print(f"Differences found for device {netmiko_device['host']}:")
-                        print(diff)
-                    else:
-                        print(f"No differences found for device {netmiko_device['host']}.")
-
-                if args.bedrock:
-                    diff = compare_configs_claude(running_config, golden_config)
-                    if diff:
-                        print(f"Differences found for device {netmiko_device['host']}:")
-                        print(diff)
-                    else:
-                        print(f"No differences found for device {netmiko_device['host']}.")
-
-                if args.liveassist:
-                    diff = compare_configs_liveassist(running_config, golden_config)
-                    if diff:
-                        print(f"Differences found for device {netmiko_device['host']}:")
-                        print(diff)
-                    else:
-                        print(f"No differences found for device {netmiko_device['host']}.")
         except Exception as e:
-            print(f"Error processing device {netmiko_device['host']}: {str(e)}")
+            output_file.write(f"Device: {netmiko_device['host']} - Error: {str(e)}\n\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Audit config files.")
