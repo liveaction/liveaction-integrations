@@ -259,7 +259,11 @@ def diff_livenx_ch_inventory(livenx_inventory_1, livenx_inventory_2):
                 livenx_device_found = True
                 break
         if livenx_device_found == False:
-            livenx_inventory_diff_list.append(livenx_device_1)    
+            if 'id' in livenx_device_1:
+                livenx_inventory_diff_list.append(livenx_device_1)
+            else:
+                livenx_inventory_diff_list.append(livenx_device_2)
+              
     return livenx_inventory_diff_list
 
 def add_to_livenx_ch_inventory(livenx_inventory):
@@ -302,23 +306,20 @@ def remove_from_livenx_ch_inventory(livenx_inventory):
     client = connect_with_tls(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
 
     # Prepare the DELETE statement template
-    delete_query = """
-    ALTER TABLE Device_Inventory DELETE WHERE ID = %s
-    """
+    delete_query = "ALTER TABLE Device_Inventory DELETE WHERE ID = %(device_id)s"
 
-    for data in livenx_inventory['devices']:
+    for data in livenx_inventory:
         try:
             # Use the ID from each device to identify and remove the entry
             device_id = data["id"]
             
             # Execute the DELETE statement
-            client.execute(delete_query, (device_id,))
+            client.execute(delete_query, {'device_id': device_id})
             local_logger.info(f"Device with ID {device_id} removed successfully.")
             print(f"Device with ID {device_id} removed successfully.")
         except Exception as e:
-            local_logger.error(f"Device with ID {device_id} removed successfully.")
+            local_logger.error(f"Error removing device with ID {device_id}: {e}")
             print(f"Error removing device with ID {data['id']}: {e}")
-
 
 def get_livenx_nodes():
     '''
