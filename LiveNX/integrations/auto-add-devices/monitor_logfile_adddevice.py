@@ -27,7 +27,7 @@ class LogFileHandler(FileSystemEventHandler):
     def on_created(self, event):
         if event.is_directory:
             return
-        if event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxServer_")) and event.src_path.endswith(".log"):
+        if (event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxNode_")) or event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxServer_"))) and event.src_path.endswith(".log"):
             run_adddevice(event.src_path, "New File")
     
     def on_modified(self, event):
@@ -43,7 +43,7 @@ class LogFileHandler(FileSystemEventHandler):
         if event.is_directory:
             return
         
-        if event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxServer_")) and event.src_path.endswith(".log"):
+        if (event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxNode_")) or event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxServer_"))) and event.src_path.endswith(".log"):
             seconds = int(time.time())
             key = (seconds, event.src_path)
             if key in self.file_cache:
