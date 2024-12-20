@@ -75,6 +75,7 @@ Registered devices will have the following default configuration:
 - Input/Output Capacity: 1000000
 - Sample Ratio: 2
 - Basic interface configuration without WAN or XCON settings
+These defaults can be changed by modifying the json files in the config directory.
 
 ## Error Handling
 

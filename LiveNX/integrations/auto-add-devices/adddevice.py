@@ -264,7 +264,7 @@ def main(args):
         exit(1)
     
     if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None or liveNxTargetIP is None:
-        local_logger.error(f"Missing env parameters: {liveNxHost} is None or {liveNxApiPort} is None or {liveNxToken} is None or {liveNxTargetIP}")
+        local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is None or {liveNxTargetIP}")
         exit(1)
 
     while True:
