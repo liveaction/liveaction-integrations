@@ -7,23 +7,24 @@ import json
 import urllib.request, urllib.parse
 import time
 import sys
+import json
 
 local_logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-liveNxHost = os.getenv("LIVENX_API_HOST")
+liveNxApiHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
-liveNxToken = os.getenv("LIVENX_API_TOKEN")
-liveNxTargetIP = os.getenv("LIVENX_TARGET_NODE_NAME")
+liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
+liveNxTargetIP = os.getenv("LIVENX_TARGET_NODE_IP")
 
 def create_request(url, data = None):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
     headers = {
-        "Authorization": "Bearer " + liveNxToken
+        "Authorization": "Bearer " + liveNxApiToken
     }
-    api_url = "https://" + liveNxHost + ":" + liveNxApiPort + url
+    api_url = "https://" + liveNxApiHost + ":" + liveNxApiPort + url
 
     request = urllib.request.Request(api_url, headers=headers, data = data)
     return request, ctx
@@ -109,82 +110,45 @@ def get_livenx_inventory():
     
     return json_data
 
-def create_livenx_interface_from_ip(address):
-    '''
-            {
-          "ifIndex": "0",
-          "name": "Interface 0",
-          "address": "123.123.123.123",
-          "subnetMask": "255.255.255.0",
-          "description": "First interface",
-          "serviceProvider": "A Service Provider",
-          "inputCapacity": "1000000",
-          "outputCapacity": "1000000",
-          "wan": false,
-          "xcon": false,
-          "label": "John's Interface Label",
-          "stringTags": "MyTag1,MyTag2"
-        }
+# livenx_config.py
+
+
+class ConfigLoader:
+    def __init__(self, config_dir="config"):
+        self.config_dir = config_dir
+        self.interface_defaults = self._load_json("interface_defaults.json")
+        self.device_defaults = self._load_json("device_defaults.json")
     
-    '''
+    def _load_json(self, filename):
+        try:
+            with open(os.path.join(self.config_dir, filename), 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            local_logger.error(f"Error loading {filename}: {str(e)}")
+            return {}
+
+def create_livenx_interface_from_ip(address, config_loader):
     ifcs = []
-    ifc = {}
-    ifc['ifIndex'] = '0'
-    ifc['name'] = 'ge0/0'
+    ifc = config_loader.interface_defaults.copy()
     ifc['address'] = address
-    ifc['subnetMask'] = '255.255.255.0'
-    ifc['description'] = ''
-    ifc['serviceProvider'] = ''
-    ifc['inputCapacity'] = "1000000"
-    ifc['outputCapacity'] = "1000000"
-    ifc['wan'] = False
-    ifc['xcon'] = False
-    ifc['label'] = ''
-    ifc['stringTags'] = ''
     ifcs.append(ifc)
     return ifcs
 
-def create_livenx_device_from_ip(nodeid, ip_address):
-    """
-        {
-            "ipAddress": "10.0.3.1",
-            "hostname": "C2611",
-            "adapterId": "Cisco::IOS",
-            "deviceType": "Router",
-            "hardwareVendor": "Cisco",
-            "model": "CISCO2611",
-            "softwareVendor": "Cisco",
-            "osVersion": "12.1(19)",
-            "backupStatus": "SUCCESS",
-            "complianceState": 0,
-            "lastBackup": 1410324616600,
-            "lastTelemetry": null,
-            "memoSummary": null,
-            "custom1": "",
-            "custom2": "",
-            "custom3": "",
-            "custom4": "",
-            "custom5": "",
-            "network": "Default",
-            "serialNumber": "JAB03060AX0"
-         },
-    """
-    livenx_device = {}
+def create_livenx_device_from_ip(nodeid, ip_address, config_loader):
+    livenx_device = config_loader.device_defaults.copy()
     ipNameRepresentation = ip_address.replace('.', '-')
-    livenx_device['nodeId'] = nodeid
-    livenx_device['interfaces'] = create_livenx_interface_from_ip(ip_address)
-    livenx_device['hostName'] = ipNameRepresentation
-    livenx_device['systemName'] = ipNameRepresentation
-    livenx_device['displaySystemName'] = ipNameRepresentation
-    livenx_device['hostName'] = ipNameRepresentation
-    livenx_device['displayHostName'] = ipNameRepresentation
-    livenx_device['systemDescription'] = ''
-    livenx_device['address'] = ip_address
-    livenx_device['site'] = ''
-    #livenx_device['groupId'] = str(uuid.uuid4())
-    #livenx_device['groupName'] = ""
-    livenx_device['stringTags'] = ""
-    livenx_device['userDefinedSampleRatio'] = 2
+    
+    # Add required fields
+    livenx_device.update({
+        'nodeId': nodeid,
+        'interfaces': create_livenx_interface_from_ip(ip_address, config_loader),
+        'hostName': ipNameRepresentation,
+        'systemName': ipNameRepresentation,
+        'displaySystemName': ipNameRepresentation,
+        'displayHostName': ipNameRepresentation,
+        'address': ip_address
+    })
+    
     local_logger.info(livenx_device)
     return livenx_device
 
@@ -299,8 +263,8 @@ def main(args):
         local_logger.info("Missing log file")
         exit(1)
     
-    if liveNxHost is None or liveNxApiPort is None or liveNxToken is None or liveNxTargetIP is None:
-        local_logger.info("Missing env any of parameters: [LIVENX_API_HOST, LIVENX_API_PORT, LIVENX_API_TOKEN, LIVENX_TARGET_NODE_NAME] ")
+    if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None or liveNxTargetIP is None:
+        local_logger.error(f"Missing env parameters: {liveNxHost} is None or {liveNxApiPort} is None or {liveNxToken} is None or {liveNxTargetIP}")
         exit(1)
 
     while True:

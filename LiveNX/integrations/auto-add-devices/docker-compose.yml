@@ -6,9 +6,10 @@ services:
     image: addautodevice-app
     volumes:
       - /data/livenx-server/data/log:/data/livenx-server/data/log  # Mount the log directory from the host to the container
+      - ./config/:/usr/src/app/config  # Mount the config directory from the host to the container
     environment:
       - LIVENX_API_HOST=0.0.0.0
       - LIVENX_API_PORT=8093
-      - LIVENX_API_TOKEN=""
-      - LIVENX_TARGET_IP=""
+      - LIVENX_API_TOKEN=foo
+      - LIVENX_TARGET_NODE_IP=0.0.0.0
     working_dir: /usr/src/app

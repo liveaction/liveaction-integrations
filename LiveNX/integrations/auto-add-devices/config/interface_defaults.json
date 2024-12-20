@@ -1,0 +1,13 @@
+{
+    "ifIndex": "0",
+    "name": "ge0/0",
+    "subnetMask": "255.255.255.0",
+    "description": "",
+    "serviceProvider": "",
+    "inputCapacity": "1000000",
+    "outputCapacity": "1000000",
+    "wan": false,
+    "xcon": false,
+    "label": "",
+    "stringTags": ""
+}
