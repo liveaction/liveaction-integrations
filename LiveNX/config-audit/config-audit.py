@@ -4,7 +4,7 @@ import hashlib
 import openai
 import difflib
 import requests
-import sqlite3
+
 import csv
 import argparse
 import boto3
@@ -24,8 +24,7 @@ clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
 clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
 clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
 
-# Configuration for database
-SQLITE_DB_FILE = "netflow_audit.db"
+
 GITHUB_REPO_URL = "https://raw.githubusercontent.com/liveaction/liveaction-integrations/refs/heads/main/LiveNX/configs/"
 
 def connect_to_clickhouse(host, port, user, password, database, ca_certs='/path/to/ca.pem', certfile='/etc/clickhouse-server/cacerts/ca.crt', keyfile='/etc/clickhouse-server/cacerts/ca.key'):
@@ -63,58 +62,61 @@ def connect_to_clickhouse(host, port, user, password, database, ca_certs='/path/
     
 def create_netmiko_list(original_devices):
     device_list_copy = [
-        {key: value for key, value in device.items() if key in {"device_type", "host", "username", "password"}}
+        {key.lower(): value for key, value in device.items() if key in {"Device_Type", "Host", "Username", "Password"}}
         for device in original_devices
     ]
     return device_list_copy
         
-# Database setup
-def setup_database_sqlite3():
-    with sqlite3.connect(SQLITE_DB_FILE) as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS audit_log (
-            id INTEGER PRIMARY KEY,
-            device_host TEXT,
-            fetch_time TIMESTAMP,
-            config_hash TEXT,
-            config_content TEST
-        )
-        """)
-        conn.commit()
-
-
 
 client = connect_to_clickhouse(host=clickHouseHost, port=int(clickHouseApiPort), user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
 
 def setup_database_clickhouse():
-    
-    # Create the audit_log table if it doesn't exist
+    # Create the Audit_Log table with the updated schema
     create_table_query = """
-    CREATE TABLE IF NOT EXISTS inventory_db.audit_log (
-        id UInt32,
-        device_host String,
-        fetch_time DateTime,
-        config_hash String,
-        config_content String
+    CREATE TABLE IF NOT EXISTS inventory_db.Audit_Log (
+        Id UInt32,
+        Name String,
+        Device_Type String,
+        Device_Serial String,
+        Host String,
+        Vendor String,
+        Model String,
+        Ios_Version String,
+        Description String,
+        Wan String,
+        Service_Provider String,
+        Site String,
+        Site_Cidr String,
+        Poll Bool,
+        Poll_Qos Bool,
+        Poll_Flow Bool,
+        Poll_Ip_Sla Bool,
+        Poll_Routing Bool,
+        Poll_Lan Bool,
+        Poll_Interval_Msec UInt32,
+        Username String,
+        Password String,
+        Config_Hash String,
+        Config_Content String,
+        Golden_File String,
+        Fetch_Time DateTime
     ) ENGINE = MergeTree()
-    ORDER BY (device_host, fetch_time)
+    ORDER BY (Host, Fetch_Time)
     SETTINGS index_granularity = 8192
     """
-    
-    
+
     import logging
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
     try:
+        # Assuming `client` is a connected ClickHouse client instance
         client.execute(create_table_query)
         logger.info("Database setup completed successfully")
     except Exception as e:
         logger.error("Error setting up database", exc_info=True)
         raise RuntimeError("Failed to set up the database") from e
 
-import csv
 
 # Read device list from CSV
 def read_device_list(device_csv):
@@ -143,29 +145,30 @@ def read_device_list(device_csv):
 
                 # Append the device with selected fields
                 devices.append({
-                    "name": row.get("NAME", "").strip(),
-                    "device_type": device_type,
-                    "device_serial": row.get("DEVICE SERIAL", "").strip(),
-                    "host": row.get("IP ADDRESS", "").strip(),
-                    "vendor": row.get("VENDOR", "").strip(),
-                    "model": row.get("MODEL", "").strip(),
-                    "ios_version": row.get("IOS VERSION", "").strip(),
-                    "description": row.get("DESCRIPTION", "").strip(),
-                    "wan": row.get("WAN", "").strip(),
-                    "service_provider": row.get("SERVICE PROVIDER", "").strip(),
-                    "site": row.get("SITE", "").strip(),
-                    "site_cidr": row.get("SITE CIDR", "").strip(),
-                    "poll": row.get("POLL", "").strip().lower() == "true",
-                    "poll_qos": row.get("POLL QOS", "").strip().lower() == "true",
-                    "poll_flow": row.get("POLL FLOW", "").strip().lower() == "true",
-                    "poll_ip_sla": row.get("POLL IP SLA", "").strip().lower() == "true",
-                    "poll_routing": row.get("POLL ROUTING", "").strip().lower() == "true",
-                    "poll_lan": row.get("POLL LAN", "").strip().lower() == "true",
-                    "poll_interval_msec": int(row.get("POLL INTERVAL (MSEC)", "0").strip() or 0),
-                    "username": row.get("USERNAME", "admin").strip(),
-                    "password": row.get("PASSWORD", "admin").strip(),
-                    "golden_file": row.get("GOLDEN FILE", "").strip(),
+                    "Name": row.get("NAME", "").strip(),
+                    "Device_Type": device_type,
+                    "Device_Serial": row.get("DEVICE SERIAL", "").strip(),
+                    "Host": row.get("IP ADDRESS", "").strip(),
+                    "Vendor": row.get("VENDOR", "").strip(),
+                    "Model": row.get("MODEL", "").strip(),
+                    "Ios_Version": row.get("IOS VERSION", "").strip(),
+                    "Description": row.get("DESCRIPTION", "").strip(),
+                    "Wan": row.get("WAN", "").strip(),
+                    "Service_Provider": row.get("SERVICE PROVIDER", "").strip(),
+                    "Site": row.get("SITE", "").strip(),
+                    "Site_Cidr": row.get("SITE CIDR", "").strip(),
+                    "Poll": row.get("POLL", "").strip().lower() == "true",
+                    "Poll_Qos": row.get("POLL QOS", "").strip().lower() == "true",
+                    "Poll_Flow": row.get("POLL FLOW", "").strip().lower() == "true",
+                    "Poll_Ip_Sla": row.get("POLL IP SLA", "").strip().lower() == "true",
+                    "Poll_Routing": row.get("POLL ROUTING", "").strip().lower() == "true",
+                    "Poll_Lan": row.get("POLL LAN", "").strip().lower() == "true",
+                    "Poll_Interval_Msec": int(row.get("POLL INTERVAL (MSEC)", "0").strip() or 0),
+                    "Username": row.get("USERNAME", "admin").strip(),
+                    "Password": row.get("PASSWORD", "admin").strip(),
+                    "Golden_File": row.get("GOLDEN FILE", "").strip(),
                 })
+
 
     except FileNotFoundError:
         print(f"Error: The file {device_csv} was not found.")
@@ -185,39 +188,21 @@ def fetch_running_config(device):
         print(f"Error fetching running config for device {device['host']}: {e}")
         return None
 
-# Save configuration if changed
-def save_config_if_changed_sqlite3(device_host, running_config):
-    config_hash = hashlib.sha256(running_config.encode()).hexdigest()
-    
-    with sqlite3.connect(SQLITE_DB_FILE) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT config_hash FROM audit_log WHERE device_host = ? ORDER BY fetch_time DESC LIMIT 1", (device_host,))
-        result = cursor.fetchone()
-
-        if not result or result[0] != config_hash:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = os.path.join(os.getcwd(), f"{device_host}_{timestamp}.cfg")
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
-            with open(filename, "w") as file:
-                file.write(running_config)
-
-            cursor.execute("INSERT INTO audit_log (device_host, fetch_time, config_hash, config_content) VALUES (?, ?, ?, ?)", (device_host, datetime.now(), config_hash, running_config))
-            conn.commit()
-
-def save_config_if_changed_clickhouse(device_host, running_config):
+def save_config_if_changed_clickhouse(device, running_config):
     # Hash the running configuration
     config_hash = hashlib.sha256(running_config.encode()).hexdigest()
 
     # Check for existing config hash
     query = """
-        SELECT config_hash 
-        FROM inventory_db.audit_log 
-        WHERE device_host = %(device_host)s 
-        ORDER BY fetch_time DESC 
+        SELECT Config_Hash 
+        FROM inventory_db.Audit_Log 
+        WHERE Host = %(Host)s 
+        ORDER BY Fetch_Time DESC 
         LIMIT 1
     """
+    device_host = device['Host']
     try:
-        result = client.execute(query, {'device_host': device_host})
+        result = client.execute(query, {'Host': device_host})
     except Exception as e:
         print(f"Error executing query for device {device_host}: {e}")
         return None
@@ -230,17 +215,47 @@ def save_config_if_changed_clickhouse(device_host, running_config):
         with open(filename, "w") as file:
             file.write(running_config)
 
-        # Insert new record with config content
+        # Insert new record with all columns
         insert_query = """
-            INSERT INTO inventory_db.audit_log 
-            (device_host, fetch_time, config_hash, config_content) 
-            VALUES (%(device_host)s, %(fetch_time)s, %(config_hash)s, %(config_content)s)
+            INSERT INTO inventory_db.Audit_Log (
+                Id, Name, Device_Type, Device_Serial, Host, Vendor, Model, Ios_Version, 
+                Description, Wan, Service_Provider, Site, Site_Cidr, Poll, Poll_Qos, 
+                Poll_Flow, Poll_Ip_Sla, Poll_Routing, Poll_Lan, Poll_Interval_Msec, 
+                Username, Password, Golden_File, Fetch_Time, Config_Hash, Config_Content
+            ) VALUES (
+                %(Id)s, %(Name)s, %(Device_Type)s, %(Device_Serial)s, %(Host)s, %(Vendor)s, %(Model)s, %(Ios_Version)s,
+                %(Description)s, %(Wan)s, %(Service_Provider)s, %(Site)s, %(Site_Cidr)s, %(Poll)s, %(Poll_Qos)s, 
+                %(Poll_Flow)s, %(Poll_Ip_Sla)s, %(Poll_Routing)s, %(Poll_Lan)s, %(Poll_Interval_Msec)s, 
+                %(Username)s, %(Password)s, %(Golden_File)s, %(Fetch_Time)s, %(Config_Hash)s, %(Config_Content)s
+            )
         """
         insert_data = {
-            'device_host': device_host,
-            'fetch_time': datetime.now(),
-            'config_hash': config_hash,
-            'config_content': running_config
+            'Id': 0,  # Use a placeholder or generate the ID as needed
+            'Name': device.get('Name', ''),
+            'Device_Type': device.get('Device_Type', ''),
+            'Device_Serial': device.get('Device_Serial', ''),
+            'Host': device_host,
+            'Vendor': device.get('Vendor', ''),
+            'Model': device.get('Model', ''),
+            'Ios_Version': device.get('Ios_Version', ''),
+            'Description': device.get('Description', ''),
+            'Wan': device.get('Wan', ''),
+            'Service_Provider': device.get('Service_Provider', ''),
+            'Site': device.get('Site', ''),
+            'Site_Cidr': device.get('Site_Cidr', ''),
+            'Poll': device.get('Poll', False),
+            'Poll_Qos': device.get('Poll_Qos', False),
+            'Poll_Flow': device.get('Poll_Flow', False),
+            'Poll_Ip_Sla': device.get('Poll_Ip_Sla', False),
+            'Poll_Routing': device.get('Poll_Routing', False),
+            'Poll_Lan': device.get('Poll_Lan', False),
+            'Poll_Interval_Msec': device.get('Poll_Interval_Msec', 0),
+            'Username': device.get('Username', 'admin'),
+            'Password': device.get('Password', 'admin'),
+            'Golden_File': device.get('Golden_File', ''),
+            'Fetch_Time': datetime.now(),
+            'Config_Hash': config_hash,
+            'Config_Content': running_config
         }
         
         # Execute the insert query
@@ -249,6 +264,7 @@ def save_config_if_changed_clickhouse(device_host, running_config):
         except Exception as e:
             print(f"Error inserting new config for device {device_host}: {e}")
             return None
+
 
 def get_device_info(device, model = '', ios_version = ''):
     try:
@@ -414,8 +430,6 @@ def main(args):
     devices = read_device_list(args.devicefile)
     netmiko_device_list = create_netmiko_list(devices)
     skip_regex_file = os.path.join(os.getcwd(), "LiveNX/config-audit/config/skip-regexes.txt")
-    if args.sqlite3:
-        setup_database_sqlite3()
     if args.clickhouse:
         setup_database_clickhouse()
 
@@ -436,15 +450,12 @@ def main(args):
             running_config = fetch_running_config(netmiko_device)
             if running_config is None:
                 raise ValueError("Failed to fetch running config")
-
-            if args.sqlite3:
-                save_config_if_changed_sqlite3(netmiko_device["host"], running_config)
              
             if args.clickhouse:
-                save_config_if_changed_clickhouse(netmiko_device["host"], running_config)
+                save_config_if_changed_clickhouse(device, running_config)
             
             model, ios_version = get_device_info(netmiko_device)
-            golden_config = fetch_golden_config(output_file, model, ios_version, device['golden_file'])
+            golden_config = fetch_golden_config(output_file, model, ios_version, device['Golden_File'])
             if golden_config is None:
                 raise ValueError("Golden config not found")
 
@@ -478,7 +489,6 @@ if __name__ == "__main__":
     parser.add_argument("--bedrock", default=False, action="store_true", help="Ask Amazon Bedrock to resolve differences between configs")
     parser.add_argument("--chatgpt", default=False, action="store_true", help="Ask ChatGPT to resolve differences between configs")
     parser.add_argument("--liveassist", default=False, action="store_true", help="Ask LiveAssist to resolve differences between configs")
-    parser.add_argument("--sqlite3", default=False, action="store_true", help="Save configs to sqlite")
     parser.add_argument("--clickhouse", default=False, action="store_true", help="Save configs to clickhouse")
     args = parser.parse_args()
     main(args)
