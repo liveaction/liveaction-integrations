@@ -5,7 +5,8 @@ local_logger = logging.getLogger(__name__)
 
 def connect_with_tls(host, port, user, password, database, ca_certs='/path/to/ca.pem', certfile='/etc/clickhouse-server/cacerts/ca.crt', keyfile='/etc/clickhouse-server/cacerts/ca.key'):
 
-
+    if not(host and port and user and password and database):
+        raise Exception("Missing Clickhouse Env setup") 
     # TLS configuration
     tls_params = {
         "secure": True,                  # Enable TLS
@@ -20,7 +21,7 @@ def connect_with_tls(host, port, user, password, database, ca_certs='/path/to/ca
         # Establish the connection
         client = Client(
             host=host,
-            port=port,
+            port=int(port),
             user=user,
             password=password,
             database=database,
