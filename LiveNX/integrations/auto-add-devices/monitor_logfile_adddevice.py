@@ -5,6 +5,7 @@ from watchdog.events import FileSystemEventHandler
 import time
 import logging
 import sys
+import argparse
 
 local_logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -51,24 +52,35 @@ class LogFileHandler(FileSystemEventHandler):
             self.file_cache[key] = True
             run_adddevice(event.src_path, "Modified File")
 
-# Set up observer and event handler
-observer = Observer()
-event_handler = LogFileHandler()
+def main(args):
+    # Set up observer and event handler
+    observer = Observer()
+    event_handler = LogFileHandler()
 
-# Monitor the directory and start observer
-observer.schedule(event_handler, path=directory_to_monitor, recursive=False)
-observer.start()
+    # Monitor the directory and start observer
+    observer.schedule(event_handler, path=directory_to_monitor, recursive=False)
+    observer.start()
 
-try:
-    # Check for existing files that match the pattern in the directory
-    for filename in os.listdir(directory_to_monitor):
-        if filename.startswith("LivenxServer_") and filename.endswith(".log"):
-            run_adddevice(os.path.join(directory_to_monitor, filename), "Existing File")
+    if args.autoaddinterfaces:
+        from autoaddinterfaces import start_interface_monitor
+        start_interface_monitor()
     
-    # Keep the observer running
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    observer.stop()
+    try:
+        # Check for existing files that match the pattern in the directory
+        for filename in os.listdir(directory_to_monitor):
+            if filename.startswith("LivenxServer_") and filename.endswith(".log"):
+                run_adddevice(os.path.join(directory_to_monitor, filename), "Existing File")
+        
+        # Keep the observer running
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
 
-observer.join()
+    observer.join()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Monitor LiveNX log files for new devices")
+    parser.add_argument("--autoaddinterfaces", action="store_true", help="Auto add interfaces")
+    args = parser.parse_args()
+    main(args)

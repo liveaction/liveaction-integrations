@@ -9,8 +9,25 @@ import time
 import sys
 import json
 
+
 local_logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
+class ConfigLoader:
+    def __init__(self, config_dir="config"):
+        self.config_dir = config_dir
+        self.interface_defaults = self._load_json("interface_defaults.json")
+        self.device_defaults = self._load_json("device_defaults.json")
+    
+    def _load_json(self, filename):
+        try:
+            with open(os.path.join(self.config_dir, filename), 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            local_logger.error(f"Error loading {filename}: {str(e)}")
+            return {}
+
+config_loader = ConfigLoader()
 
 liveNxApiHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
@@ -112,20 +129,6 @@ def get_livenx_inventory():
 
 # livenx_config.py
 
-
-class ConfigLoader:
-    def __init__(self, config_dir="config"):
-        self.config_dir = config_dir
-        self.interface_defaults = self._load_json("interface_defaults.json")
-        self.device_defaults = self._load_json("device_defaults.json")
-    
-    def _load_json(self, filename):
-        try:
-            with open(os.path.join(self.config_dir, filename), 'r') as f:
-                return json.load(f)
-        except Exception as e:
-            local_logger.error(f"Error loading {filename}: {str(e)}")
-            return {}
 
 def create_livenx_interface_from_ip(address, config_loader):
     ifcs = []

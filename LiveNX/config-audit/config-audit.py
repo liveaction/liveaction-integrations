@@ -17,9 +17,9 @@ from datetime import datetime
 from netmiko import ConnectHandler
 
 clickHouseHost = os.getenv("CLICKHOUSE_HOST","localhost")
-clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","")
-clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","")
-clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","")
+clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","default")
+clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","default")
+clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","9000")
 clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
 clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
 clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
