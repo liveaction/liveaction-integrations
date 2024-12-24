@@ -10,7 +10,11 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(script_dir, 'common'))
 sys.path.insert(0, os.path.join(script_dir, 'netld'))
 
-from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventory, remove_from_livenx_inventory, diff_livenx_inventory, get_livenx_ch_inventory, map_livenx_inventory_to_livenx_ch_inventory, diff_livenx_ch_inventory, add_to_livenx_ch_inventory, remove_from_livenx_ch_inventory
+from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventory, \
+    remove_from_livenx_inventory, diff_livenx_inventory, \
+    get_livenx_ch_inventory, map_livenx_inventory_to_livenx_ch_inventory, diff_livenx_ch_inventory, \
+    add_to_livenx_ch_inventory, remove_from_livenx_ch_inventory,  get_bluecat_addresses, \
+    diff_bluecat_addresses
 from netld.incidents import push_netld_incidents, get_netld_incidents
 from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts, get_clickhouse_alerts, add_to_clickhouse_alerts, diff_clickhouse_alerts
 from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory, get_netld_inventory, map_livenx_inventory_to_netld_inventory, map_netld_inventory_to_livenx_inventory
@@ -102,6 +106,17 @@ def main(args):
                 if len(livenx_ch_inventory_diff_to_remove) > 0:
                     if args.noprompt == True or query_yes_no("This inventory will be removed: " + str(livenx_ch_inventory_diff_to_remove)):
                         remove_from_livenx_ch_inventory(livenx_ch_inventory_diff_to_remove)
+            if args.fromproduct == "bluecat_integrity" and args.toproduct == "livenxch":
+                ## sync the Bluecat address to the livenx clickhouse
+                ## figure out which sites to add
+                orig_bluecat_addresses = get_bluecat_addresses()
+                orig_livenxch_inventories = get_livenx_ch_inventory()
+                bluecat_addresses_diff_to_add = diff_bluecat_addresses(orig_bluecat_addresses, orig_livenxch_inventories)
+                if len(bluecat_addresses_diff_to_add) > 0:
+                    if args.noprompt == True or query_yes_no("This inventory will be added: " + str(bluecat_addresses_diff_to_add)):
+                        add_to_livenx_ch_inventory(bluecat_addresses_diff_to_add)
+                else:
+                    local_logger.info("Bluecat addresses is already sync with livenx inventory")  
 
         elif args.alerts:
             if args.fromproduct == "livenx" and args.toproduct == "servicenow":
