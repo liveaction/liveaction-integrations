@@ -62,40 +62,17 @@ class InterfaceMonitor:
         interface = config_loader.interface_defaults.copy()
         interface.update({
             "ifIndex": if_index,
-            "name": f"Interface {if_index}",
+            "name": f"dummyseed_eth{if_index}/0",
             "address": ip4,
             "wan": False,
             "xcon": False,
             "label": "",
             "stringTags": ""
         })
-        """{
-            "devices": [
-                {
-                "deviceSerial": "John's Device",
-                "interfaces": [
-                    {
-                    "ifIndex": "0",
-                    "name": "Interface 0",
-                    "address": "123.123.123.123",
-                    "subnetMask": "255.255.255.0",
-                    "description": "First interface",
-                    "serviceProvider": "A Service Provider",
-                    "inputCapacity": "1000000",
-                    "outputCapacity": "1000000",
-                    "wan": false,
-                    "xcon": false,
-                    "label": "John's Interface Label",
-                    "stringTags": "MyTag1,MyTag2"
-                    }
-                ]
-                }
-            ]
-            }"""
         payload = f"""{
             "devices": [
                 {
-                "deviceSerial": "John's Device",
+                "deviceSerial": "{device_serial}",
                 "interfaces": [{interface}]
                 }
             ]
@@ -125,10 +102,11 @@ class InterfaceMonitor:
             logging.error(f"API notification failed: {e}")
 
     def get_interfaces(self) -> Dict[str, Set[Tuple[int, int, str, str]]]:
+        # get all interfaces that aren't marked with dummyseed
         query = """
         SELECT DISTINCT DeviceSerial, IngressIfIndex, EgressIfIndex, SourceIpv4, DestIpv4
         FROM livenx_flowdb.basic_raw
-        WHERE time >= now() - INTERVAL 5 MINUTE
+        WHERE time >= now() - INTERVAL 5 MINUTE AND IngressIfName NOT LIKE '%dummyseed_eth%' AND EgressIfName NOT LIKE '%dummyseed_eth%'
         """
         
         current_interfaces = {}
