@@ -58,7 +58,7 @@ class InterfaceMonitor:
         self.client = connect_with_tls(host=clickHouseHost, port=clickHouseApiPort, user=clickHouseUsername, password=clickHousePassword, database='livenx_flowdb', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
         self.previous_interfaces: Dict[str, Set[Tuple[int, int]]] = {}
 
-    def notify_api(self, device_serial: str, if_index: int, ip4: str):
+    def add_interface(self, device_serial: str, if_index: int, ip4: str):
         interface = config_loader.interface_defaults.copy()
         interface.update({
             "ifIndex": if_index,
@@ -101,10 +101,10 @@ class InterfaceMonitor:
         except requests.exceptions.RequestException as e:
             logging.error(f"API notification failed: {e}")
 
-    def get_interfaces(self) -> Dict[str, Set[Tuple[int, int, str, str]]]:
+    def get_interfaces(self) -> Dict[str, Set[Tuple[int, int]]]:
         # get all interfaces that aren't marked with dummyseed
         query = """
-        SELECT DISTINCT DeviceSerial, IngressIfIndex, EgressIfIndex, SourceIpv4, DestIpv4
+        SELECT DISTINCT DeviceSerial, IngressIfIndex, EgressIfIndex
         FROM livenx_flowdb.basic_raw
         WHERE time >= now() - INTERVAL 5 MINUTE AND IngressIfName NOT LIKE '%dummyseed_eth%' AND EgressIfName NOT LIKE '%dummyseed_eth%'
         """
@@ -112,27 +112,27 @@ class InterfaceMonitor:
         current_interfaces = {}
         rows = self.client.execute(query)
         
-        for device_serial, ingress, egress, sourceip4, destip4 in rows:
+        for device_serial, ingress, egress in rows:
             if device_serial not in current_interfaces:
                 current_interfaces[device_serial] = set()
-            current_interfaces[device_serial].add((ingress, egress, sourceip4, destip4))
+            current_interfaces[device_serial].add((ingress, egress))
             
         return current_interfaces
     
-    def compare_interfaces(self, current: Dict[str, Set[Tuple[int, int, str, str]]]):
+    def compare_interfaces(self, current: Dict[str, Set[Tuple[int, int]]]):
         for device, interfaces in current.items():
             if device in self.previous_interfaces:
                 new_interfaces = interfaces - self.previous_interfaces[device]
                 if new_interfaces:
                     logging.info(f"New interfaces for {device}: {new_interfaces}")
-                    for ingress, egress, sourceip4, destip4 in new_interfaces:
-                        self.notify_api(device, ingress, sourceip4)
-                        self.notify_api(device, egress, destip4)
+                    for ingress, egress in new_interfaces:
+                        self.add_interface(device, ingress, "")
+                        self.add_interface(device, egress, "")
             else:
                 logging.info(f"New device detected: {device} with interfaces: {interfaces}")
-                for ingress, egress, sourceip4, destip4 in new_interfaces:
-                    self.notify_api(device, ingress, sourceip4)
-                    self.notify_api(device, egress, destip4)
+                for ingress, egress in new_interfaces:
+                    self.add_interface(device, ingress, "")
+                    self.add_interface(device, egress, "")
     
     def run(self):
         while True:
