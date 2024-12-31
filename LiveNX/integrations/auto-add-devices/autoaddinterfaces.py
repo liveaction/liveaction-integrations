@@ -20,8 +20,8 @@ clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","default")
 clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","default")
 clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","9000")
 clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
-clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
-clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
+clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "clickhouse-server/cacerts/ca.crt")
+clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "clickhouse-server/cacerts/ca.key")
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -54,7 +54,10 @@ def create_request(url, data = None):
     return request, ctx
 
 class InterfaceMonitor:
-    def __init__(self, connection_params: Dict):
+    def __init__(self, connection_params: Dict=None):
+        if not(os.path.isfile(clickhouseCertfile) and os.path.isfile(clickhouseKeyfile)):
+            logging.error(f"Missing env clickhouse certificate file: {clickhouseCertfile} or key F=file: {clickhouseKeyfile}")
+            exit(1)
         self.client = connect_with_tls(host=clickHouseHost, port=clickHouseApiPort, user=clickHouseUsername, password=clickHousePassword, database='livenx_flowdb', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
         self.previous_interfaces: Dict[str, Set[Tuple[int, int]]] = {}
 
@@ -69,14 +72,14 @@ class InterfaceMonitor:
             "label": "",
             "stringTags": ""
         })
-        payload = f"""{
+        payload = {
             "devices": [
                 {
-                "deviceSerial": "{device_serial}",
+                "deviceSerial": f"{device_serial}",
                 "interfaces": [{interface}]
                 }
             ]
-            }"""
+        }
         
         try:
             # Create the request and add the Content-Type header
@@ -149,9 +152,9 @@ class InterfaceMonitor:
     
 
 def start_monitor():
-    with daemon.DaemonContext():
-        monitor = InterfaceMonitor()
-        monitor.run()
+    # with daemon.DaemonContext():
+    monitor = InterfaceMonitor()
+    monitor.run()
 
 def start_interface_monitor():
     process = Process(target=start_monitor, args=())

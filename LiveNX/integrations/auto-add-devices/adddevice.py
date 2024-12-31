@@ -170,7 +170,7 @@ def map_ip_to_livenx_inventory(ip_list):
         local_logger.info(f"Node Id doesnot match with liveNx Target IP")
         return 
     for ip in ip_list:
-        livenx_devices.append(create_livenx_device_from_ip(nodeid, ip))
+        livenx_devices.append(create_livenx_device_from_ip(nodeid, ip, config_loader))
     
     livenx_inventory['devices'] = livenx_devices
     return livenx_inventory
