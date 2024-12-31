@@ -34,6 +34,9 @@ export LIVENX_TARGET_NODE_IP="your-target-node-ip"
 # Run monitor script 
 python3 monitor_logfile_adddevice.py
 
+# Run monitor script with auto add interfaces
+python3 --autoaddinterfaces monitor_logfile_adddevice.py
+
 # Run once
 python3 adddevice.py --logfile /path/to/your/logfile.log
 
@@ -47,6 +50,7 @@ python3 adddevice.py --logfile /path/to/your/logfile.log --continuous
 |----------|-------------|----------|
 | `--logfile` | Path to the log file to monitor | Yes |
 | `--continuous` | Monitor the log file continuously | No |
+| `--autoaddinterfaces` | Auto Add Interface | No |
 
 ## Features
 
@@ -124,7 +128,7 @@ docker build -t addautodevice-app .
 Running Docker Image
 --------------------
 
-docker run -v /data/livenx-server/data/log:/data/livenx-server/data/log -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOKEN=your_token_here -e LIVENX_TARGET_NODE_IP=Local your_image_name
+docker run -v /data/livenx-server/data/log:/data/livenx-server/data/log -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOKEN=your_token_here -e LIVENX_TARGET_NODE_IP=Local your_image_name -e CLICKHOUSE_HOST=locahost -e CLICKHOUSE_USERNAME=default -e CLICKHOUSE_USERNAME=default -e CLICKHOUSE_PORT=9000 -e CLICKHOUSE_CACERTS=/path/to/ca.pem -e CLICKHOUSE_CERTFILE=clickhouse-server/cacerts/ca.crt -e CLICKHOUSE_KEYFILE=clickhouse-server/cacerts/ca.key
 
 Using Docker Compose
 --------------------

@@ -12,4 +12,11 @@ services:
       - LIVENX_API_PORT=8093
       - LIVENX_API_TOKEN=foo
       - LIVENX_TARGET_NODE_IP=0.0.0.0
+      - CLICKHOUSE_HOST=localhost
+      - CLICKHOUSE_USERNAME=default
+      - CLICKHOUSE_PASSWORD=default
+      - CLICKHOUSE_PORT=9000
+      - CLICKHOUSE_CACERTS=/path/to/ca.pem
+      - CLICKHOUSE_CERTFILE=clickhouse-server/cacerts/ca.crt
+      - CLICKHOUSE_KEYFILE=clickhouse-server/cacerts/ca.key
     working_dir: /usr/src/app

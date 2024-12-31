@@ -1,0 +1,3 @@
+This directory will contain a livenx-generated clickhouse certificate authority private key and public certificate.
+
+This README exists to make sure this directory exists in git, so it will be created on the OVA.
