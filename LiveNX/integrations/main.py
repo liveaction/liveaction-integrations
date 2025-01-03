@@ -99,6 +99,8 @@ def main(args):
                 if len(livenx_ch_inventory_diff_to_add) > 0:
                     if args.noprompt == True or query_yes_no("This inventory will be added: " + str(livenx_ch_inventory_diff_to_add)):
                         add_to_livenx_ch_inventory(livenx_ch_inventory_diff_to_add)
+                else:
+                    local_logger.info("ClickHouse device serial is already sync with livenx inventory") 
 
                 ## figure out which devices to remove
                 livenx_ch_inventory_diff_to_remove = diff_livenx_ch_inventory(orig_livenx_ch_inventory, new_livenx_ch_inventory)
