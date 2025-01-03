@@ -85,7 +85,7 @@ def get_livenx_ch_inventory():
   client = connect_with_tls(host=clickHouseHost, port=clickHouseApiPort, user=clickHouseUsername, password=clickHousePassword, database='inventory_db', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
 
   # Define the query to retrieve all contents of the Device_Inventory table
-  query = "SELECT ID, Host_Name, Client_IP FROM Device_Inventory"
+  query = "SELECT ID, Host_Name, Client_IP, Serial FROM Device_Inventory"
 
   try:
       # Execute the query
@@ -93,7 +93,7 @@ def get_livenx_ch_inventory():
 
       # Process and display results
       for result in results:
-          formatted_result = dict(zip(["id", "hostName", "clientIp"], result))
+          formatted_result = dict(zip(["id", "hostName", "clientIp", "serial"], result))
           livenx_ch_inventory.append(formatted_result)
 
   except Exception as e:
@@ -253,13 +253,17 @@ def map_livenx_inventory_to_livenx_ch_inventory(livenx_inventory):
     livenx_ch_inventory['devices'] = livenx_devices
     return livenx_inventory
 
+def compare_livenx_ch_device(livenx_device_1, livenx_device_2):
+    is_same = livenx_device_1['serial'] == livenx_device_2['serial']
+    return is_same
+
 def diff_livenx_ch_inventory(livenx_inventory_1, livenx_inventory_2):
     livenx_inventory_diff_list = []
 
     for livenx_device_1 in livenx_inventory_1['devices']:
         livenx_device_found = False
         for livenx_device_2 in livenx_inventory_2['devices']:
-            if compare_livenx_device(livenx_device_1, livenx_device_2):
+            if compare_livenx_ch_device(livenx_device_1, livenx_device_2):
                 livenx_device_found = True
                 break
         if livenx_device_found == False:
