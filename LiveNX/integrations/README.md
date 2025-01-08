@@ -54,6 +54,9 @@ python3 main.py --alerts --fromproduct livenx --toproduct servicenow --continuou
 
 # Sync sites from BlueCat to Linenx
 python3 main.py --sites --fromproduct bluecat_integrity --toproduct livenx
+
+# Sync custom applications from snow to Linenx
+python3 main.py --custom_applications --fromproduct snow_csv --toproduct livenx --csv_input /data/mdb_ci_server.csv
 ```
 
 ### Command Line Arguments
@@ -71,6 +74,8 @@ python3 main.py --sites --fromproduct bluecat_integrity --toproduct livenx
 | `--noprompt` | Skip confirmation prompts | False |
 | `--logstdout` | Log to stdout instead of file | False |
 | `--num_minutes_behind` | Minutes to run behind wall clock | 2 |
+| `--custom_applications` | Enable custom application synchronization | False |
+| `--csv_input` | CSV file path | '' |
 
 ## Features
 

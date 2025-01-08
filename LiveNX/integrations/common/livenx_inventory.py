@@ -765,3 +765,41 @@ def get_bluecat_addresses():
     except Exception as err:
         local_logger.error(f"Error getting bluecat addresses: {err}")
         return []
+    
+def get_livenx_custom_inventory():
+
+    api_url = "/v1/applications/custom?source=nx"
+
+    request, ctx = create_request(api_url)
+    request.add_header("Content-Type", "application/json")
+    request.add_header("accept", "application/json")
+    
+    # Specify the request method as POST
+    request.method = "GET"
+
+    json_data = None
+    with urllib.request.urlopen(request, context=ctx) as response:
+        response_data = response.read().decode('utf-8')
+        # Parse the JSON response
+        json_data = json.loads(response_data)
+    
+    return json_data.get('applications', [])
+
+
+def add_to_livenx_custom_inventory(snow_devices):
+    for data in snow_devices:
+      #Post the applications making sure to ignore the ssl certificates with verify=False
+      # response = requests.post(url = url, headers = headers, data = data, verify=False)
+      data = json.dumps(data).encode('utf-8')
+
+      # Create the request and add the Content-Type header
+      request, ctx = create_request("/v1/applications/custom?source=nx", data)
+      local_logger.info(data)
+      request.add_header("Content-Type", "application/json")
+      request.add_header("accept", "application/json")
+      # Specify the request method as POST
+      request.method = "POST"
+
+      with urllib.request.urlopen(request, context=ctx) as response:
+          response_data = response.read().decode('utf-8')
+          local_logger.info(response_data)
