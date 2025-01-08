@@ -14,7 +14,7 @@ from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventor
     remove_from_livenx_inventory, diff_livenx_inventory, \
     get_livenx_ch_inventory, map_livenx_inventory_to_livenx_ch_inventory, diff_livenx_ch_inventory, \
     add_to_livenx_ch_inventory, remove_from_livenx_ch_inventory,  get_bluecat_addresses, \
-    diff_bluecat_addresses
+    diff_bluecat_addresses, add_to_livenx_custom_inventory, get_livenx_custom_inventory
 from netld.incidents import push_netld_incidents, get_netld_incidents
 from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts, get_clickhouse_alerts, add_to_clickhouse_alerts, diff_clickhouse_alerts
 from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory, get_netld_inventory, map_livenx_inventory_to_netld_inventory, map_netld_inventory_to_livenx_inventory
@@ -22,6 +22,7 @@ from helper.timer import get_top_of_current_minute_epoch
 from helper.prompt import query_yes_no
 from servicenow.incidents import get_servicenow_incidents, push_servicenow_incidents
 from common.livenx_sites import get_bluecat_blocks, get_livenx_sites, map_bluecat_blocks_to_livenx_sites, diff_bluecat_sites, add_to_livenx_sites, get_clickhouse_sites, diff_clickhouse_sites, add_to_clickhouse_sites
+from snow.inventory import get_snow_inventory, get_diff_snow_inventory
 
 from config.logger import setup_logger
 local_logger = None
@@ -185,6 +186,18 @@ def main(args):
                         add_to_clickhouse_sites(clickhouse_sites_diff_to_add)
                 else:
                     local_logger.info("Clickhouse is already sync with livenx sites")
+        elif args.custom_applications:
+            if args.fromproduct == "snow_csv" and args.toproduct == "livenx":
+                ## figure out which devices to add
+                orig_snow_inventory = get_snow_inventory(args.csv_input)
+                orig_livenx_custom_inventory = get_livenx_custom_inventory()
+                diff_snow_inventory = get_diff_snow_inventory(orig_snow_inventory, orig_livenx_custom_inventory)
+                if len(diff_snow_inventory) > 0:
+                    if args.noprompt == True or query_yes_no("This inventory will be added: " + str(diff_snow_inventory)):
+                        add_to_livenx_custom_inventory(diff_snow_inventory)
+                else:
+                    local_logger.info("Snow inventory is already sync with livenx application customs")
+
 
         if args.continuous is False:
             break
@@ -209,5 +222,8 @@ if __name__ == "__main__":
     parser.add_argument('--noprompt', action="store_true", help='Dont prompt')
     parser.add_argument('--logstdout', action="store_true", help='Log to stdout instead of file')
     parser.add_argument('--num_minutes_behind', type=int, default=2, help='The number of minutes to run behind wallclock')
+    parser.add_argument("--custom_applications", action="store_true", help="Get and push inventory data.")
+    parser.add_argument('--csv_input', type=str, default='', help='The product to push to')
+
     args = parser.parse_args()
     main(args)
