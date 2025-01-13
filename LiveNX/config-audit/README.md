@@ -26,5 +26,12 @@ python audit_tool.py --devicefile devices.csv
 - Devices must allow SSH access for the script to function.
 - The program assumes golden configurations are structured by model and IOS version in the GitHub repository.
 
+## Usage:
+ - Extract the device list from the LiveNX Server using the CSV export at https://x.x.x.x/livenx/settings/device-management?tabId=My%20Devices
+ - Open CSV file using a CSV editor and add new empty columns to the end of the column list:
+    - Username: should contain the SSH Username used to connect to the device
+    - Password: should contain the SSH Password used to connect to the device
+    - Golden_File: should be empty, or contain a full path to the golden config file used for comparison. If empty, it will fetch the golden config from github https://raw.githubusercontent.com/liveaction/liveaction-integrations/refs/heads/main/LiveNX/configs/{encoded_model}/{encoded_ios_version}.cfg, which encoded_model is the model name of the device (example: ciscoCSR1000v) and encoded_ios_version is the ios version number (example: 16.3.1).
+
 ## License
 This program is provided under the MIT License. Use it at your own risk and customize it to fit your requirements.
