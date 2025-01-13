@@ -221,12 +221,12 @@ def save_config_if_changed_clickhouse(device, running_config):
                 Id, Name, Device_Type, Device_Serial, Host, Vendor, Model, Ios_Version, 
                 Description, Wan, Service_Provider, Site, Site_Cidr, Poll, Poll_Qos, 
                 Poll_Flow, Poll_Ip_Sla, Poll_Routing, Poll_Lan, Poll_Interval_Msec, 
-                Username, Password, Golden_File, Fetch_Time, Config_Hash, Config_Content
+                Golden_File, Fetch_Time, Config_Hash, Config_Content
             ) VALUES (
                 %(Id)s, %(Name)s, %(Device_Type)s, %(Device_Serial)s, %(Host)s, %(Vendor)s, %(Model)s, %(Ios_Version)s,
                 %(Description)s, %(Wan)s, %(Service_Provider)s, %(Site)s, %(Site_Cidr)s, %(Poll)s, %(Poll_Qos)s, 
                 %(Poll_Flow)s, %(Poll_Ip_Sla)s, %(Poll_Routing)s, %(Poll_Lan)s, %(Poll_Interval_Msec)s, 
-                %(Username)s, %(Password)s, %(Golden_File)s, %(Fetch_Time)s, %(Config_Hash)s, %(Config_Content)s
+               %(Golden_File)s, %(Fetch_Time)s, %(Config_Hash)s, %(Config_Content)s
             )
         """
         insert_data = {
@@ -250,8 +250,6 @@ def save_config_if_changed_clickhouse(device, running_config):
             'Poll_Routing': device.get('Poll_Routing', False),
             'Poll_Lan': device.get('Poll_Lan', False),
             'Poll_Interval_Msec': device.get('Poll_Interval_Msec', 0),
-            'Username': device.get('Username', 'admin'),
-            'Password': device.get('Password', 'admin'),
             'Golden_File': device.get('Golden_File', ''),
             'Fetch_Time': datetime.now(),
             'Config_Hash': config_hash,
