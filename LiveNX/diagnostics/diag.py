@@ -184,6 +184,329 @@ def tracepath_ip(ip_address):
     except Exception as e:
         print(f"tracepath error: {e}")
 
+# Function to run tracepath
+def version_ip(hostname, port, token, fw):
+    if not(hostname and  port and token):
+        raise Exception("Missing LiveNx hostname or token")
+    headers = {
+        "Authorization": "Bearer " + token
+    }
+    try:
+        url = f"https://{hostname}:{port}/v1/version"
+        fw.write("Version requested...\n")
+        response = requests.get(url, headers=headers, verify=False)
+        responses = []
+        if response.status_code == 200:
+            response_json = response.json()
+            responses.append(response_json)
+            fw.write(f"API Version: {response_json.get('version')}\n")
+        else:
+            fw.write(f"Failed to fetch version information: {response.status_code}\n")
+        fw.write(f"{'-' * 40}\n")
+        return True
+    except Exception as err:
+        fw.write(f"Error to fetch version: {err}\n")
+        fw.write(f"{'-' * 40}\n")
+        return False
+
+
+
+def fetch_nodes(hostname, port, token, fw):
+    if not(hostname and  port and token):
+        raise Exception("Missing LiveNx hostname or token")
+    
+    headers = {
+        "Authorization": "Bearer " + token
+    }
+    try:
+        url = f"https://{hostname}:{port}/v1/nodes"
+        
+        response = requests.get(url, headers=headers, verify=False)
+        node_name_mapping = {}
+        fw.write("Nodes requested...\n")
+        if response.status_code == 200:
+            response_json = response.json()
+            nodes = response_json.get("nodes", [])
+
+            # Calculate total nodes and sub counts by state
+            total_nodes = len(nodes)
+            state_counts = {}
+            for node in nodes:
+                node_id = node.get("id")
+                node_name = node.get("name")
+                if node_id and node_name:
+                    node_name_mapping[node_id] = node_name
+
+                state = node.get("state", "Unknown")
+                state_counts[state] = state_counts.get(state, 0) + 1
+
+            # Calculate the percentage of connected nodes
+            connected_count = state_counts.get("Connected", 0)
+            connected_percentage = (connected_count / total_nodes * 100) if total_nodes > 0 else 0
+        
+            fw.write(f"Total Nodes: {total_nodes}\n")
+            for state, count in state_counts.items():
+                fw.write(f"Total '{state}': {count} nodes\n")
+            fw.write(f"Percentage of Connected Nodes: {connected_percentage:.2f}%\n")
+        else:
+            fw.write(f"Failed to fetch nodes: {response.status_code}\n")
+        fw.write(f"{'-' * 40}\n")
+        return node_name_mapping
+    except Exception as err:
+        fw.write(f"Error to fetch nodes: {err}\n")
+        fw.write(f"{'-' * 40}\n")
+        return ""
+
+# Function to fetch system statistics and calculate averages
+def fetch_system_statistics(hostname, port, token, fw):
+    if not(hostname and  port and token):
+        raise Exception("Missing LiveNx hostname or token")
+    headers = {
+        "Authorization": "Bearer " + token
+    }
+    try:
+        url = f"https://{hostname}:{port}/v1/system/statistics"
+        response = requests.get(url, headers=headers, verify=False)
+        fw.write("System Statistic requested...\n")
+        node_name_mapping = fetch_nodes(hostname, port, token, fw)
+        if response.status_code == 200:
+            response_json = response.json()
+            node_statistics = response_json.get("nodeStatistics", [])
+
+            for node_stat in node_statistics:
+                node_id = node_stat.get("nodeId")
+                node_name = node_name_mapping.get(node_id, "Unknown Node")
+                statistics = node_stat.get("statistics", {})
+
+                os_cpu_total = 0
+                jvm_cpu_total = 0
+                flow_rate_total = 0
+                total_records = len(statistics)
+
+                most_recent_timestamp = max(statistics.keys(), key=lambda x: x) if statistics else None
+                total_devices = active_devices = down_devices = None
+
+                for timestamp, data in statistics.items():
+                    if data:
+                        os_cpu_total += data.get("osCpuUsage", 0)
+                        jvm_cpu_total += data.get("jvmCpuUsage", 0)
+                        flow_rate_total += data.get("lastFlowRate", 0)
+
+                        # Capture most recent devices info
+                        if timestamp == most_recent_timestamp:
+                            total_devices = data.get("totalDevices")
+                            active_devices = data.get("activeDevices")
+                            down_devices = data.get("downDevices")
+
+                # Calculate averages
+                avg_os_cpu = os_cpu_total / total_records if total_records > 0 else 0
+                avg_jvm_cpu = jvm_cpu_total / total_records if total_records > 0 else 0
+                avg_flow_rate = flow_rate_total / total_records if total_records > 0 else 0
+                
+                fw.write(f"Node Name: {node_name}\n")
+                fw.write(f"Average OS CPU Usage: {avg_os_cpu:.2f}%\n")
+                fw.write(f"Average JVM CPU Usage: {avg_jvm_cpu:.2f}%\n")
+                fw.write(f"Average Flow Rate in FPS: {avg_flow_rate:.2f}%\n")
+                if most_recent_timestamp:                
+                    fw.write(f"Total Devices: {total_devices}\n")
+                    fw.write(f"Active Devices: {active_devices}\n")
+                    fw.write(f"Down Devices: {down_devices}\n")
+                fw.write(f"{'-' * 20}\n")
+        else:
+            fw.write(f"Failed to fetch system statistics: {response.status_code}\n")
+        fw.write(f"{'-' * 40}\n")
+        return True
+    except Exception as err:
+        fw.write(f"Error to fetch system statistics: {err}\n")
+        fw.write(f"{'-' * 40}\n")
+        return False
+
+# Function to fetch app mailer settings and display information
+def fetch_app_mailer_settings(hostname, port, token, fw):
+    if not(hostname and  port and token):
+        raise Exception("Missing LiveNx hostname or token")
+    headers = {
+        "Authorization": "Bearer " + token
+    }
+    try:
+        url = f"https://{hostname}:{port}/v1/appMailer/settings"
+        response = requests.get(url, headers=headers, verify=False)
+        fw.write("App Mailer Settings requested...\n")
+        if response.status_code == 200:
+            response_json = response.json()
+            app_mailer_config = response_json.get("appMailerConfig", None)
+
+            if app_mailer_config:
+                sender_address = app_mailer_config.get("senderAddress", {})
+                smtp_settings = app_mailer_config.get("smtpSettings", {})
+
+                sender_email = sender_address.get("address", "Unknown")
+                sender_name = sender_address.get("name", "Unknown")
+                smtp_host = smtp_settings.get("hostName", "Unknown")
+                smtp_port = smtp_settings.get("port", "Unknown")
+                smtp_security = smtp_settings.get("security", "Unknown")
+
+                fw.write(f"EMAIL Configuration:\n")
+                fw.write(f"Sender Address: {sender_email} ({sender_name})\n")
+                fw.write(f"SMTP Host: {smtp_host}\n")
+                fw.write(f"SMTP Port: {smtp_port}\n")
+                fw.write(f"SMTP Security: {smtp_security}\n")
+            else:
+                fw.write(f"No Email Configured\n")
+        else:
+            fw.write(f"Failed to fetch app mailer settings: {response.status_code}\n")
+        fw.write(f"{'-' * 40}\n")
+        return True
+    except Exception as err:
+        fw.write(f"Error to fetch app mailer settings: {err}\n")
+        fw.write(f"{'-' * 40}\n")
+        return False
+
+# Function to fetch syslog configuration and display information
+def fetch_syslog_config(hostname, port, token, fw):
+    if not(hostname and  port and token):
+        raise Exception("Missing LiveNx hostname or token")
+    headers = {
+        "Authorization": "Bearer " + token
+    }
+    try:
+        url = f"https://{hostname}:{port}/v1/syslog/config"
+        response = requests.get(url, headers=headers, verify=False)
+        fw.write("Syslog Config requested...\n")
+        if response.status_code == 200:
+            response_json = response.json()
+            syslog_config = response_json.get("syslogAddress", None)
+
+            if syslog_config:
+                engineer_console_enable = response_json.get("engineerConsoleEnable", "Unknown")
+                syslog_facility = response_json.get("syslogFacility", "Unknown")
+                syslog_protocol = response_json.get("syslogProtocol", "Unknown")
+                syslog_port = response_json.get("syslogPort", "Unknown")
+                syslog_address = response_json.get("syslogAddress", "Unknown")
+                app_name = response_json.get("appName", "Unknown")
+                hostname_format = response_json.get("hostNameFormat", "Unknown")
+                timestamp_format = response_json.get("timeStampFormat", "Unknown")
+                process_id_format = response_json.get("processIdFormat", "Unknown")
+                
+                fw.write(f"SYSLOG Configuration:\n")
+                fw.write(f"Engineer Console Enabled: {engineer_console_enable}\n")
+                fw.write(f"Syslog Facility: {syslog_facility}\n")
+                fw.write(f"Syslog Protocol: {syslog_protocol}\n")
+                fw.write(f"Syslog Port: {syslog_port}\n")
+                fw.write(f"Syslog IP Address: {syslog_address}\n")
+                fw.write(f"App Name: {app_name}\n")
+                fw.write(f"Hostname Format: {hostname_format}\n")
+                fw.write(f"Timestamp Format: {timestamp_format}\n")
+                fw.write(f"Process ID Format: {process_id_format}\n")
+            else:
+                fw.write(f"SYSLOG is not configured\n")
+        else:
+            print(f"Failed to fetch syslog configuration: {response.status_code}")
+            fw.write(f"Failed to fetch syslog configuration: {response.status_code}\n")
+        fw.write(f"{'-' * 40}\n")
+        return True
+    except Exception as err:
+        fw.write(f"Error to fetch syslog configuration: {err}\n")
+        fw.write(f"{'-' * 40}\n")
+        return False
+
+
+# Function to fetch SNMP trap configuration and display information
+def fetch_snmp_trap_config(hostname, port, token, fw):
+    if not(hostname and  port and token):
+        raise Exception("Missing LiveNx hostname or token")
+    headers = {
+        "Authorization": "Bearer " + token
+    }
+    try:
+        url = f"https://{hostname}:{port}/v1/alerting/couriers"
+        response = requests.get(url, headers=headers, verify=False)
+        fw.write("SNMP Trap Config requested...\n")
+        if response.status_code == 200:
+            response_json = response.json()
+            couriers = response_json.get("couriers", [])
+            snmp_trap_configured = False
+            for courier in couriers:
+                if courier.get("type") == "SNMP_TRAP":
+                    snmp_trap_configured = True
+                    config = courier.get("config", {})
+                    recipients = config.get("recipients", [])
+
+                    if recipients:
+                        fw.write(f"SNMP Trap Configuration:\n")
+                        for recipient in recipients:
+                            address = recipient.get("address", "Unknown")
+                            snmp_settings = recipient.get("snmpSettings", {})
+                            snmp_version = snmp_settings.get("snmpVersion", "Unknown")
+                            port = snmp_settings.get("port", "Unknown")
+                            community = snmp_settings.get("settings", {}).get("snmpCommunity", "Unknown")
+
+                            fw.write(f"Destination IP Address: {address}\n")
+                            fw.write(f"SNMP Version: {snmp_version}\n")
+                            fw.write(f"Port: {port}\n")
+                            fw.write(f"Community: {community}\n")
+                            fw.write(f"{'-' * 20}\n")
+                    else:
+                        fw.write(f"SNMP Traps not configured (no recipients)\n")
+                        fw.write(f"{'-' * 20}\n")
+                    break
+
+            if not snmp_trap_configured:
+                fw.write(f"SNMP Traps not configured\n")            
+        else:
+            print(f"Failed to fetch SNMP Trap configuration: {response.status_code}")
+            fw.write(f"Failed to fetch SNMP Trap configuration: {response.status_code}\n")
+        fw.write(f"{'-' * 40}\n")
+        return True
+    except Exception as err:
+        fw.write(f"Error to fetch SNMP Trap configuration: {err}\n")
+        fw.write(f"{'-' * 40}\n")
+        return False
+
+
+# Function to fetch webhook configuration and display information
+def fetch_webhooks_config(hostname, port, token, fw):
+    if not(hostname and  port and token):
+        raise Exception("Missing LiveNx hostname or token")
+    headers = {
+        "Authorization": "Bearer " + token
+    }
+    try:
+        url = f"https://{hostname}:{port}/v1/webhooks/"
+        response = requests.get(url, headers=headers, verify=False)
+        fw.write("Webhooks Config requested...\n")
+        if response.status_code == 200:
+            response_json = response.json()
+            webhooks = response_json if isinstance(response_json, list) else []
+
+            if webhooks:
+                fw.write(f"Webhooks Configuration:\n")
+                for webhook in webhooks:
+                    webhook_id = webhook.get("webhookId", "Unknown")
+                    topics = ", ".join(webhook.get("topics", []))
+                    username = webhook.get("username", "Unknown")
+                    callback_url = webhook.get("callbackUrl", "Unknown")
+                    has_auth_header = webhook.get("hasAuthorizationHeader", False)
+                    subscription_time = webhook.get("subscriptionTimeMillis", "Unknown")
+                    
+                    fw.write(f"Webhook ID: {webhook_id}\n")
+                    fw.write(f"Subscribed Topics: {topics}\n")
+                    fw.write(f"Username: {username}\n")
+                    fw.write(f"Callback URL: {callback_url}\n")
+                    fw.write(f"Has Authorization Header: {has_auth_header}\n")
+                    fw.write(f"Subscription Time: {subscription_time}\n")
+                    fw.write(f"{'-' * 20}\n")
+            else:
+                fw.write(f"No Webhooks Configured\n")
+        else:
+            fw.write(f"Failed to fetch webhooks configuration: {response.status_code}\n")
+        fw.write(f"{'-' * 40}\n")
+        return True
+    except Exception as err:
+        fw.write(f"Error to fetch webhooks configuration: {err}\n")
+        fw.write(f"{'-' * 40}\n")
+        return False
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run diagnostics on a network device.")
     parser.add_argument('--target_ip', required=False, help='Target IP address for SNMP, ping, and tracepath')
@@ -203,6 +526,13 @@ if __name__ == "__main__":
     parser.add_argument('--snmpv3authpassword', required=False, help='snmpwalk v3 password')
     parser.add_argument('--snmpv3walkpassphrase', required=False, help='snmlwalk v3 passphrase')
     parser.add_argument('--vmanage_use_token', action='store_true', help='Specifies if vManage token auth should be used')
+
+    ###
+    parser.add_argument('--livenx_healthcheck', action='store_true', help='Specifies to get health check')
+    parser.add_argument('--livenx_ip', required=False, help='Specifies liveNX host')
+    parser.add_argument('--livenx_port', required=False, default='8093', help='liveNx port for API interaction')
+    parser.add_argument('--livenx_token', required=False, default='', help='liveNx token for API interaction')
+    
     
 
     args = parser.parse_args()
@@ -255,3 +585,18 @@ if __name__ == "__main__":
     if args.logs == True:
         # Collect logs
         collect_logs()
+    
+    if args.livenx_healthcheck == True:
+        log_file = f'health_check_{datetime.now().strftime("%Y%m%d%H%M%S")}.log'
+        with open(log_file, 'w') as fw:
+            version_ip(args.livenx_ip,args.livenx_port,args.livenx_token, fw)
+            node_name_mapping = fetch_nodes(args.livenx_ip,args.livenx_port,args.livenx_token, fw)
+            fetch_system_statistics(args.livenx_ip,args.livenx_port,args.livenx_token, fw)
+            fetch_app_mailer_settings(args.livenx_ip,args.livenx_port,args.livenx_token, fw)
+            fetch_syslog_config(args.livenx_ip,args.livenx_port,args.livenx_token, fw)
+
+                # Fetch SNMP trap configuration and print report
+            fetch_snmp_trap_config(args.livenx_ip,args.livenx_port,args.livenx_token, fw)
+
+            # Fetch webhooks configuration and print report
+            fetch_webhooks_config(args.livenx_ip,args.livenx_port,args.livenx_token, fw)
