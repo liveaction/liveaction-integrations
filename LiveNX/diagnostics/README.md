@@ -91,6 +91,11 @@ python3 diag.py [OPTIONS]
   python3 diag.py --target_ip 8.8.8.8 --trace
   ```
 
+- **Run healthcheck Testcases to a liveNX:**
+  ```bash
+  pytest test_diag.py --livenx_ip=<livenx ip> --livenx_port=<livenx port default 8093> --livenx_token=<livenx token>
+  ```
+
 ## Output
 
 - SNMP walk results are saved to `snmpv2_walk_output.txt` or `snmpv3_walk_output.txt`.
