@@ -464,7 +464,7 @@ ENGINE = MergeTree
 ORDER BY (Alert_Id, Type, COALESCE(Date_Created, toDateTime('1970-01-01 00:00:00')), COALESCE(Date_Closed, toDateTime('1970-01-01 00:00:00')))
 SETTINGS index_granularity = 8192;
 
-CREATE TABLE IF NOT EXISTS inventory_db.audit_log (
+CREATE TABLE IF NOT EXISTS inventory_db.Audit_Log (
     Id UInt32,
     Name String,
     Device_Type String,

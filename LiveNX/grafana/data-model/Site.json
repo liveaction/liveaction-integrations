@@ -1,0 +1,972 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 44,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Serial"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "SNMP",
+                    "url": "https://10.4.205.50:3000/d/a9479ecb-5f78-4f15-9a68-2a2706e2fdde/device-information?orgId=1&var-Granularity=5&var-DeviceSerial=${__data.fields.Serial}&var-Application=All&var-Dscp=All"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 16,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawSql": "SELECT * FROM inventory_db.Device_Inventory  WHERE (('All' LIKE '${Site_Name}') OR (Site LIKE '${Site_Name}'))",
+          "refId": "A"
+        }
+      ],
+      "title": "Devices In Site",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 24,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    time AS Time,\n    8*(SUM(SumOctets)/1/60) AS value,\n    ApplicationName AS metric\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE time >= 1560296996 AND time <= 1561104323 AND (ApplicationName) GLOBAL IN \n(\n    SELECT\n        ApplicationName\n    FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n    WHERE time >= 1560296996 AND time <= 1561104323 AND ApplicationName != 'unknown' AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\n    GROUP BY ApplicationName\n    ORDER BY SUM(SumOctets) DESC\n    LIMIT 10\n)\n\nGROUP BY Time,metric\nORDER BY Time",
+          "rawSql": "SELECT \n    time AS Time,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    ApplicationName AS metric\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND (ApplicationName) GLOBAL IN \n(\n    SELECT\n        ApplicationName\n    FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n    WHERE $__timeFilter(time) AND ApplicationName != 'unknown' AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')) AND (('All' LIKE '${Site_Name}') OR (DeviceSiteName LIKE '${Site_Name}'))\n    GROUP BY ApplicationName\n    ORDER BY SUM(SumOctets) DESC\n    LIMIT 10\n)\n\nGROUP BY Time,metric\nORDER BY Time",
+          "refId": "Application",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "hide": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.0.3",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    time AS Time,\n    8*(SUM(SumOctets)/1/60) AS value,\n    ApplicationName AS metric\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE time >= 1560296996 AND time <= 1561104323 AND (ApplicationName) GLOBAL IN \n(\n    SELECT\n        ApplicationName\n    FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n    WHERE time >= 1560296996 AND time <= 1561104323 AND ApplicationName != 'unknown' AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\n    GROUP BY ApplicationName\n    ORDER BY SUM(SumOctets) DESC\n    LIMIT 10\n)\n\nGROUP BY Time,metric\nORDER BY Time",
+          "rawSql": "SELECT\n    time AS Time,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    'Total' AS metric\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time)\nGROUP BY Time,metric\nORDER BY Time",
+          "refId": "Total",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Traffic by Application Name (Bits/sec)",
+      "transformations": [
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TotalBytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AverageBitRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PeakBitRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AveragePacketRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "pps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PeakPacketRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "pps"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 15,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalBytes"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    SUM(SumOctets) AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets) AS TotalPackets,\n    SUM(SumOctets)*8/1/60 AS AverageBitRate,\n    AVG(SumPackets)/1/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/1/60 AS PeakBitRate,\n    MAX(SumPackets)/1/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n    time >= 1705950483 AND time <= 1705954083 AND ApplicationName != 'unknown' AND (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND (('All' LIKE 'server2-flowgen1-node1') OR (DeviceSerial LIKE 'server2-flowgen1-node1'))\nGROUP BY ApplicationName\nLIMIT 1000",
+          "rawSql": "\nWITH\nTop1000Applications AS (\n    SELECT\n        ApplicationName,\n        SUM(SumOctets) AS TotalBytes,\n        SUM(SumFlowCount) AS TotalFlows,\n        SUM(SumPackets) AS TotalPackets,\n        SUM(SumOctets)*8/($__toTime - $__fromTime) AS AverageBitRate,\n        SUM(SumPackets)/($__toTime - $__fromTime) AS AveragePacketRate\n    FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n    WHERE ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')) AND (('All' LIKE '${Site_Name}') OR (DeviceSiteName LIKE '${Site_Name}')))\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n)\nSELECT  \n    A.ApplicationName AS ApplicationName,\n    A.TotalBytes AS TotalBytes,\n    A.TotalFlows AS TotalFlows,\n    A.TotalPackets AS TotalPackets,\n    A.AverageBitRate AS AverageBitRate,\n    A.AveragePacketRate AS AveragePacketRate,\n    B.PeakPacketRate AS PeakPacketRate,\n    C.PeakBitRate AS PeakBitRate\nFROM Top1000Applications A\nJOIN (\n    SELECT ApplicationName,MAX(SumSumPackets)/${Granularity}/60 AS PeakPacketRate, SUM(SumSumOctets) AS TotalBytes\n    FROM\n    (\n        SELECT\n            ApplicationName,\n            time,\n            SUM(SumPackets) AS SumSumPackets,\n            SUM(SumOctets) AS SumSumOctets\n        FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n        WHERE ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')))\n        GROUP BY time, ApplicationName\n    ) AS subquery\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n) AS B ON A.ApplicationName = B.ApplicationName\nJOIN (\n    SELECT ApplicationName,(MAX(SumSumOctets)*8)/${Granularity}/60 AS PeakBitRate, SUM(SumSumOctets) AS TotalBytes\n    FROM\n    (\n        SELECT\n            ApplicationName,\n            time,\n            SUM(SumOctets) AS SumSumOctets\n        FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n        WHERE ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')))\n        GROUP BY time, ApplicationName\n    ) AS subquery\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n) AS C ON A.ApplicationName = C.ApplicationName\nORDER BY TotalBytes DESC;\n\n",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Traffic by Application Name - Inbound/Outbound (Bytes)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TotalBytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AverageBitRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PeakBitRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AveragePacketRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "pps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PeakPacketRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "pps"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 13,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalBytes"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    SUM(SumOctets) AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets) AS TotalPackets,\n    SUM(SumOctets)*8/1/60 AS AverageBitRate,\n    AVG(SumPackets)/1/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/1/60 AS PeakBitRate,\n    MAX(SumPackets)/1/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n    time >= 1706108576 AND time <= 1706151776 AND FlowDirection == 0 AND ApplicationName != 'unknown' AND (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName\nLIMIT 1000",
+          "rawSql": "WITH\nTop1000Applications AS (\n    SELECT\n        ApplicationName,\n        SUM(SumOctets) AS TotalBytes,\n        SUM(SumFlowCount) AS TotalFlows,\n        SUM(SumPackets) AS TotalPackets,\n        SUM(SumOctets)*8/($__toTime - $__fromTime) AS AverageBitRate,\n        SUM(SumPackets)/($__toTime - $__fromTime) AS AveragePacketRate\n    FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n    WHERE FlowDirection == 0 AND ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')) AND (('All' LIKE '${Site_Name}') OR (DeviceSiteName LIKE '${Site_Name}')))\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n)\nSELECT  \n    A.ApplicationName AS ApplicationName,\n    A.TotalBytes AS TotalBytes,\n    A.TotalFlows AS TotalFlows,\n    A.TotalPackets AS TotalPackets,\n    A.AverageBitRate AS AverageBitRate,\n    A.AveragePacketRate AS AveragePacketRate,\n    B.PeakPacketRate AS PeakPacketRate,\n    C.PeakBitRate AS PeakBitRate\nFROM Top1000Applications A\nJOIN (\n    SELECT ApplicationName,MAX(SumSumPackets)/${Granularity}/60 AS PeakPacketRate, SUM(SumSumOctets) AS TotalBytes\n    FROM\n    (\n        SELECT\n            ApplicationName,\n            time,\n            SUM(SumPackets) AS SumSumPackets,\n            SUM(SumOctets) AS SumSumOctets\n        FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n        WHERE FlowDirection == 0 AND ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')))\n        GROUP BY time, ApplicationName\n    ) AS subquery\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n) AS B ON A.ApplicationName = B.ApplicationName\nJOIN (\n    SELECT ApplicationName,(MAX(SumSumOctets)*8)/${Granularity}/60 AS PeakBitRate, SUM(SumSumOctets) AS TotalBytes\n    FROM\n    (\n        SELECT\n            ApplicationName,\n            time,\n            SUM(SumOctets) AS SumSumOctets\n        FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n        WHERE FlowDirection == 0 AND ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')))\n        GROUP BY time, ApplicationName\n    ) AS subquery\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n) AS C ON A.ApplicationName = C.ApplicationName\nORDER BY TotalBytes DESC;\n\n",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Traffic by Application Name - Inbound (Bytes)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TotalBytes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AverageBitRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PeakBitRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AveragePacketRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "pps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PeakPacketRate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "pps"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalBytes"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    SUM(SumOctets) AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets) AS TotalPackets,\n    SUM(SumOctets)*8/1/60 AS AverageBitRate,\n    AVG(SumPackets)/1/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/1/60 AS PeakBitRate,\n    MAX(SumPackets)/1/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n    time >= 1706108617 AND time <= 1706151817 AND FlowDirection == 1 AND ApplicationName != 'unknown' AND (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName\nLIMIT 1000",
+          "rawSql": "WITH\nTop1000Applications AS (\n    SELECT\n        ApplicationName,\n        SUM(SumOctets) AS TotalBytes,\n        SUM(SumFlowCount) AS TotalFlows,\n        SUM(SumPackets) AS TotalPackets,\n        SUM(SumOctets)*8/($__toTime - $__fromTime) AS AverageBitRate,\n        SUM(SumPackets)/($__toTime - $__fromTime) AS AveragePacketRate\n    FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n    WHERE FlowDirection == 1 AND ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')) AND (('All' LIKE '${Site_Name}') OR (DeviceSiteName LIKE '${Site_Name}')))\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n)\nSELECT  \n    A.ApplicationName AS ApplicationName,\n    A.TotalBytes AS TotalBytes,\n    A.TotalFlows AS TotalFlows,\n    A.TotalPackets AS TotalPackets,\n    A.AverageBitRate AS AverageBitRate,\n    A.AveragePacketRate AS AveragePacketRate,\n    B.PeakPacketRate AS PeakPacketRate,\n    C.PeakBitRate AS PeakBitRate\nFROM Top1000Applications A\nJOIN (\n    SELECT ApplicationName,MAX(SumSumPackets)/${Granularity}/60 AS PeakPacketRate, SUM(SumSumOctets) AS TotalBytes\n    FROM\n    (\n        SELECT\n            ApplicationName,\n            time,\n            SUM(SumPackets) AS SumSumPackets,\n            SUM(SumOctets) AS SumSumOctets\n        FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n        WHERE FlowDirection == 1 AND ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')))\n        GROUP BY time, ApplicationName\n    ) AS subquery\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n) AS B ON A.ApplicationName = B.ApplicationName\nJOIN (\n    SELECT ApplicationName,(MAX(SumSumOctets)*8)/${Granularity}/60 AS PeakBitRate, SUM(SumSumOctets) AS TotalBytes\n    FROM\n    (\n        SELECT\n            ApplicationName,\n            time,\n            SUM(SumOctets) AS SumSumOctets\n        FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n        WHERE FlowDirection == 1 AND ($__timeFilter(time) AND ApplicationName != 'unknown' AND (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}')))\n        GROUP BY time, ApplicationName\n    ) AS subquery\n    GROUP BY ApplicationName\n    ORDER BY TotalBytes DESC\n    LIMIT 1000\n) AS C ON A.ApplicationName = C.ApplicationName\nORDER BY TotalBytes DESC;\n\n",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Traffic by Application Name - Outbound (Bytes)",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [
+    "inventory",
+    "datamodel"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "5m",
+          "value": "5"
+        },
+        "hide": 1,
+        "includeAll": false,
+        "label": "Granularity",
+        "multi": false,
+        "name": "Granularity",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1"
+          },
+          {
+            "selected": true,
+            "text": "5m",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "60m",
+            "value": "60"
+          },
+          {
+            "selected": false,
+            "text": "360m",
+            "value": "360"
+          }
+        ],
+        "query": "1m : 1,5m : 5,60m : 60,360m : 360",
+        "queryValue": "",
+        "rawSql": "1m : 1,5m : 5,60m : 60,360m : 360",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "multi": false,
+        "name": "Application",
+        "options": [],
+        "query": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "rawSql": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "DeviceSerial",
+        "multi": false,
+        "name": "DeviceSerial",
+        "options": [],
+        "query": "SELECT DISTINCT DeviceSerial FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "rawSql": "SELECT DISTINCT DeviceSerial FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "SELECT DISTINCT Site FROM inventory_db.Device_Inventory",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Site",
+        "multi": false,
+        "name": "Site_Name",
+        "options": [],
+        "query": "SELECT DISTINCT Site FROM inventory_db.Device_Inventory",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Site",
+  "uid": "be76b7d9-088f-45e4-abf8-ba3854e31ff85",
+  "version": 7,
+  "weekStart": ""
+}

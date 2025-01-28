@@ -1,0 +1,1574 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 42,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binbps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.1.7",
+      "targets": [
+        {
+          "builderOptions": {
+            "aggregates": [],
+            "columns": [
+              {
+                "alias": "TimeUnix",
+                "hint": "time",
+                "name": "TimeUnix",
+                "type": "DateTime64(9)"
+              }
+            ],
+            "database": "default",
+            "filters": [
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "time",
+                "key": "",
+                "operator": "WITH IN DASHBOARD TIME RANGE",
+                "type": "datetime"
+              }
+            ],
+            "groupBy": [],
+            "limit": 1000,
+            "meta": {},
+            "mode": "aggregate",
+            "orderBy": [
+              {
+                "default": true,
+                "dir": "ASC",
+                "hint": "time",
+                "name": ""
+              }
+            ],
+            "queryType": "timeseries",
+            "table": "otel_metrics_sum"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "meta": {
+            "builderOptions": {
+              "aggregates": [],
+              "columns": [
+                {
+                  "alias": "TimeUnix",
+                  "hint": "time",
+                  "name": "TimeUnix",
+                  "type": "DateTime64(9)"
+                }
+              ],
+              "database": "default",
+              "filters": [
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "time",
+                  "key": "",
+                  "operator": "WITH IN DASHBOARD TIME RANGE",
+                  "type": "datetime"
+                }
+              ],
+              "groupBy": [],
+              "limit": 1000,
+              "meta": {},
+              "mode": "aggregate",
+              "orderBy": [
+                {
+                  "default": true,
+                  "dir": "ASC",
+                  "hint": "time",
+                  "name": ""
+                }
+              ],
+              "queryType": "timeseries",
+              "table": "otel_metrics_sum"
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "timeseries",
+          "rawSql": "WITH RawData AS (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        SUM(Value) AS InterfaceBytesTotal\n    FROM (\n        SELECT \n            TimeUnix,\n            ResourceAttributes['device.id'] AS DeviceID,\n            Value\n        FROM \"default\".\"otel_metrics_sum\"\n        WHERE MetricName = 'ifInOctets'\n        AND (TimeUnix >= $__fromTime AND TimeUnix <= $__toTime)\n        AND (('All' LIKE '${DeviceSerial}') OR (ResourceAttributes['device.id'] LIKE '${DeviceSerial}'))\n    )\n    GROUP BY TimeUnix, DeviceID\n)\nSELECT \n    TimeUnix,\n    DeviceID,\n    if(prev_bytes IS NULL OR time_diff = 0, 0,\n        (InterfaceBytesTotal - prev_bytes) / time_diff\n    ) AS InterfaceBytesRate\nFROM (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        InterfaceBytesTotal,\n        lagInFrame(InterfaceBytesTotal) OVER (PARTITION BY DeviceID ORDER BY TimeUnix) AS prev_bytes,\n        toUnixTimestamp64Nano(TimeUnix) - toUnixTimestamp64Nano(lagInFrame(TimeUnix) OVER (PARTITION BY DeviceID ORDER BY TimeUnix)) AS time_diff\n    FROM RawData\n)\nORDER BY TimeUnix ASC;",
+          "refId": "InterfaceIn"
+        },
+        {
+          "builderOptions": {
+            "aggregates": [],
+            "columns": [
+              {
+                "alias": "TimeUnix",
+                "hint": "time",
+                "name": "TimeUnix",
+                "type": "DateTime64(9)"
+              }
+            ],
+            "database": "default",
+            "filters": [
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "time",
+                "key": "",
+                "operator": "WITH IN DASHBOARD TIME RANGE",
+                "type": "datetime"
+              }
+            ],
+            "groupBy": [],
+            "limit": 1000,
+            "meta": {},
+            "mode": "aggregate",
+            "orderBy": [
+              {
+                "default": true,
+                "dir": "ASC",
+                "hint": "time",
+                "name": ""
+              }
+            ],
+            "queryType": "timeseries",
+            "table": "otel_metrics_sum"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "hide": false,
+          "meta": {
+            "builderOptions": {
+              "aggregates": [],
+              "columns": [
+                {
+                  "alias": "TimeUnix",
+                  "hint": "time",
+                  "name": "TimeUnix",
+                  "type": "DateTime64(9)"
+                }
+              ],
+              "database": "default",
+              "filters": [
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "time",
+                  "key": "",
+                  "operator": "WITH IN DASHBOARD TIME RANGE",
+                  "type": "datetime"
+                }
+              ],
+              "groupBy": [],
+              "limit": 1000,
+              "meta": {},
+              "mode": "aggregate",
+              "orderBy": [
+                {
+                  "default": true,
+                  "dir": "ASC",
+                  "hint": "time",
+                  "name": ""
+                }
+              ],
+              "queryType": "timeseries",
+              "table": "otel_metrics_sum"
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "timeseries",
+          "rawSql": "WITH RawData AS (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        SUM(Value) AS InterfaceBytesTotal\n    FROM (\n        SELECT \n            TimeUnix,\n            ResourceAttributes['device.id'] AS DeviceID,\n            Value\n        FROM \"default\".\"otel_metrics_sum\"\n        WHERE MetricName = 'ifOutOctets'\n        AND (TimeUnix >= $__fromTime AND TimeUnix <= $__toTime)\n        AND (('All' LIKE '${DeviceSerial}') OR (ResourceAttributes['device.id'] LIKE '${DeviceSerial}'))\n    )\n    GROUP BY TimeUnix, DeviceID\n)\nSELECT \n    TimeUnix,\n    DeviceID,\n    if(prev_bytes IS NULL OR time_diff = 0, 0,\n        (InterfaceBytesTotal - prev_bytes) / time_diff\n    ) AS InterfaceBytesRate\nFROM (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        InterfaceBytesTotal,\n        lagInFrame(InterfaceBytesTotal) OVER (PARTITION BY DeviceID ORDER BY TimeUnix) AS prev_bytes,\n        toUnixTimestamp64Nano(TimeUnix) - toUnixTimestamp64Nano(lagInFrame(TimeUnix) OVER (PARTITION BY DeviceID ORDER BY TimeUnix)) AS time_diff\n    FROM RawData\n)\nORDER BY TimeUnix ASC;",
+          "refId": "InterfaceOut"
+        }
+      ],
+      "title": "Device Interface Volume (bits/sec)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.1.7",
+      "targets": [
+        {
+          "builderOptions": {
+            "aggregates": [],
+            "columns": [
+              {
+                "alias": "TimeUnix",
+                "hint": "time",
+                "name": "TimeUnix",
+                "type": "DateTime64(9)"
+              }
+            ],
+            "database": "default",
+            "filters": [
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "time",
+                "key": "",
+                "operator": "WITH IN DASHBOARD TIME RANGE",
+                "type": "datetime"
+              }
+            ],
+            "groupBy": [],
+            "limit": 1000,
+            "meta": {},
+            "mode": "aggregate",
+            "orderBy": [
+              {
+                "default": true,
+                "dir": "ASC",
+                "hint": "time",
+                "name": ""
+              }
+            ],
+            "queryType": "timeseries",
+            "table": "otel_metrics_sum"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "meta": {
+            "builderOptions": {
+              "aggregates": [],
+              "columns": [
+                {
+                  "alias": "TimeUnix",
+                  "hint": "time",
+                  "name": "TimeUnix",
+                  "type": "DateTime64(9)"
+                }
+              ],
+              "database": "default",
+              "filters": [
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "time",
+                  "key": "",
+                  "operator": "WITH IN DASHBOARD TIME RANGE",
+                  "type": "datetime"
+                }
+              ],
+              "groupBy": [],
+              "limit": 1000,
+              "meta": {},
+              "mode": "aggregate",
+              "orderBy": [
+                {
+                  "default": true,
+                  "dir": "ASC",
+                  "hint": "time",
+                  "name": ""
+                }
+              ],
+              "queryType": "timeseries",
+              "table": "otel_metrics_sum"
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "timeseries",
+          "rawSql": "WITH RawData AS (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        SUM(Value) AS InterfaceBytesTotal\n    FROM (\n        SELECT \n            TimeUnix,\n            ResourceAttributes['device.id'] AS DeviceID,\n            Value\n        FROM \"default\".\"otel_metrics_sum\"\n        WHERE MetricName = 'ifInOctets'\n        AND (TimeUnix >= $__fromTime AND TimeUnix <= $__toTime)\n        AND (('All' LIKE '${DeviceSerial}') OR (ResourceAttributes['device.id'] LIKE '${DeviceSerial}'))\n    )\n    GROUP BY TimeUnix, DeviceID\n)\nSELECT \n    TimeUnix,\n    DeviceID,\n    if(prev_bytes IS NULL OR time_diff = 0, 0,\n        (InterfaceBytesTotal - prev_bytes) / time_diff\n    ) AS InterfaceBytesRate\nFROM (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        InterfaceBytesTotal,\n        lagInFrame(InterfaceBytesTotal) OVER (PARTITION BY DeviceID ORDER BY TimeUnix) AS prev_bytes,\n        toUnixTimestamp64Nano(TimeUnix) - toUnixTimestamp64Nano(lagInFrame(TimeUnix) OVER (PARTITION BY DeviceID ORDER BY TimeUnix)) AS time_diff\n    FROM RawData\n)\nORDER BY TimeUnix ASC;",
+          "refId": "Interface"
+        }
+      ],
+      "title": "Device Interface Inbound Volume (ifInOctets) (bytes/sec)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.1.7",
+      "targets": [
+        {
+          "builderOptions": {
+            "aggregates": [],
+            "columns": [
+              {
+                "alias": "TimeUnix",
+                "hint": "time",
+                "name": "TimeUnix",
+                "type": "DateTime64(9)"
+              }
+            ],
+            "database": "default",
+            "filters": [
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "time",
+                "key": "",
+                "operator": "WITH IN DASHBOARD TIME RANGE",
+                "type": "datetime"
+              }
+            ],
+            "groupBy": [],
+            "limit": 1000,
+            "meta": {},
+            "mode": "aggregate",
+            "orderBy": [
+              {
+                "default": true,
+                "dir": "ASC",
+                "hint": "time",
+                "name": ""
+              }
+            ],
+            "queryType": "timeseries",
+            "table": "otel_metrics_sum"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "meta": {
+            "builderOptions": {
+              "aggregates": [],
+              "columns": [
+                {
+                  "alias": "TimeUnix",
+                  "hint": "time",
+                  "name": "TimeUnix",
+                  "type": "DateTime64(9)"
+                }
+              ],
+              "database": "default",
+              "filters": [
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "time",
+                  "key": "",
+                  "operator": "WITH IN DASHBOARD TIME RANGE",
+                  "type": "datetime"
+                }
+              ],
+              "groupBy": [],
+              "limit": 1000,
+              "meta": {},
+              "mode": "aggregate",
+              "orderBy": [
+                {
+                  "default": true,
+                  "dir": "ASC",
+                  "hint": "time",
+                  "name": ""
+                }
+              ],
+              "queryType": "timeseries",
+              "table": "otel_metrics_sum"
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "timeseries",
+          "rawSql": "WITH RawData AS (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        SUM(Value) AS InterfaceBytesTotal\n    FROM (\n        SELECT \n            TimeUnix,\n            ResourceAttributes['device.id'] AS DeviceID,\n            Value\n        FROM \"default\".\"otel_metrics_sum\"\n        WHERE MetricName = 'ifInOctets'\n        AND (TimeUnix >= $__fromTime AND TimeUnix <= $__toTime)\n        AND (('All' LIKE '${DeviceSerial}') OR (ResourceAttributes['device.id'] LIKE '${DeviceSerial}'))\n    )\n    GROUP BY TimeUnix, DeviceID\n)\nSELECT \n    TimeUnix,\n    DeviceID,\n    if(prev_bytes IS NULL OR time_diff = 0, 0,\n        (InterfaceBytesTotal - prev_bytes) / time_diff\n    ) AS InterfaceBytesRate\nFROM (\n    SELECT \n        TimeUnix,\n        DeviceID,\n        InterfaceBytesTotal,\n        lagInFrame(InterfaceBytesTotal) OVER (PARTITION BY DeviceID ORDER BY TimeUnix) AS prev_bytes,\n        toUnixTimestamp64Nano(TimeUnix) - toUnixTimestamp64Nano(lagInFrame(TimeUnix) OVER (PARTITION BY DeviceID ORDER BY TimeUnix)) AS time_diff\n    FROM RawData\n)\nORDER BY TimeUnix ASC;",
+          "refId": "Interface"
+        }
+      ],
+      "title": "Device Interface Outbound Volume (ifOutOctets)  (bytes/sec)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 24,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "hide": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.0.5",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    time AS Time,\n    8*(SUM(SumOctets)/5/60) AS value,\n    concat(ApplicationName, ':', toString(d.name)) AS metric\nFROM livenx_flowdb.basic_entity_app_5m_dist\nJOIN livenx_flowdb.dscp AS d ON toUInt8(Dscp) = d.dscp\nWHERE time >= 1708095952 AND time <= 1708096852 AND (ApplicationName, Dscp) GLOBAL IN \n(\n    SELECT\n        ApplicationName, Dscp\n    FROM livenx_flowdb.basic_entity_app_5m_dist\n    JOIN livenx_flowdb.dscp AS d ON toUInt8(Dscp) = d.dscp\n    WHERE time >= 1708095952 AND time <= 1708096852 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\n    GROUP BY ApplicationName, Dscp\n    ORDER BY SUM(SumOctets) DESC\n    LIMIT 10\n)\n\nGROUP BY Time,metric\nORDER BY Time",
+          "rawSql": "SELECT\n    time AS Time,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    'Basic' AS metric\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\nGROUP BY Time,metric\nORDER BY Time",
+          "refId": "Basic",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "hide": false,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.0.5",
+          "queryType": "table",
+          "rawSql": "SELECT\n    time AS Time,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    'AVC' AS metric\nFROM livenx_flowdb.avc_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\nGROUP BY Time,metric\nORDER BY Time",
+          "refId": "AVC"
+        },
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "hide": false,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.0.5",
+          "queryType": "table",
+          "rawSql": "SELECT\n    time AS Time,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    'MediaNet' AS metric\nFROM livenx_flowdb.medianet_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\nGROUP BY Time,metric\nORDER BY Time",
+          "refId": "MediaNet"
+        }
+      ],
+      "title": "Total Traffic by Flow Type (Bits/sec)",
+      "transformations": [
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Traffic"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalBytes"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.0.5",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    d.name AS Dscp,\n    SUM(SumOctets)/5 AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets)/5 AS TotalPackets,\n    SUM(SumOctets)*8/5/60 AS AverageBitRate,\n    AVG(SumPackets)/5/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/5/60 AS PeakBitRate,\n    MAX(SumPackets)/5/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_5m_dist as f\nJOIN livenx_flowdb.dscp AS d ON toUInt8(f.Dscp) = d.dscp\nWHERE\n    time >= 1708095989 AND time <= 1708096889 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND  \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName, Dscp\nLIMIT 1000",
+          "rawSql": "SELECT\n    DeviceSerial,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    SUM(SumFlowCount) AS FlowCount\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\nGROUP BY DeviceSerial",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Basic Traffic by Device (Bytes)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Traffic"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalBytes"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.0.5",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    d.name AS Dscp,\n    SUM(SumOctets)/5 AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets)/5 AS TotalPackets,\n    SUM(SumOctets)*8/5/60 AS AverageBitRate,\n    AVG(SumPackets)/5/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/5/60 AS PeakBitRate,\n    MAX(SumPackets)/5/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_5m_dist as f\nJOIN livenx_flowdb.dscp AS d ON toUInt8(f.Dscp) = d.dscp\nWHERE\n    time >= 1708095989 AND time <= 1708096889 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND  \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName, Dscp\nLIMIT 1000",
+          "rawSql": "SELECT\n    DeviceSerial,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    SUM(SumFlowCount) AS FlowCount\nFROM livenx_flowdb.avc_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\nGROUP BY DeviceSerial",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "AVC Traffic by Device (Bytes)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Traffic"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalBytes"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.0.5",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    d.name AS Dscp,\n    SUM(SumOctets)/5 AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets)/5 AS TotalPackets,\n    SUM(SumOctets)*8/5/60 AS AverageBitRate,\n    AVG(SumPackets)/5/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/5/60 AS PeakBitRate,\n    MAX(SumPackets)/5/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_5m_dist as f\nJOIN livenx_flowdb.dscp AS d ON toUInt8(f.Dscp) = d.dscp\nWHERE\n    time >= 1708095989 AND time <= 1708096889 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND  \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName, Dscp\nLIMIT 1000",
+          "rawSql": "SELECT\n    DeviceSerial,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    SUM(SumFlowCount) AS FlowCount\nFROM livenx_flowdb.medianet_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND\n    (('All' LIKE '${Dscp}') OR (toString(Dscp) LIKE '${Dscp}')) AND \n    (('All' LIKE '${Application}') OR (ApplicationName LIKE '${Application}')) AND \n    (('All' LIKE '${DeviceSerial}') OR (DeviceSerial LIKE '${DeviceSerial}'))\nGROUP BY DeviceSerial",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "MediaNet Traffic by Device (Bytes)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 14,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    d.name AS Dscp,\n    SUM(SumOctets)/5 AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets)/5 AS TotalPackets,\n    SUM(SumOctets)*8/5/60 AS AverageBitRate,\n    AVG(SumPackets)/5/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/5/60 AS PeakBitRate,\n    MAX(SumPackets)/5/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_5m_dist as f\nJOIN livenx_flowdb.dscp AS d ON toUInt8(f.Dscp) = d.dscp\nWHERE\n    time >= 1708095989 AND time <= 1708096889 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND  \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName, Dscp\nLIMIT 1000",
+          "rawSql": "SELECT\n    Fetch_Time,count()\nFROM inventory_db.Audit_Log\nWHERE \n    (('All' LIKE '${DeviceSerial}') OR (Device_Serial LIKE '${DeviceSerial}'))\nGROUP BY Fetch_Time",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Device Config Changes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            },
+            "filterable": true,
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      },
+      "id": 12,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "TotalBytes"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    ApplicationName,\n    d.name AS Dscp,\n    SUM(SumOctets)/5 AS TotalBytes,\n    SUM(SumFlowCount) AS TotalFlows,\n    SUM(SumPackets)/5 AS TotalPackets,\n    SUM(SumOctets)*8/5/60 AS AverageBitRate,\n    AVG(SumPackets)/5/60 AS AveragePacketRate,\n    MAX(SumOctets)*8/5/60 AS PeakBitRate,\n    MAX(SumPackets)/5/60 AS PeakPacketRate\nFROM livenx_flowdb.basic_entity_app_5m_dist as f\nJOIN livenx_flowdb.dscp AS d ON toUInt8(f.Dscp) = d.dscp\nWHERE\n    time >= 1708095989 AND time <= 1708096889 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND  \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\nGROUP BY ApplicationName, Dscp\nLIMIT 1000",
+          "rawSql": "SELECT\n    *\nFROM inventory_db.Audit_Log\nWHERE \n    (('All' LIKE '${DeviceSerial}') OR (Device_Serial LIKE '${DeviceSerial}'))",
+          "refId": "A",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Device Config Audit Log",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [
+    "inventory",
+    "datamodel",
+    "opentelemetry"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "5m",
+          "value": "5"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Granularity",
+        "multi": false,
+        "name": "Granularity",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1"
+          },
+          {
+            "selected": true,
+            "text": "5m",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "60m",
+            "value": "60"
+          },
+          {
+            "selected": false,
+            "text": "360m",
+            "value": "360"
+          }
+        ],
+        "query": "1m : 1,5m : 5,60m : 60,360m : 360",
+        "queryValue": "",
+        "rawSql": "1m : 1,5m : 5,60m : 60,360m : 360",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "SELECT DISTINCT Serial FROM inventory_db.Device_Inventory",
+        "hide": 0,
+        "includeAll": true,
+        "label": "DeviceSerial",
+        "multi": false,
+        "name": "DeviceSerial",
+        "options": [],
+        "query": "SELECT DISTINCT Serial FROM inventory_db.Device_Inventory",
+        "rawSql": "SELECT DISTINCT DeviceSerial FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "ApplicationName",
+        "multi": false,
+        "name": "Application",
+        "options": [],
+        "query": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "rawSql": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "SELECT DISTINCT Dscp AS Dscp FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist as f\nWHERE\n       $__timeFilter(time)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Dscp",
+        "multi": false,
+        "name": "Dscp",
+        "options": [],
+        "query": "SELECT DISTINCT Dscp AS Dscp FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist as f\nWHERE\n       $__timeFilter(time)",
+        "rawSql": "SELECT DISTINCT ApplicationName FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE\n       $__timeFilter(time)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Device Information",
+  "uid": "a9479ecb-5f78-4f15-9a68-2a2706e2fdde",
+  "version": 14,
+  "weekStart": ""
+}
