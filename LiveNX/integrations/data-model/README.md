@@ -60,6 +60,10 @@ sudo iptables -A INPUT -p tcp --dport 4318 -j ACCEPT
 
 ## To Run The Data Model Sync
 
+Only the LiveNX Server, run the sync via:
+
+cd liveaction-integrations/LiveNX/integrations/data-model/clickhouse
+
 Edit the run_model_sync.sh script to set the environment variables to the proper settings. Typically only the CLICKHOUSE_PASSWORD and LIVENX_API_TOKEN environment variables need to be set.
 
 Run the sync via:
