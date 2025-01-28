@@ -8,6 +8,14 @@ sh ./create_db.sh
 
 ## To Run The Data Model Sync
 
+Install the integration libraries:
+
+cd liveaction-integrations/LiveNX/integrations
+
+sudo apt install pip
+
+pip3 install -r requirements.txt 
+
 Only on the LiveNX Server, run the sync via:
 
 cd liveaction-integrations/LiveNX/integrations/data-model/clickhouse
