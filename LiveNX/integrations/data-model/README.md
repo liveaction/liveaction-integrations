@@ -22,6 +22,9 @@ Stop the sync via:
 
 sh ./stop_model_sync.sh
 
+## Viewing the new Data Model
+
+Information from the new data model can be viewed by installing the Grafana dashboards found in the liveaction-integrations/LiveNX/grafana/data-model diretory.
 
 ## To Integrate LiveAssist and OTEL Collection with the New Data Model
 
