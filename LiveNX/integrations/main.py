@@ -20,9 +20,9 @@ from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts, get_clic
 from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory, get_netld_inventory, map_livenx_inventory_to_netld_inventory, map_netld_inventory_to_livenx_inventory
 from helper.timer import get_top_of_current_minute_epoch
 from helper.prompt import query_yes_no
-from servicenow.incidents import get_servicenow_incidents, push_servicenow_incidents
+from servicenow.incidents import get_servicenow_incidents, push_servicenow_incidents, get_snow_inventory, get_diff_snow_inventory
 from common.livenx_sites import get_bluecat_blocks, get_livenx_sites, map_bluecat_blocks_to_livenx_sites, diff_bluecat_sites, add_to_livenx_sites, get_clickhouse_sites, diff_clickhouse_sites, add_to_clickhouse_sites
-from snow.inventory import get_snow_inventory, get_diff_snow_inventory
+
 
 from config.logger import setup_logger
 local_logger = None
