@@ -3,7 +3,7 @@ set -e
 docker exec -i clickhouse-server clickhouse-client -n <<-EOSQL
 
 CREATE DATABASE IF NOT EXISTS inventory_db;
-CREATE TABLE inventory_db.Device_Inventory
+CREATE TABLE IF NOT EXISTS inventory_db.Device_Inventory
 (
     -- Core Fields
     Href String,
@@ -215,7 +215,7 @@ ORDER BY (ID, Type)
 SETTINGS index_granularity = 8192;
 
 
-CREATE TABLE inventory_db.Network_Sites
+CREATE TABLE IF NOT EXISTS inventory_db.Network_Sites
 (
     -- Core Site Information
     ID UUID,                               -- Unique identifier for the site.
@@ -315,7 +315,7 @@ PRIMARY KEY (ID)
 ORDER BY (ID)
 SETTINGS index_granularity = 8192;
 
-CREATE TABLE inventory_db.SDWAN_Inventory
+CREATE TABLE IF NOT EXISTS inventory_db.SDWAN_Inventory
 (
     ID String,
     Device_Name String,
@@ -357,7 +357,7 @@ PRIMARY KEY (ID)
 ORDER BY (ID)
 SETTINGS index_granularity = 8192;
 
-CREATE TABLE inventory_db.SNMP_Inventory
+CREATE TABLE IF NOT EXISTS inventory_db.SNMP_Inventory
 (
     -- Device Information
     ID String,                           -- Unique identifier for the device
@@ -422,7 +422,7 @@ PRIMARY KEY (ID)
 ORDER BY (ID, Device_Type)
 SETTINGS index_granularity = 8192;
 
-CREATE TABLE inventory_db.Alert_Inventory
+CREATE TABLE IF NOT EXISTS inventory_db.Alert_Inventory
 (
     -- Basic Alert Metadata
     Version String,

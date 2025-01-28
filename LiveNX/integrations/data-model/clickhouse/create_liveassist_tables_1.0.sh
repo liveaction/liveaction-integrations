@@ -93,6 +93,46 @@ ORDER BY (ServiceName, TimestampTime, Timestamp)
 TTL TimestampTime + toIntervalDay(3)
 SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
 
+CREATE TABLE IF NOT EXISTS default.otel_metrics_sum
+(
+    ResourceAttributes Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    ResourceSchemaUrl String CODEC(ZSTD(1)),
+    ScopeName String CODEC(ZSTD(1)),
+    ScopeVersion String CODEC(ZSTD(1)),
+    ScopeAttributes Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    ScopeDroppedAttrCount UInt32 CODEC(ZSTD(1)),
+    ScopeSchemaUrl String CODEC(ZSTD(1)),
+    ServiceName LowCardinality(String) CODEC(ZSTD(1)),
+    MetricName String CODEC(ZSTD(1)),
+    MetricDescription String CODEC(ZSTD(1)),
+    MetricUnit String CODEC(ZSTD(1)),
+    Attributes Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    StartTimeUnix DateTime64(9) CODEC(Delta(8), ZSTD(1)),
+    TimeUnix DateTime64(9) CODEC(Delta(8), ZSTD(1)),
+    Value Float64 CODEC(ZSTD(1)),
+    Flags UInt32 CODEC(ZSTD(1)),
+    Exemplars Nested(
+        FilteredAttributes Map(LowCardinality(String), String),
+        TimeUnix DateTime64(9),
+        Value Float64,
+        SpanId String,
+        TraceId String
+    ) CODEC(ZSTD(1)),
+    AggregationTemporality Int32 CODEC(ZSTD(1)),
+    IsMonotonic Bool CODEC(Delta(1), ZSTD(1)),
+    INDEX idx_res_attr_key mapKeys(ResourceAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_res_attr_value mapValues(ResourceAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_scope_attr_key mapKeys(ScopeAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_scope_attr_value mapValues(ScopeAttributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_attr_key mapKeys(Attributes) TYPE bloom_filter(0.01) GRANULARITY 1,
+    INDEX idx_attr_value mapValues(Attributes) TYPE bloom_filter(0.01) GRANULARITY 1
+)
+ENGINE = MergeTree
+PARTITION BY toDate(TimeUnix)
+ORDER BY (ServiceName, MetricName, Attributes, toUnixTimestamp64Nano(TimeUnix))
+TTL toDateTime(TimeUnix) + toIntervalDay(3)
+SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
+
 CREATE MATERIALIZED VIEW IF NOT EXISTS default.structured_events_view TO default.structured_events
 (
     alert_id String,
@@ -194,6 +234,72 @@ AS SELECT
     if(mapContains(LogAttributes, 'LevelTwoInformation_topologypath'), LogAttributes['LevelTwoInformation_topologypath'], if(mapContains(LogAttributes, 'LevelTwoInformation_4tupletopologypath'), LogAttributes['LevelTwoInformation_4tupletopologypath'], '')) AS level2_topology,
     if(mapContains(LogAttributes, 'LevelTwoInformation_topapplicationsflowcsv'), LogAttributes['LevelTwoInformation_topapplicationsflowcsv'], '') AS level2_applicationsflow
 FROM default.otel_logs
-WHERE ((LogAttributes['log.type']) = 'npm') AND ((LogAttributes['receiver_type']) = 'livenx')
+WHERE ((LogAttributes['log.type']) = 'npm') AND ((LogAttributes['receiver_type']) = 'livenx');
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS default.SNMP_Inventory_MV
+(
+    ID String,
+    Device_Name String,
+    Device_Type String,
+    Management_IP String,
+    Site String,
+    Vendor String,
+    Model String,
+    SNMP_Metrics Array(Tuple(String, String, Float64, String, DateTime64(9))),
+    SNMP_Traps Array(String),
+    SNMP_Interfaces Array(Tuple(String, UInt16, String, UInt64, UInt64, UInt32, DateTime64(9))),
+    SNMP_Configuration Array(Tuple(String, String, String, String, String, String, DateTime64(9))),
+    Polling_Configuration Array(Tuple(UInt32, UInt8, UInt16, DateTime64(9)))
+)
+ENGINE = ReplacingMergeTree
+PRIMARY KEY ID
+ORDER BY (ID, Device_Type)
+SETTINGS index_granularity = 8192
+AS WITH device_info AS
+    (
+        SELECT
+            ResourceAttributes['device.id'] AS ID,
+            ResourceAttributes['device.name'] AS Device_Name,
+            ResourceAttributes['device.type'] AS Device_Type,
+            ResourceAttributes['network.ip'] AS Management_IP,
+            ResourceAttributes['location.site'] AS Site,
+            ResourceAttributes['device.vendor'] AS Vendor,
+            ResourceAttributes['device.model'] AS Model,
+            ScopeName
+        FROM default.otel_metrics_sum
+        WHERE ((ResourceAttributes['device.id']) IS NOT NULL) AND (ScopeName = 'github.com/open-telemetry/opentelemetry-collector-contrib/receiver/snmpreceiver')
+        GROUP BY
+            ID,
+            Device_Name,
+            Device_Type,
+            Management_IP,
+            Site,
+            Vendor,
+            Model,
+            ScopeName
+    )
+SELECT
+    d.ID,
+    d.Device_Name,
+    d.Device_Type,
+    d.Management_IP,
+    d.Site,
+    d.Vendor,
+    d.Model,
+    groupArray((coalesce(MetricName, ''), coalesce(toString(Attributes['snmp.oid']), ''), coalesce(Value, 0.), coalesce(MetricUnit, ''), coalesce(TimeUnix, toDateTime64('2000-01-01 00:00:00', 9)))) AS SNMP_Metrics,
+    arrayFilter(x -> (x != ''), ['']) AS SNMP_Traps,
+    groupArray((coalesce(toString(Attributes['interface.name']), ''), toUInt16OrZero(Attributes['interface.index']), coalesce(toString(Attributes['interface.status']), ''), coalesce(toUInt64(Value * if((Attributes['traffic.direction']) = 'in', 1, 0)), 0), coalesce(toUInt64(Value * if((Attributes['traffic.direction']) = 'out', 1, 0)), 0), toUInt32OrZero(Attributes['interface.errors']), coalesce(TimeUnix, toDateTime64('2000-01-01 00:00:00', 9)))) AS SNMP_Interfaces,
+    groupArray((coalesce(toString(ResourceAttributes['snmp.community']), ''), coalesce(toString(ResourceAttributes['snmp.version']), ''), coalesce(toString(ResourceAttributes['snmp.security.level']), ''), coalesce(toString(ResourceAttributes['snmp.username']), ''), coalesce(toString(ResourceAttributes['snmp.auth.protocol']), ''), coalesce(toString(ResourceAttributes['snmp.priv.protocol']), ''), coalesce(TimeUnix, toDateTime64('2000-01-01 00:00:00', 9)))) AS SNMP_Configuration,
+    groupArray((coalesce(toUInt32OrZero(ResourceAttributes['polling.interval']), 0), coalesce(toUInt8OrZero(ResourceAttributes['polling.retries']), 0), coalesce(toUInt16OrZero(ResourceAttributes['polling.timeout']), 0), coalesce(TimeUnix, toDateTime64('2000-01-01 00:00:00', 9)))) AS Polling_Configuration
+FROM default.otel_metrics_sum AS o
+INNER JOIN device_info AS d ON (d.ID = (o.ResourceAttributes['device.id'])) AND (o.ScopeName = d.ScopeName)
+GROUP BY
+    d.ID,
+    d.Device_Name,
+    d.Device_Type,
+    d.Management_IP,
+    d.Site,
+    d.Vendor,
+    d.Model;
 
 EOSQL
