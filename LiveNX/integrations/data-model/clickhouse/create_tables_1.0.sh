@@ -1,27 +1,26 @@
 #!/bin/bash
 set -e
-
-docker exec -i clickhouse clickhouse-client -n <<-EOSQL
+docker exec -i clickhouse-server clickhouse-client -n <<-EOSQL
 
 CREATE DATABASE IF NOT EXISTS inventory_db;
 CREATE TABLE inventory_db.Device_Inventory
 (
     -- Core Fields
-    `Href` String,
-    `ID` String,
-    `Type` String,
-    `Name` String,
-    `Serial` String,
-    `Client_IP` String,
-    `System_Name` String,
-    `Display_System_Name` String,
-    `Host_Name` String,
-    `Display_Host_Name` String,
-    `System_Location` String,
-    `System_Description` String,
+    Href String,
+    ID String,
+    Type String,
+    Name String,
+    Serial String,
+    Client_IP String,
+    System_Name String,
+    Display_System_Name String,
+    Host_Name String,
+    Display_Host_Name String,
+    System_Location String,
+    System_Description String,
     
     -- OS Version
-    `OS_Version` Nested(
+    OS_Version Nested(
         Major_Number UInt16,
         Minor_Number UInt16,
         Indiv_Number Nullable(UInt16),
@@ -31,10 +30,10 @@ CREATE TABLE inventory_db.Device_Inventory
         Version_String Nullable(String),
         OS_Type String
     ),
-    `OS_Version_String` String,
+    OS_Version_String String,
     
     -- Vendor Product
-    `Vendor_Product` Nested(
+    Vendor_Product Nested(
         Model String,
         Display_Name String,
         Description String,
@@ -49,20 +48,20 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- User-Defined Fields
-    `User_Defined_Fields` Nested(
+    User_Defined_Fields Nested(
         Key String,
         Value String
     ),
     
     -- Configuration
-    `Configuration` Nested(
+    Configuration Nested(
         ID String,
         Type String,
         Name String
     ),
     
     -- MAC Address
-    `MAC_Address` Nested(
+    MAC_Address Nested(
         ID String,
         Type String,
         Name String,
@@ -70,44 +69,44 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- Device Information
-    `Device` Nested(
+    Device Nested(
         ID String,
         Type String,
         Name String
     ),
     
     -- Location
-    `Location` Nested(
+    Location Nested(
         ID String,
         Type String,
         Name String
     ),
     
     -- Lease Information
-    `Lease_Date_Time` DateTime,
-    `Lease_Expiration_Date_Time` DateTime,
-    `Remote_ID` String,
+    Lease_Date_Time DateTime,
+    Lease_Expiration_Date_Time DateTime,
+    Remote_ID String,
     
     -- IP Group and Template
-    `IP_Group` Nested(
+    IP_Group Nested(
         ID String,
         Type String,
         Name String
     ),
-    `Template` Nested(
+    Template Nested(
         ID String,
         Type String,
         Name String
     ),
     
     -- Misc Fields
-    `Site` String,
-    `Is_Data_Center_Site` Bool,
-    `Tags` Array(String),
-    `Tagged_Omni` Bool,
+    Site String,
+    Is_Data_Center_Site Bool,
+    Tags Array(String),
+    Tagged_Omni Bool,
     
     -- Interfaces
-    `Interfaces` Nested(
+    Interfaces Nested(
         Name String,
         Abbreviated_Name String,
         If_Index UInt16,
@@ -120,8 +119,8 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- Monitor and Settings
-    `Monitor_Only` Bool,
-    `Settings` Nested(
+    Monitor_Only Bool,
+    Settings Nested(
         Poll_Interval UInt64,
         Enable_Poll Bool,
         Enable_QoS_Poll Bool,
@@ -133,7 +132,7 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- Capabilities
-    `Capabilities` Nested(
+    Capabilities Nested(
         NBAR_Capable Bool,
         Netflow_Collector_Capable Bool,
         MediaTrace_Capable Bool,
@@ -148,7 +147,7 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- Polling Support
-    `Polling_Supported` Nested(
+    Polling_Supported Nested(
         Netflow_Polling_Supported Bool,
         IPSLA_Polling_Supported Bool,
         LAN_Polling_Supported Bool,
@@ -157,17 +156,17 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- Circuit and Port Information
-    `Circuit_ID` String,
-    `Router_Port_Info` String,
-    `Switch_Port_Info` String,
-    `VLAN_Info` String,
-    `Vendor_Class_Identifier` String,
+    Circuit_ID String,
+    Router_Port_Info String,
+    Switch_Port_Info String,
+    VLAN_Info String,
+    Vendor_Class_Identifier String,
     
     -- Parameter Request List
-    `Parameter_Request_List` Array(UInt16),
+    Parameter_Request_List Array(UInt16),
     
     -- Client Identifier
-    `Client_Identifier` Nested(
+    Client_Identifier Nested(
         ID String,
         Type String,
         Name String,
@@ -178,19 +177,19 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- IPv6 Specific Fields
-    `Reserved_Using` Nullable(String),
-    `Identity_Association_Identifier` Nullable(String),
-    `Interface_ID` Nullable(String),
+    Reserved_Using Nullable(String),
+    Identity_Association_Identifier Nullable(String),
+    Interface_ID Nullable(String),
     
     -- Links
-    `_Links` Nested(
+    _Links Nested(
         Self_Href String,
         Collection_Href String
     ),
     
     -- Group and Link Info
-    `Group_ID` String,
-    `Link_Info` Nested(
+    Group_ID String,
+    Link_Info Nested(
         Type String,
         Label String,
         Display_Value String,
@@ -205,10 +204,10 @@ CREATE TABLE inventory_db.Device_Inventory
     ),
     
     -- Additional Metadata
-    `Analytics_Node` String,
-    `State` String,
-    `User_Defined_Sample_Ratio` UInt32,
-    `Device_Loaded_State` String
+    Analytics_Node String,
+    State String,
+    User_Defined_Sample_Ratio UInt32,
+    Device_Loaded_State String
 )
 ENGINE = ReplacingMergeTree()
 PRIMARY KEY (ID)
@@ -219,16 +218,16 @@ SETTINGS index_granularity = 8192;
 CREATE TABLE inventory_db.Network_Sites
 (
     -- Core Site Information
-    `ID` UUID,                               -- Unique identifier for the site.
-    `Site_Name` String,                      -- Name of the site.
-    `Site_Description` String,               -- Description of the site.
-    `Type` String,                           -- Type of site (e.g., "building").
-    `Is_Data_Center` Bool,                   -- Indicates if the site is a data center.
-    `Site_IP_Ranges` Array(String),          -- List of IP ranges associated with the site.
-    `Is_Configured` Bool,                    -- Indicates if the site is configured.
+    ID UUID,                               -- Unique identifier for the site.
+    Site_Name String,                      -- Name of the site.
+    Site_Description String,               -- Description of the site.
+    Type String,                           -- Type of site (e.g., "building").
+    Is_Data_Center Bool,                   -- Indicates if the site is a data center.
+    Site_IP_Ranges Array(String),          -- List of IP ranges associated with the site.
+    Is_Configured Bool,                    -- Indicates if the site is configured.
 
     -- Mailing Address
-    `Mailing_Address` Nested(
+    Mailing_Address Nested(
         Address1 String,                     -- Primary address line.
         Address2 Nullable(String),           -- Secondary address line.
         City String,                         -- City name.
@@ -238,13 +237,13 @@ CREATE TABLE inventory_db.Network_Sites
     ),
 
     -- Geographical Position
-    `Position` Nested(
+    Position Nested(
         Latitude Float64,                    -- Latitude of the site.
         Longitude Float64                    -- Longitude of the site.
     ),
 
     -- Regional Information
-    `Region` Nested(
+    Region Nested(
         ID UUID,                             -- Unique identifier for the region.
         Long_Name String,                    -- Full name of the region (e.g., "California").
         Short_Name String,                   -- Abbreviation of the region (e.g., "CA").
@@ -253,7 +252,7 @@ CREATE TABLE inventory_db.Network_Sites
     ),
 
     -- Location Details [NEW]
-    `Location` Nested(
+    Location Nested(
         ID UInt64,                           -- Unique identifier for the location.
         Type String,                         -- Type of location (e.g., "Location").
         Name String,                         -- Name of the location.
@@ -266,22 +265,22 @@ CREATE TABLE inventory_db.Network_Sites
         Longitude Float64,                   -- Longitude of the location.
         Latitude Float64                     -- Latitude of the location.
     ),
-    `User_Defined_Fields` Nested(           -- User-defined fields for the location. [NEW]
+    User_Defined_Fields Nested(           -- User-defined fields for the location. [NEW]
         Key String,
         Value String
     ),
 
     -- Contact Information
-    `Contact_Name` String,                   -- Name of the contact person for the site.
-    `Phone_Number` String,                   -- Phone number for the site contact.
-    `Email` String,                          -- Email address for the site contact.
+    Contact_Name String,                   -- Name of the contact person for the site.
+    Phone_Number String,                   -- Phone number for the site contact.
+    Email String,                          -- Email address for the site contact.
 
     -- Site Details
-    `Number_Of_Employees` UInt32,            -- Number of employees at the site.
-    `Tier_Category_ID` UUID,                -- Identifier for the site's tier category.
+    Number_Of_Employees UInt32,            -- Number of employees at the site.
+    Tier_Category_ID UUID,                -- Identifier for the site's tier category.
 
     -- Devices
-    `Devices` Nested(
+    Devices Nested(
         Device_Serial String,                -- Serial number of the device.
         Device_Name String,                  -- Name of the device.
         Host_Name String,                    -- Hostname of the device.
@@ -290,7 +289,7 @@ CREATE TABLE inventory_db.Network_Sites
     ),
 
     -- Business Hours
-    `Business_Hours` Nested(
+    Business_Hours Nested(
         Site String,                         -- Name of the site.
         ID UUID,                             -- Unique identifier for the business hours record.
         Time_Settings Nested(
@@ -306,10 +305,10 @@ CREATE TABLE inventory_db.Network_Sites
     ),
 
     -- Client Messages
-    `Client_Messages` Array(String),         -- Messages from clients or systems about the site.
+    Client_Messages Array(String),         -- Messages from clients or systems about the site.
 
     -- Tags
-    `Tags` Array(String)                     -- Tags associated with the site.
+    Tags Array(String)                     -- Tags associated with the site.
 )
 ENGINE = ReplacingMergeTree()
 PRIMARY KEY (ID)
@@ -318,15 +317,15 @@ SETTINGS index_granularity = 8192;
 
 CREATE TABLE inventory_db.SDWAN_Inventory
 (
-    `ID` String,
-    `Device_Name` String,
-    `Device_Type` String,
-    `Serial_Number` String,
-    `Management_IP` String,
-    `Site` String,
-    `Location` String,
-    `OS_Version` String,
-    `Links` Nested(
+    ID String,
+    Device_Name String,
+    Device_Type String,
+    Serial_Number String,
+    Management_IP String,
+    Site String,
+    Location String,
+    OS_Version String,
+    Links Nested(
         Link_ID String,
         Source_Node String,
         Destination_Node String,
@@ -335,7 +334,7 @@ CREATE TABLE inventory_db.SDWAN_Inventory
         Jitter Float32,
         Packet_Loss Float32
     ),
-    `Interfaces` Nested(
+    Interfaces Nested(
         Interface_Name String,
         Interface_Type String,
         Status String,
@@ -344,14 +343,14 @@ CREATE TABLE inventory_db.SDWAN_Inventory
         Traffic_Out UInt64,
         Errors UInt32
     ),
-    `Policies` Nested(
+    Policies Nested(
         Policy_Name String,
         Source_IP String,
         Destination_IP String,
         Traffic_Type String,
         Priority UInt8
     ),
-    `Last_Updated` DateTime
+    Last_Updated DateTime
 )
 ENGINE = ReplacingMergeTree()
 PRIMARY KEY (ID)
@@ -361,16 +360,16 @@ SETTINGS index_granularity = 8192;
 CREATE TABLE inventory_db.SNMP_Inventory
 (
     -- Device Information
-    `ID` String,                           -- Unique identifier for the device
-    `Device_Name` String,                  -- Name of the device
-    `Device_Type` String,                  -- Type/category of the device
-    `Management_IP` String,                -- Management IP address for SNMP
-    `Site` String,                         -- Location of the device
-    `Vendor` String,                       -- Device manufacturer
-    `Model` String,                        -- Device model
+    ID String,                           -- Unique identifier for the device
+    Device_Name String,                  -- Name of the device
+    Device_Type String,                  -- Type/category of the device
+    Management_IP String,                -- Management IP address for SNMP
+    Site String,                         -- Location of the device
+    Vendor String,                       -- Device manufacturer
+    Model String,                        -- Device model
 
     -- SNMP Metrics
-    `SNMP_Metrics` Nested(
+    SNMP_Metrics Nested(
         Metric_Name String,                -- Name of the metric
         OID String,                        -- SNMP OID for the metric
         Value Float64,                     -- Metric value
@@ -379,7 +378,7 @@ CREATE TABLE inventory_db.SNMP_Inventory
     ),
 
     -- SNMP Traps
-    `SNMP_Traps` Nested(
+    SNMP_Traps Nested(
         Trap_ID String,                    -- Unique identifier for the trap
         Trap_Type String,                  -- Type of trap
         Trap_Source String,                -- Source device of the trap
@@ -389,7 +388,7 @@ CREATE TABLE inventory_db.SNMP_Inventory
     ),
 
     -- SNMP Interfaces
-    `SNMP_Interfaces` Nested(
+    SNMP_Interfaces Nested(
         Interface_Name String,             -- Name of the interface
         If_Index UInt16,                   -- Interface SNMP index
         Status String,                     -- Interface status (UP/DOWN)
@@ -400,7 +399,7 @@ CREATE TABLE inventory_db.SNMP_Inventory
     ),
 
     -- SNMP Configuration
-    `SNMP_Configuration` Nested(
+    SNMP_Configuration Nested(
         Community_String String,           -- Community string for SNMP
         Version String,                    -- SNMP version (v1, v2c, v3)
         Security_Level String,             -- SNMPv3 security level
@@ -411,7 +410,7 @@ CREATE TABLE inventory_db.SNMP_Inventory
     ),
 
     -- Polling Configuration
-    `Polling_Configuration` Nested(
+    Polling_Configuration Nested(
         Poll_Interval UInt32,              -- Polling interval in seconds
         Retries UInt8,                     -- Number of retries
         Timeout UInt16,                    -- Timeout in milliseconds
@@ -426,39 +425,39 @@ SETTINGS index_granularity = 8192;
 CREATE TABLE inventory_db.Alert_Inventory
 (
     -- Basic Alert Metadata
-    `Version` String,
-    `Alert_Id` String,
-    `Type` String,
-    `Alert_Category` String,
-    `Alert_Identifier_Id` String,
-    `Date_Created` DateTime,
-    `Date_Closed` Nullable(DateTime),
-    `Duration_Since_Created_Minutes` Int32,
-    `Duration_Active_Minutes` Int32,
-    `Severity` String,
-    `User_Status` String,
-    `Contributes_To_Status` Bool,
-    `Alert_State` String,
-    `Date_Of_Last_Alert_State_Change` Nullable(DateTime),
+    Version String,
+    Alert_Id String,
+    Type String,
+    Alert_Category String,
+    Alert_Identifier_Id String,
+    Date_Created DateTime,
+    Date_Closed Nullable(DateTime),
+    Duration_Since_Created_Minutes Int32,
+    Duration_Active_Minutes Int32,
+    Severity String,
+    User_Status String,
+    Contributes_To_Status Bool,
+    Alert_State String,
+    Date_Of_Last_Alert_State_Change Nullable(DateTime),
 
     -- Alert Description
-    `Description_Title` String,
-    `Description_Summary` String,
-    `Description_Details` Array(Tuple(String, String, String)),
-    `Description_Source_Info` Array(Tuple(String, String, String, Nullable(String))),
-    `Description_Link_Info` Array(Tuple(String, String, String, Nullable(String))),
-    `Description_Table_Info_Label` String,
-    `Description_Table_Info_Columns` Array(Tuple(String, String, String)),
-    `Description_Table_Info_Rows` Array(Array(Tuple(String, String, String))),
+    Description_Title String,
+    Description_Summary String,
+    Description_Details Array(Tuple(String, String, String)),
+    Description_Source_Info Array(Tuple(String, String, String, Nullable(String))),
+    Description_Link_Info Array(Tuple(String, String, String, Nullable(String))),
+    Description_Table_Info_Label String,
+    Description_Table_Info_Columns Array(Tuple(String, String, String)),
+    Description_Table_Info_Rows Array(Array(Tuple(String, String, String))),
 
     -- Root Cause Analysis
-    `Root_Cause_Analysis_Summary` String,
-    `Root_Cause_Analysis_Issues` Array(Tuple(String, String)),
-    `Root_Cause_Analysis_Chain_Id` String,
+    Root_Cause_Analysis_Summary String,
+    Root_Cause_Analysis_Issues Array(Tuple(String, String)),
+    Root_Cause_Analysis_Chain_Id String,
 
     -- Alert Integrations
-    `Alert_Integrations_ServiceNow_Alert_Integration_Incident_Number` String,
-    `Alert_Integrations_ServiceNow_Alert_Integration_Incident_Url` String
+    Alert_Integrations_ServiceNow_Alert_Integration_Incident_Number String,
+    Alert_Integrations_ServiceNow_Alert_Integration_Incident_Url String
 )
 ENGINE = MergeTree
 -- Replace nullable columns in the sorting key with coalesced values
