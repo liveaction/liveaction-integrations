@@ -16,7 +16,8 @@ from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventor
     add_to_livenx_ch_inventory, remove_from_livenx_ch_inventory,  get_bluecat_addresses, \
     diff_bluecat_addresses, add_to_livenx_custom_inventory, get_livenx_custom_inventory
 from netld.incidents import push_netld_incidents, get_netld_incidents
-from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts, get_clickhouse_alerts, add_to_clickhouse_alerts, diff_clickhouse_alerts
+from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts, get_clickhouse_alerts, add_to_clickhouse_alerts, diff_clickhouse_alerts,\
+    add_to_freshwork_alerts, get_freshwork_alerts, diff_freshwork_alerts
 from netld.inventory import add_to_netld_inventory, remove_from_netld_inventory, get_netld_inventory, map_livenx_inventory_to_netld_inventory, map_netld_inventory_to_livenx_inventory
 from helper.timer import get_top_of_current_minute_epoch
 from helper.prompt import query_yes_no
@@ -153,7 +154,18 @@ def main(args):
                     if args.noprompt == True or query_yes_no("This alerts will be added: " + str(clickhouse_alerts_diff_to_add)):
                         add_to_clickhouse_alerts(clickhouse_alerts_diff_to_add)
                 else:
-                    local_logger.info("Clickhouse is already sync with livenx alerts")      
+                    local_logger.info("Clickhouse is already sync with livenx alerts")
+            elif args.fromproduct == "livenx" and args.toproduct == "freshwork":
+                ## sync the LiveNX alerts to the freshwork alerts
+                ## figure out which alerts to add
+                orig_livenx_alerts = get_livenx_alerts(starttimesecs, endtimesecs)
+                orig_freshwork_alerts = get_freshwork_alerts()
+                freshwork_alerts_diff_to_add = diff_freshwork_alerts(orig_livenx_alerts, orig_freshwork_alerts)
+                if len(freshwork_alerts_diff_to_add) > 0:
+                    if args.noprompt == True or query_yes_no("This alerts will be added: " + str(freshwork_alerts_diff_to_add)):
+                        add_to_freshwork_alerts(freshwork_alerts_diff_to_add)
+                else:
+                    local_logger.info("Freshwork is already sync with livenx alerts")
             elif args.fromproduct == "netld":
                 alerts = get_netld_incidents()
             
