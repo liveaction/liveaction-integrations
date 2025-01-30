@@ -8,6 +8,14 @@ sh ./create_db.sh
 
 ## To Run The Data Model Sync
 
+Install the integration libraries:
+
+cd liveaction-integrations/LiveNX/integrations
+
+sudo apt install pip
+
+pip3 install -r requirements.txt 
+
 Only on the LiveNX Server, run the sync via:
 
 cd liveaction-integrations/LiveNX/integrations/data-model/clickhouse
@@ -32,7 +40,7 @@ On the LiveNX Server only:
 
 sh ./create_liveassist_tables_1.0.sh
 
-Add clickhouse to the OTEL collector export in /etc/la-otelcol.yaml:
+Add clickhouse to the OTEL collector export in /etc/la-otelcol.yaml. Change the password: value to the clickhouse password located in /etc/clickhouse-server/users.d/users.xml:
 
 ```
 exporters:
@@ -60,15 +68,30 @@ service:
   pipelines:
     logs:
       exporters:
+      ...
       - clickhouse
-...
+      receivers:
+      ...
+      - otlp
     metrics:
       exporters:
+      ...
       - clickhouse
-...
+      processors:
+      - attributes
+      - attributes/npm
+      receivers:
+      ...
+      - otlp
     traces:
       exporters:
+      ...
       - clickhouse
+      processors:
+      - attributes
+      - attributes/npm
+      receivers:
+      - otlp
 ...
 ```
 
@@ -89,3 +112,6 @@ sudo iptables -A INPUT -p tcp --dport 4317 -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 4318 -j ACCEPT 
 ```
 
+Restart the OTEL collector:
+
+sudo systemctl restart la-otelcol

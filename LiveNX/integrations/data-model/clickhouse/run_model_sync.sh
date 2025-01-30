@@ -12,17 +12,17 @@ export CLICKHOUSE_CERTFILE=/etc/clickhouse-server/cacerts/ca.crt
 export CLICKHOUSE_KEYFILE=/etc/clickhouse-server/cacerts/ca.key
 
 # Run the Python scripts in background
-python3 ../main.py --inventory --fromproduct livenx --toproduct livenxch --noprompt --continuous &
+python3 ../../main.py --inventory --fromproduct livenx --toproduct livenxch --noprompt --continuous &
 # Store the PIDs for each background process
 echo "Started inventory process with PID: $!"
 inventory_pid=$!
-python3 ../main.py --sites --fromproduct livenx --toproduct livenxch --noprompt --continuous &
+sleep 5
+python3 ../../main.py --sites --fromproduct livenx --toproduct livenxch --noprompt --continuous &
 echo "Started sites process with PID: $!"
 sites_pid=$!
-python3 ../main.py --alerts --fromproduct livenx --toproduct livenxch --noprompt --continuous &
+python3 ../../main.py --alerts --fromproduct livenx --toproduct livenxch --noprompt --continuous &
 echo "Started alerts process with PID: $!"
 alerts_pid=$!
-
 # Optional: Write PIDs to a file for later management
 echo "$inventory_pid $sites_pid $alerts_pid" > integration_pids.txt
 
