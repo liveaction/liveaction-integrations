@@ -1,12 +1,12 @@
 ### Example
 Audit configurations with ChatGPT:
 ```bash
-python audit_tool.py --devicefile devices.csv --chatgpt
+python config_audit.py.py --devicefile devices.csv --chatgpt
 ```
 
 Audit configurations without ChatGPT:
 ```bash
-python audit_tool.py --devicefile devices.csv
+python config_audit.py.py --devicefile devices.csv
 ```
 
 ## How It Works
