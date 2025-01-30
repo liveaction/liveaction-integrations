@@ -57,6 +57,9 @@ python3 main.py --sites --fromproduct bluecat_integrity --toproduct livenx
 
 # Sync custom applications from snow to Linenx
 python3 main.py --custom_applications --fromproduct snow_csv --toproduct livenx --csv_input /data/mdb_ci_server.csv
+
+# Sync alerts from LiveNX to Freshwork
+python3 main.py --alerts --fromproduct livenx --toproduct freshwork
 ```
 
 ### Command Line Arguments
@@ -160,6 +163,9 @@ THIRDEYE_NETWORK=Default
 BLUECAT_API_HOST=1.0.0.1
 BLUECAT_API_USER="username"
 BLUECAT_API_PASSWORD="password"
+FRESHWORK_HOST=1.0.0.1
+FRESHWORK_USERNAME="username"
+FRESHWORK_PASSWORD="password"
 
 
 Push inventory continuously from LiveAction LiveNX to LogicVein NetLD:
