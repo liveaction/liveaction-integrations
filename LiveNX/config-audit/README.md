@@ -1,12 +1,12 @@
 ### Example
 Audit configurations with ChatGPT:
 ```bash
-python config_audit.py.py --devicefile devices.csv --chatgpt
+python config-audit.py --devicefile devices.csv --chatgpt
 ```
 
 Audit configurations without ChatGPT:
 ```bash
-python config_audit.py.py --devicefile devices.csv
+python config-audit.py --devicefile devices.csv
 ```
 
 ## How It Works
@@ -29,9 +29,22 @@ python config_audit.py.py --devicefile devices.csv
 ## Usage:
  - Extract the device list from the LiveNX Server using the CSV export at https://x.x.x.x/livenx/settings/device-management?tabId=My%20Devices
  - Open CSV file using a CSV editor and add new empty columns to the end of the column list:
-    - Username: should contain the SSH Username used to connect to the device
-    - Password: should contain the SSH Password used to connect to the device
-    - Golden_File: should be empty, or contain a full path to the golden config file used for comparison. If empty, it will fetch the golden config from github https://raw.githubusercontent.com/liveaction/liveaction-integrations/refs/heads/main/LiveNX/configs/{encoded_model}/{encoded_ios_version}.cfg, which encoded_model is the model name of the device (example: ciscoCSR1000v) and encoded_ios_version is the ios version number (example: 16.3.1).
+    - USERNAME should contain the SSH Username used to connect to the device
+    - PASSWORD should contain the SSH Password used to connect to the device
+    - GOLDEN_FILE should be empty, or contain a full path to the golden config file used for comparison. If empty, it will fetch the golden config from github https://raw.githubusercontent.com/liveaction/liveaction-integrations/refs/heads/main/LiveNX/configs/{encoded_model}/{encoded_ios_version}.cfg, which encoded_model is the model name of the device (example: ciscoCSR1000v) and encoded_ios_version is the ios version number (example: 16.3.1).
+
+ - Set the following environmental variables:
+
+LIVENX_API_HOST=127.0.0.1
+LIVENX_API_PORT=8093
+LIVENX_API_TOKEN=foobar
+LIVENX_TARGET_IP=127.0.0.1
+CLICKHOUSE_HOST=127.0.0.1
+CLICKHOUSE_USERNAME=default
+CLICKHOUSE_PASSWORD=foobar2
+CLICKHOUSE_PORT=9440
+CLICKHOUSE_CERTFILE=/etc/clickhouse-server/cacerts/ca.crt
+CLICKHOUSE_KEYFILE=/etc/clickhouse-server/cacerts/ca.key
 
 ## License
 This program is provided under the MIT License. Use it at your own risk and customize it to fit your requirements.

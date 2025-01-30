@@ -1,3 +1,5 @@
 netmiko
 requests
 clickhouse-driver
+openai
+boto3
