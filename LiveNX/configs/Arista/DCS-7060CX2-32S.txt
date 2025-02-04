@@ -1,0 +1,40 @@
+1) Replace <LIVENX-SERVER-IP> with the IP address of your LiveNX server.
+
+2) Replace <Management> with desired source interface (Note:  Should be the same interface used to poll the device via SNMP)
+
+3) Adjust interface Ethernet# to specify the interfaces you wish to monitor. Apply the flow tracker to each relevant interface as needed.
+
+Note: May need to add "no sflow enable" to interface getting converted from sflow to IPFIX.
+
+
+
+
+! Disable sFlow globally to prevent conflicts
+no sflow run
+
+! Enable IP routing for IPFIX packets to be routed to the collector
+ip routing
+
+! Define the sampled flow tracker
+flow tracking sampled
+   tracker LiveNX-Tracker
+      sample 1000
+      no shutdown
+
+! Define the flow exporter and associate it with the tracker
+flow tracking sampled
+   tracker LiveNX-Tracker
+      exporter LiveNX-Exporter
+         collector <LIVENX-SERVER-IP> port 2055
+         local interface <Management>
+         template interval 300000
+         no shutdown
+
+! Apply the flow tracker to the desired interfaces
+interface Ethernet1
+   flow tracker sampled LiveNX-Tracker
+   no shutdown
+
+interface Ethernet2
+   flow tracker sampled LiveNX-Tracker
+   no shutdown
