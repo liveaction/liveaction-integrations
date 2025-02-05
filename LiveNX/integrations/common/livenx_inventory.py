@@ -5,6 +5,7 @@ import json
 import logging
 import requests
 from helper.clickhouse import connect_with_tls
+from common.netmikoConnector import fetch_running_config
 
 local_logger = logging.getLogger(__name__)
 
@@ -803,3 +804,41 @@ def add_to_livenx_custom_inventory(snow_devices):
       with urllib.request.urlopen(request, context=ctx) as response:
           response_data = response.read().decode('utf-8')
           local_logger.info(response_data)
+
+def update_to_livenx_inventory_serial(devices):
+    
+    update_devices = []
+    for device in devices:
+      cmd_results = fetch_running_config({
+                "device_type": device.get('deviceType', 'LiveWire'),
+                "host": device.get('address'),
+                "username": device.get('username', 'admin'),
+                "password": device.get('password', 'admin'),
+            }) or []
+      for line in cmd_results:
+         line = line.split("\t")
+         if len(line) > 0:
+            serial = line[0]
+            if serial !='' and device.get('serial') != serial:
+               update_devices.append({
+                  "nodeId": device.get('nodeId'),
+                  "stringTags": "%s,New Device Serial: %s"%(device.get('stringTags'), serial)
+              })
+      #Post the applications making sure to ignore the ssl certificates with verify=False
+      # response = requests.post(url = url, headers = headers, data = data, verify=False)
+      if len(update_devices) > 0:
+
+        data = json.dumps(update_devices).encode('utf-8')
+
+        # Create the request and add the Content-Type header
+        request, ctx = create_request("/v1/devices", data)
+        local_logger.info(data)
+        request.add_header("Content-Type", "application/json")
+        request.add_header("accept", "application/json")
+        # Specify the request method as POST
+        request.method = "PUT"
+
+        with urllib.request.urlopen(request, context=ctx) as response:
+            response_data = response.read().decode('utf-8')
+            local_logger.info(response_data)
+
