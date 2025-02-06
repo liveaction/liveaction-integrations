@@ -14,7 +14,8 @@ from common.livenx_inventory import get_livenx_inventory, add_to_livenx_inventor
     remove_from_livenx_inventory, diff_livenx_inventory, \
     get_livenx_ch_inventory, map_livenx_inventory_to_livenx_ch_inventory, diff_livenx_ch_inventory, \
     add_to_livenx_ch_inventory, remove_from_livenx_ch_inventory,  get_bluecat_addresses, \
-    diff_bluecat_addresses, add_to_livenx_custom_inventory, get_livenx_custom_inventory
+    diff_bluecat_addresses, add_to_livenx_custom_inventory, get_livenx_custom_inventory, \
+    update_to_livenx_inventory_serial
 from netld.incidents import push_netld_incidents, get_netld_incidents
 from common.livenx_alerts import push_livenx_alerts, get_livenx_alerts, get_clickhouse_alerts, add_to_clickhouse_alerts, diff_clickhouse_alerts,\
     add_to_freshwork_alerts, get_freshwork_alerts, diff_freshwork_alerts
@@ -210,6 +211,10 @@ def main(args):
                 else:
                     local_logger.info("Snow inventory is already sync with livenx application customs")
 
+        elif args.serialsync:
+            orig_livenx_inventory = get_livenx_inventory()
+            update_to_livenx_inventory_serial(orig_livenx_inventory['devices'])
+            local_logger.info("livenx inventory serial device sync successfully.")
 
         if args.continuous is False:
             break
@@ -236,6 +241,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_minutes_behind', type=int, default=2, help='The number of minutes to run behind wallclock')
     parser.add_argument("--custom_applications", action="store_true", help="Get and push inventory data.")
     parser.add_argument('--csv_input', type=str, default='', help='The product to push to')
+    parser.add_argument("--serialsync", action="store_true", help="Sync serial number device.")
 
     args = parser.parse_args()
     main(args)

@@ -60,6 +60,9 @@ python3 main.py --custom_applications --fromproduct snow_csv --toproduct livenx 
 
 # Sync alerts from LiveNX to Freshwork
 python3 main.py --alerts --fromproduct livenx --toproduct freshwork
+
+# Sync livenx serial
+python3 main.py --serialsync
 ```
 
 ### Command Line Arguments
@@ -79,6 +82,7 @@ python3 main.py --alerts --fromproduct livenx --toproduct freshwork
 | `--num_minutes_behind` | Minutes to run behind wall clock | 2 |
 | `--custom_applications` | Enable custom application synchronization | False |
 | `--csv_input` | CSV file path | '' |
+| `--serialsync` | Livenx device serial sync | '' |
 
 ## Features
 
