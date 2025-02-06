@@ -36,14 +36,23 @@ python config-audit.py --devicefile devices.csv
  - Set the following environmental variables:
 
 LIVENX_API_HOST=127.0.0.1
+
 LIVENX_API_PORT=8093
+
 LIVENX_API_TOKEN=foobar
+
 LIVENX_TARGET_IP=127.0.0.1
+
 CLICKHOUSE_HOST=127.0.0.1
+
 CLICKHOUSE_USERNAME=default
+
 CLICKHOUSE_PASSWORD=foobar2
+
 CLICKHOUSE_PORT=9440
+
 CLICKHOUSE_CERTFILE=/etc/clickhouse-server/cacerts/ca.crt
+
 CLICKHOUSE_KEYFILE=/etc/clickhouse-server/cacerts/ca.key
 
 ## License
