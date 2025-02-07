@@ -1,0 +1,14 @@
+enable
+config
+flow-export active-flow-timeout 1
+flow-export destination 1 <LiveNX IP address> 2055 # for collector 1
+flow-export destination 2 <LiveNX IP address> 2055 # for Collector 2 (Optional)
+no flow-export destination {1 | 2}                 # If want to disable any collector
+flow-export enable                                 #Enables the export of NetFlow records
+flow-export engine-id <0-255>                      #Specifies the VIP or LC slot number of the flow switching engine
+flow-export engine-type <0-255>                    # Specifies the flow-export engine type. They are: 0 for RP, and 1 for VIP/LC.
+flow-export traffic-type lan-rx
+flow-export traffic-type lan-tx 
+flow-export traffic-type wan-rx 
+flow-export traffic-type wan-tx                    # Specifies which interface to turn on for flow exporting
+write memory
