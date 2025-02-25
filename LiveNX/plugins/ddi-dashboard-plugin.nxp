@@ -1,0 +1,159 @@
+{
+  "plugins" : [ {
+    "id" : "79ce4a12-6851-455a-a731-c1026620e899",
+    "name" : "DDI",
+    "description" : "DDI Health Dashboard",
+    "enabled" : true,
+    "imported" : false,
+    "createdVersion" : "25.1.0",
+    "dashboards" : [ {
+      "id" : "b47b3f97-aa33-44c6-9a50-5849050c2f08",
+      "name" : "DDI",
+      "description" : "",
+      "widgets" : [ {
+        "type" : "CUSTOM",
+        "sizeX" : 1,
+        "sizeY" : 1,
+        "row" : 1,
+        "col" : 0,
+        "id" : {
+          "categoryId" : 300,
+          "typeId" : 0,
+          "customId" : "67a51a0fea7911d1bd1845b4"
+        }
+      }, {
+        "type" : "CUSTOM",
+        "sizeX" : 1,
+        "sizeY" : 1,
+        "row" : 2,
+        "col" : 0,
+        "id" : {
+          "categoryId" : 300,
+          "typeId" : 0,
+          "customId" : "67a51efaea7911d1bd185c3f"
+        }
+      }, {
+        "type" : "CUSTOM",
+        "sizeX" : 1,
+        "sizeY" : 1,
+        "row" : 2,
+        "col" : 1,
+        "id" : {
+          "categoryId" : 300,
+          "typeId" : 0,
+          "customId" : "67a51f09ea7911d1bd185ce8"
+        }
+      }, {
+        "type" : "CUSTOM",
+        "sizeX" : 2,
+        "sizeY" : 1,
+        "row" : 0,
+        "col" : 1,
+        "id" : {
+          "categoryId" : 300,
+          "typeId" : 0,
+          "customId" : "67a51f1fea7911d1bd185d84"
+        }
+      }, {
+        "type" : "CUSTOM",
+        "sizeX" : 2,
+        "sizeY" : 1,
+        "row" : 1,
+        "col" : 1,
+        "id" : {
+          "categoryId" : 300,
+          "typeId" : 0,
+          "customId" : "67a4f8a16eee07591d564b6e"
+        }
+      }, {
+        "type" : "CUSTOM",
+        "sizeX" : 1,
+        "sizeY" : 1,
+        "row" : 0,
+        "col" : 0,
+        "id" : {
+          "categoryId" : 300,
+          "typeId" : 0,
+          "customId" : "67a51bb3ea7911d1bd184821"
+        }
+      } ]
+    } ],
+    "customWidgets" : [ {
+      "id" : "67a51a0fea7911d1bd1845b4",
+      "name" : "DHCP Alerts by Type",
+      "reportId" : {
+        "category" : "sql",
+        "id" : "5"
+      },
+      "viewType" : "aggregation",
+      "parameters" : {
+        "executionType" : "aggregation"
+      }
+    }, {
+      "id" : "67a51efaea7911d1bd185c3f",
+      "name" : "Alerts by Destination",
+      "reportId" : {
+        "category" : "sql",
+        "id" : "2"
+      },
+      "viewType" : "aggregation",
+      "parameters" : {
+        "executionType" : "aggregation"
+      }
+    }, {
+      "id" : "67a51f09ea7911d1bd185ce8",
+      "name" : "Alerts by Source",
+      "reportId" : {
+        "category" : "sql",
+        "id" : "3"
+      },
+      "viewType" : "aggregation",
+      "parameters" : {
+        "executionType" : "aggregation"
+      }
+    }, {
+      "id" : "67a51f1fea7911d1bd185d84",
+      "name" : "Alerts over Time",
+      "reportId" : {
+        "category" : "sql",
+        "id" : "1"
+      },
+      "viewType" : "timeseries",
+      "parameters" : {
+        "executionType" : "timeseries"
+      }
+    }, {
+      "id" : "67a4f8a16eee07591d564b6e",
+      "name" : "DNS and DHCP Traffic",
+      "reportId" : {
+        "category" : "flow",
+        "id" : "8"
+      },
+      "viewType" : "timeseries",
+      "parameters" : {
+        "deviceSerial" : "ALL_DEVICES_SERIAL",
+        "interface" : "All Interfaces",
+        "direction" : "both",
+        "flowType" : "basic",
+        "executionType" : "timeseries",
+        "sortBy" : "BIT_RATE",
+        "flexSearch" : "flow.app=dns | flow.app=dhcp",
+        "businessHours" : "none",
+        "binDuration" : "auto",
+        "reportDataSource" : "auto"
+      }
+    }, {
+      "id" : "67a51bb3ea7911d1bd184821",
+      "name" : "DNS Alerts by Type",
+      "reportId" : {
+        "category" : "sql",
+        "id" : "4"
+      },
+      "viewType" : "aggregation",
+      "parameters" : {
+        "executionType" : "aggregation"
+      }
+    } ],
+    "dynamicReports" : [ ]
+  } ]
+}
