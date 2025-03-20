@@ -11,7 +11,7 @@ import boto3
 import json
 from clickhouse_driver import Client
 from datetime import datetime
-
+import sqlite3
 import urllib.parse
 from datetime import datetime
 from netmiko import ConnectHandler
@@ -263,6 +263,116 @@ def save_config_if_changed_clickhouse(device, running_config):
             print(f"Error inserting new config for device {device_host}: {e}")
             return None
 
+def save_config_if_changed_sqlite(device, running_config):
+    # Hash the running configuration
+    config_hash = hashlib.sha256(running_config.encode()).hexdigest()
+
+    # Connect to SQLite database
+    conn = sqlite3.connect('inventory_db.sqlite')
+    cursor = conn.cursor()
+
+    # Create table if it doesn't exist
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Audit_Log (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Name TEXT,
+            Device_Type TEXT,
+            Device_Serial TEXT,
+            Host TEXT,
+            Vendor TEXT,
+            Model TEXT,
+            Ios_Version TEXT,
+            Description TEXT,
+            Wan TEXT,
+            Service_Provider TEXT,
+            Site TEXT,
+            Site_Cidr TEXT,
+            Poll BOOLEAN,
+            Poll_Qos BOOLEAN,
+            Poll_Flow BOOLEAN,
+            Poll_Ip_Sla BOOLEAN,
+            Poll_Routing BOOLEAN,
+            Poll_Lan BOOLEAN,
+            Poll_Interval_Msec INTEGER,
+            Golden_File TEXT,
+            Fetch_Time TEXT,
+            Config_Hash TEXT,
+            Config_Content TEXT
+        )
+    """)
+
+    # Check for existing config hash
+    query = """
+        SELECT Config_Hash 
+        FROM Audit_Log 
+        WHERE Host = ? 
+        ORDER BY Fetch_Time DESC 
+        LIMIT 1
+    """
+    device_host = device['Host']
+    try:
+        cursor.execute(query, (device_host,))
+        result = cursor.fetchone()
+    except Exception as e:
+        print(f"Error executing query for device {device_host}: {e}")
+        conn.close()
+        return None
+
+    if not result or result[0] != config_hash:
+        # Save to file system as backup if the config is different
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = os.path.join(os.getcwd(), f"{device_host}_{timestamp}.cfg")
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w") as file:
+            file.write(running_config)
+
+        # Insert new record with all columns
+        insert_query = """
+            INSERT INTO Audit_Log (
+                Name, Device_Type, Device_Serial, Host, Vendor, Model, Ios_Version, 
+                Description, Wan, Service_Provider, Site, Site_Cidr, Poll, Poll_Qos, 
+                Poll_Flow, Poll_Ip_Sla, Poll_Routing, Poll_Lan, Poll_Interval_Msec, 
+                Golden_File, Fetch_Time, Config_Hash, Config_Content
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
+        """
+        insert_data = (
+            device.get('Name', ''),
+            device.get('Device_Type', ''),
+            device.get('Device_Serial', ''),
+            device_host,
+            device.get('Vendor', ''),
+            device.get('Model', ''),
+            device.get('Ios_Version', ''),
+            device.get('Description', ''),
+            device.get('Wan', ''),
+            device.get('Service_Provider', ''),
+            device.get('Site', ''),
+            device.get('Site_Cidr', ''),
+            device.get('Poll', False),
+            device.get('Poll_Qos', False),
+            device.get('Poll_Flow', False),
+            device.get('Poll_Ip_Sla', False),
+            device.get('Poll_Routing', False),
+            device.get('Poll_Lan', False),
+            device.get('Poll_Interval_Msec', 0),
+            device.get('Golden_File', ''),
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            config_hash,
+            running_config
+        )
+        
+        # Execute the insert query
+        try:
+            cursor.execute(insert_query, insert_data)
+            conn.commit()
+        except Exception as e:
+            print(f"Error inserting new config for device {device_host}: {e}")
+            conn.close()
+            return None
+
+    conn.close()
 
 def get_device_info(device, model = '', ios_version = ''):
     try:
@@ -451,6 +561,9 @@ def main(args):
              
             if args.clickhouse:
                 save_config_if_changed_clickhouse(device, running_config)
+            if args.sqlite:
+                save_config_if_changed_sqlite(device, running_config)
+
             
             model, ios_version = get_device_info(netmiko_device)
             golden_config = fetch_golden_config(output_file, model, ios_version, device['Golden_File'])
@@ -488,6 +601,7 @@ if __name__ == "__main__":
     parser.add_argument("--chatgpt", default=False, action="store_true", help="Ask ChatGPT to resolve differences between configs")
     parser.add_argument("--liveassist", default=False, action="store_true", help="Ask LiveAssist to resolve differences between configs")
     parser.add_argument("--clickhouse", default=False, action="store_true", help="Save configs to clickhouse")
+    parser.add_argument("--sqlite", default=False, action="store_true", help="Save configs to sqlite")
     args = parser.parse_args()
     main(args)
 
