@@ -154,22 +154,15 @@ def create_livenx_device_from_ip(nodeid, ip_address, config_loader):
     local_logger.debug(livenx_device)
     return livenx_device
 
-
 def choose_target_node(nodes):
     global CURRENT_NODE_INDEX
-    if CURRENT_NODE_INDEX >= len(nodes):
-        CURRENT_NODE_INDEX = 0
-    i = 0
-    for node in nodes:
-        # skip adding to the local node
-        if node['local'] == True:
-            i += 1
-            continue
-        if i == CURRENT_NODE_INDEX:
-            CURRENT_NODE_INDEX += 1
-            return node
-        i += 1
-    return None
+    nodes = [node for node in nodes if not node.get('local', False)]  # Filter out local nodes
+    if not nodes:
+        return None
+    CURRENT_NODE_INDEX %= len(nodes)  # Ensure index wraps around
+    target_node = nodes[CURRENT_NODE_INDEX]
+    CURRENT_NODE_INDEX += 1
+    return target_node
 
 def map_ip_to_livenx_inventory(ip_list):
     livenx_inventory = {}
