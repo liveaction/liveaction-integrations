@@ -14,7 +14,6 @@ This tool scans log files for messages about unknown devices sending flow packet
   - `LIVENX_API_HOST`: LiveNX server hostname
   - `LIVENX_API_PORT`: LiveNX API port
   - `LIVENX_API_TOKEN`: Authentication token for LiveNX API
-  - `LIVENX_TARGET_NODE_IP`: Target LiveNX node IP address
 
 ## Installation
 
@@ -24,7 +23,6 @@ This tool scans log files for messages about unknown devices sending flow packet
 export LIVENX_API_HOST="your.livenx.host"
 export LIVENX_API_PORT="8093"
 export LIVENX_API_TOKEN="your-api-token"
-export LIVENX_TARGET_NODE_IP="your-target-node-ip"
 ```
 
 ## Usage

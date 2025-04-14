@@ -166,7 +166,7 @@ def choose_target_node(nodes):
             continue
         if i == CURRENT_NODE_INDEX:
             CURRENT_NODE_INDEX += 1
-            return node['id']
+            return node
     return None
 
 def map_ip_to_livenx_inventory(ip_list):
