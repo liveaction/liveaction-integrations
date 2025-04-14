@@ -54,15 +54,16 @@ def main(args):
         start_interface_monitor()
 
     # Check for existing files that match the pattern in the directory
-    for filename in os.listdir(directory_to_monitor):
-        if filename.startswith("LivenxServer_") and filename.endswith(".log"):
-            run_adddevice(os.path.join(directory_to_monitor, filename), "Existing File")
-
-    # Start monitoring the directory
     if args.autoadddevices:
-        # Start the directory monitoring in the background
-        local_logger.info("Starting directory monitoring in the background...")
-        monitor_directory(args.continuous)
+        for filename in os.listdir(directory_to_monitor):
+            if filename.startswith("LivenxServer_") and filename.endswith(".log"):
+                run_adddevice(os.path.join(directory_to_monitor, filename), "Existing File")
+
+        if args.continuous:
+            # Start monitoring the directory
+            # Start the directory monitoring in the background
+            local_logger.info("Starting directory monitoring in the background...")
+            monitor_directory(args.continuous)
 
     if args.continuous:
         # Keep the script running to monitor the directory
