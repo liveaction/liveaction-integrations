@@ -4,8 +4,7 @@ import os
 from helper.clickhouse import connect_with_tls
 from typing import Dict, Set, Tuple
 from multiprocessing import Process
-import requests
-import daemon
+#import requests
 import urllib
 import ssl
 import json
@@ -83,7 +82,7 @@ class InterfaceMonitor:
         
         try:
             # Create the request and add the Content-Type header
-            request, ctx = create_request(f"/v1/devices/virtual/interfaces", payload)
+            request, ctx = create_request(f"/v1/devices/virtual/interfaces", json.dumps(payload).encode('utf-8'))
             logging.info(payload)
             request.add_header("Content-Type", "application/json")
             request.add_header("accept", "application/json")
@@ -95,14 +94,6 @@ class InterfaceMonitor:
                 logging.info(response_data)
         except Exception as err:
             logging.error(f"Error on /v1/devices/virtual/interface API Call {err}")
-        
-        url = self.add_interfaces_url.format(device_serial)
-        try:
-            response = requests.post(url, json=payload, verify=False)
-            response.raise_for_status()
-            logging.info(f"API notification successful for device {device_serial}, ifIndex {if_index}")
-        except requests.exceptions.RequestException as e:
-            logging.error(f"API notification failed: {e}")
 
     def get_interfaces(self) -> Dict[str, Set[Tuple[int, int]]]:
         # get all interfaces that aren't marked with dummyseed
@@ -152,11 +143,16 @@ class InterfaceMonitor:
     
 
 def start_monitor():
-    # with daemon.DaemonContext():
     monitor = InterfaceMonitor()
     monitor.run()
 
 def start_interface_monitor():
-    process = Process(target=start_monitor, args=())
-    process.start()
-    return process
+    try:
+        process = Process(target=start_monitor, args=())
+        process.daemon = True  # Set the process as a daemon
+        process.start()
+        logging.info("Interface monitor started successfully.")
+        return process
+    except Exception as e:
+        logging.error(f"Failed to start interface monitor: {e}")
+        raise

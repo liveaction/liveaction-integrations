@@ -21,7 +21,7 @@ def run_adddevice(logfile, file_event_type):
     subprocess.Popen(["python3", "adddevice.py", "--logfile", logfile])
 
 # Function to monitor the directory for new or modified files
-def monitor_directory():
+def monitor_directory(continuous):
     file_cache = {}  # Cache to store file modification times
     while True:
         try:
@@ -36,6 +36,9 @@ def monitor_directory():
                         file_event_type = "New File" if filepath not in file_cache else "Modified File"
                         file_cache[filepath] = last_modified
                         run_adddevice(filepath, file_event_type)
+            if continuous == False:
+                local_logger.info("Stopping directory monitoring.")
+                break
 
             # Remove old entries from the cache (older than 3 seconds)
             file_cache = {path: mtime for path, mtime in file_cache.items() if current_time - mtime <= 3}
@@ -56,10 +59,27 @@ def main(args):
             run_adddevice(os.path.join(directory_to_monitor, filename), "Existing File")
 
     # Start monitoring the directory
-    monitor_directory()
+    if args.autoadddevices:
+        # Start the directory monitoring in the background
+        local_logger.info("Starting directory monitoring in the background...")
+        monitor_directory(args.continuous)
+
+    if args.continuous:
+        # Keep the script running to monitor the directory
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            local_logger.info("Stopping directory monitoring.")
+            exit(0)
+    else:
+        local_logger.info("Directory monitoring is not continuous. Exiting.")
+        exit(0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Monitor LiveNX log files for new devices")
     parser.add_argument("--autoaddinterfaces", action="store_true", help="Auto add interfaces")
+    parser.add_argument("--autoadddevices", action="store_true", help="Auto add devices")
+    parser.add_argument('--continuous', action="store_true", help='Run it continuously')
     args = parser.parse_args()
     main(args)
