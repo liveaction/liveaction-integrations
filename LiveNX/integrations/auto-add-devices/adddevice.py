@@ -151,7 +151,7 @@ def create_livenx_device_from_ip(nodeid, ip_address, config_loader):
         'address': ip_address
     })
     
-    local_logger.info(livenx_device)
+    local_logger.debug(livenx_device)
     return livenx_device
 
 
@@ -249,10 +249,11 @@ def add_to_livenx_inventory(livenx_inventory):
     try:
       # Convert the device list to a JSON string and encode it to bytes
       data = json.dumps(livenx_inventory).encode('utf-8')
+      local_logger.info("Adding device to LiveNX {livenx_inventory}")
 
       # Create the request and add the Content-Type header
       request, ctx = create_request("/v1/devices/virtual", data)
-      local_logger.info(data)
+      local_logger.debug(data)
       request.add_header("Content-Type", "application/json")
       request.add_header("accept", "application/json")
       # Specify the request method as POST
@@ -260,14 +261,14 @@ def add_to_livenx_inventory(livenx_inventory):
       
       with urllib.request.urlopen(request, context=ctx) as response:
           response_data = response.read().decode('utf-8')
-          local_logger.info(response_data)
+          local_logger.debug(response_data)
     except Exception as err:
         local_logger.error(f"Error on /v1/devices/virtual API Call {err}")
 
 
 def main(args):
     ## trace input arguments
-    local_logger.info(args)
+    local_logger.debug(args)
 
     if args.logfile is None:
         local_logger.info("Missing log file")
@@ -288,9 +289,9 @@ def main(args):
         except Exception as err:
             pass
       if len(ip_list) < 1:
-        local_logger.info("No IP to add")
+        local_logger.debug("No IP to add")
       else:
-        local_logger.info(f"List of IPs to add: {ip_list}")   
+        local_logger.debug(f"List of IPs to add: {ip_list}")   
         livenx_invenory = map_ip_to_livenx_inventory(ip_list)
         # Add IP to LiveNX
         if isinstance(livenx_invenory, dict) and len(livenx_invenory.get('devices',[])) > 0:
