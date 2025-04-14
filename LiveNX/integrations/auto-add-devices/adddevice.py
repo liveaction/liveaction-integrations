@@ -9,7 +9,7 @@ import time
 import sys
 import json
 
-
+CURRENT_NODE_INDEX = 0
 local_logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -32,7 +32,6 @@ config_loader = ConfigLoader()
 liveNxApiHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
-liveNxTargetIP = os.getenv("LIVENX_TARGET_NODE_IP")
 
 def create_request(url, data = None):
     ctx = ssl.create_default_context()
@@ -156,20 +155,28 @@ def create_livenx_device_from_ip(nodeid, ip_address, config_loader):
     return livenx_device
 
 
+def choose_target_node(nodes):
+    global CURRENT_NODE_INDEX
+    if CURRENT_NODE_INDEX >= len(nodes):
+        CURRENT_NODE_INDEX = 0
+    i = 0
+    for node in nodes:
+        # skip adding to the local node
+        if node['local'] == True:
+            continue
+        if i == CURRENT_NODE_INDEX:
+            CURRENT_NODE_INDEX += 1
+            return node['id']
+    return None
+
 def map_ip_to_livenx_inventory(ip_list):
     livenx_inventory = {}
     livenx_devices = []
     nodes = get_livenx_nodes()
-    node = None
-    nodeid = None
-    for node in nodes:
-      if node['ipAddress'] == liveNxTargetIP:
-        nodeid = node['id']
-        break
-    if nodeid == None:
-        local_logger.info(f"Node Id doesnot match with liveNx Target IP")
-        return 
+    
     for ip in ip_list:
+        target_node = choose_target_node(nodes)
+        nodeid = target_node['id']
         livenx_devices.append(create_livenx_device_from_ip(nodeid, ip, config_loader))
     
     livenx_inventory['devices'] = livenx_devices
@@ -266,8 +273,8 @@ def main(args):
         local_logger.info("Missing log file")
         exit(1)
     
-    if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None or liveNxTargetIP is None:
-        local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is None or {liveNxTargetIP}")
+    if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None:
+        local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is Nonelive")
         exit(1)
 
     while True:
