@@ -163,10 +163,12 @@ def choose_target_node(nodes):
     for node in nodes:
         # skip adding to the local node
         if node['local'] == True:
+            i += 1
             continue
         if i == CURRENT_NODE_INDEX:
             CURRENT_NODE_INDEX += 1
             return node
+        i += 1
     return None
 
 def map_ip_to_livenx_inventory(ip_list):
