@@ -10,8 +10,8 @@ import sys
 import json
 
 CURRENT_NODE_INDEX = 0
-local_logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+local_logger = logging.getLogger(__name__)
 
 class ConfigLoader:
     def __init__(self, config_dir="config"):
@@ -203,7 +203,7 @@ def readFile(filename=None):
                         ipAddress = ip[0]
                         if ipAddress not in ip_list:
                           ip_list.append(ipAddress)
-        local_logger.info(f"List of IPs {ip_list}")
+        local_logger.debug(f"List of IPs {ip_list}")
         return ip_list
     except Exception as err:
         local_logger.error(f"Error while reading log file {err}")
@@ -281,7 +281,7 @@ def main(args):
     while True:
       ## Get list of IPs from log file  
       ip_list = readFile(args.logfile)
-      ## Map IP to Linenx Inventory 
+      ## Map IP to LiveNX Inventory 
       orginal_livenx_inventory = get_livenx_inventory()
       for livenx_device in orginal_livenx_inventory.get('devices',[]):          
         try:
