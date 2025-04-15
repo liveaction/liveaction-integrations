@@ -261,6 +261,30 @@ def add_to_livenx_inventory(livenx_inventory):
         local_logger.error(f"Error on /v1/devices/virtual API Call {err}")
 
 
+def write_samplicator_config_to_file(livenx_inventory):
+    try:
+        #
+        # 0.0.0.0/0: 10.4.205.205/2055
+        # 0.0.0.0/0: 10.4.205.213/2055
+        livenx_nodes = get_livenx_nodes()
+        config_filename = "samplicator_config.conf"
+        with open(config_filename, 'w') as config_file:
+          for device in livenx_inventory.get('devices', []):
+              ip_address = device.get('address')
+              node_id = device.get('nodeId')
+              for node in livenx_nodes:
+                node_ip = node.get('ipAddress')
+                if node['id'] == node_id:
+                    local_logger.debug(f"Node IP: {node_ip}")
+                    break
+              if node_ip:
+                if ip_address:
+                  line = f"{ip_address}/24: {node_ip}/2055\n"
+                  local_logger.debug(f"Writing line to config file: {line.strip()}")
+                  config_file.write(line)
+    except Exception as err:
+        local_logger.error(f"Error writing out samplicator config {err}")
+
 def main(args):
     ## trace input arguments
     local_logger.debug(args)
@@ -277,8 +301,12 @@ def main(args):
       ## Get list of IPs from log file  
       ip_list = readFile(args.logfile)
       ## Map IP to LiveNX Inventory 
-      orginal_livenx_inventory = get_livenx_inventory()
-      for livenx_device in orginal_livenx_inventory.get('devices',[]):          
+      original_livenx_inventory = get_livenx_inventory()
+      if args.writesamplicatorconfig:
+        # Write the samplicator config
+        write_samplicator_config_to_file(original_livenx_inventory)
+      
+      for livenx_device in original_livenx_inventory.get('devices',[]):          
         try:
           ip_list.remove(livenx_device['address'])
         except Exception as err:
@@ -303,5 +331,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
     parser.add_argument('--continuous', action="store_true", help='Run it continuously')
+    parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
     args = parser.parse_args()
     main(args)

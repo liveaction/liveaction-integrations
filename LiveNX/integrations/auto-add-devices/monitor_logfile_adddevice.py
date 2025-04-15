@@ -49,6 +49,7 @@ def monitor_directory(continuous):
             break
 
 def main(args):
+
     if args.autoaddinterfaces:
         from autoaddinterfaces import start_interface_monitor
         start_interface_monitor()
