@@ -58,11 +58,12 @@ def add_interface(device_serial: str, if_index: int, ip4: str):
             }
         ]
     }
-   
-    print(payload)
+  
+    j = json.dumps(payload).encode('utf-8')
+    print(j)
     try:
         # Create the request and add the Content-Type header
-        request, ctx = create_request(f"/v1/devices/virtual/interfaces", json.dumps(payload).encode('utf-8'))
+        request, ctx = create_request(f"/v1/devices/virtual/interfaces", j)
         logging.info(payload)
         request.add_header("Content-Type", "application/json")
         request.add_header("accept", "application/json")

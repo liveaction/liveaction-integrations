@@ -122,10 +122,8 @@ class InterfaceMonitor:
             # Check if the device serial is in the current interfaces
             existing_interfaces = []
             for interface in interfaces:
-                print(interface)
                 existing_interfaces.append(interface.get('ifIndex'))
             for current_interface in current_interfaces[device_serial]:
-                print(current_interface)
                 if current_interface[0] not in existing_interfaces:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
