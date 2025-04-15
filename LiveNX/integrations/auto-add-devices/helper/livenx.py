@@ -16,46 +16,46 @@ if not liveNxApiHost or not liveNxApiPort or not liveNxApiToken:
 def set_interfaces(device_serial: str, ifIndexes: list[int], ip4: str):
     """ HTTP PUT JSON FORMAT
     {
- {
   "devices": [
     {
-      "deviceSerial": "FOC3070X0F33088",
+      "deviceSerial": "John's Device",
       "interfaces": [
         {
-          "interfaceName": "GigabitEthernet1",
-          "config": {
-            "serviceProvider": "A Service Provider",
-            "inputCapacity": 1000000,
-            "outputCapacity": 1000000,
-            "wan": false,
-            "xcon": false,
-            "label": "John's Interface Label",
-            "stringTags": "MyTag1,MyTag2",
-            "address": "123.123.123.123",
-            "subnetMask": "255.255.255.0"
-          }
+          "ifIndex": "0",
+          "name": "Interface 0",
+          "address": "123.123.123.123",
+          "subnetMask": "255.255.255.0",
+          "description": "First interface",
+          "serviceProvider": "A Service Provider",
+          "inputCapacity": "1000000",
+          "outputCapacity": "1000000",
+          "wan": false,
+          "xcon": false,
+          "label": "John's Interface Label",
+          "stringTags": "MyTag1,MyTag2"
         }
       ]
     }
   ]
+}
 }"""
     interfaces = []
     payload = {}
     for if_index in ifIndexes:
         interface = {
-            "interfaceName": f"Interface{if_index}/0",
-            "config": {
-                "serviceProvider": "",
-                "inputCapacity": 1000000,
-                "outputCapacity": 1000000,
-                "wan": False,
-                "xcon": False,
-                "label": f"Interface{if_index}/0",
-                "stringTags": "",
-                "address": ip4,
-                "subnetMask": ""
+            "ifIndex": f"{if_index}",
+            "name": f"Interface{if_index}/0",
+            "address": ip4,
+            "subnetMask": "255.255.255.0",
+            "description": "",
+            "serviceProvider": "",
+            "inputCapacity": "1000000",
+            "outputCapacity": "1000000",
+            "wan": False,
+            "xcon": False,
+            "label": f"Interface{if_index}/0",
+            "stringTags": "",
             }
-        }
         interfaces.append(interface)
 
     payload = {
@@ -71,7 +71,7 @@ def set_interfaces(device_serial: str, ifIndexes: list[int], ip4: str):
     print(j)
     try:
         # Create the request and add the Content-Type header
-        request, ctx = create_request(f"/v1/devices/interfaces/config", j)
+        request, ctx = create_request(f"/v1/devices/virtual/interfaces", j)
         logging.info(payload)
         request.add_header("Content-Type", "application/json")
         request.add_header("accept", "application/json")
@@ -82,7 +82,7 @@ def set_interfaces(device_serial: str, ifIndexes: list[int], ip4: str):
             response_data = response.read().decode('utf-8')
             logging.info(response_data)
     except Exception as err:
-        logging.error(f"Error on /v1/devices/virtual/interface API Call {err}")
+        logging.error(f"Error on /v1/devices/virtual/interfaces API Call {err}")
 
 def create_request(url, data = None):
     ctx = ssl.create_default_context()
