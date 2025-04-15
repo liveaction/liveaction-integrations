@@ -261,11 +261,12 @@ def add_to_livenx_inventory(livenx_inventory):
         local_logger.error(f"Error on /v1/devices/virtual API Call {err}")
 
 
-def write_samplicator_config_to_file(livenx_inventory):
+def write_samplicator_config_to_file():
     try:
         #
         # 0.0.0.0/0: 10.4.205.205/2055
         # 0.0.0.0/0: 10.4.205.213/2055
+        livenx_inventory = get_livenx_inventory()
         livenx_nodes = get_livenx_nodes()
         config_filename = "samplicator_config.conf"
         with open(config_filename, 'w') as config_file:
@@ -289,6 +290,11 @@ def main(args):
     ## trace input arguments
     local_logger.debug(args)
 
+    if args.writesamplicatorconfig:
+        # Write the samplicator config
+        write_samplicator_config_to_file()
+        exit(1)
+
     if args.logfile is None:
         local_logger.info("Missing log file")
         exit(1)
@@ -302,9 +308,6 @@ def main(args):
       ip_list = readFile(args.logfile)
       ## Map IP to LiveNX Inventory 
       original_livenx_inventory = get_livenx_inventory()
-      if args.writesamplicatorconfig:
-        # Write the samplicator config
-        write_samplicator_config_to_file(original_livenx_inventory)
       
       for livenx_device in original_livenx_inventory.get('devices',[]):          
         try:
