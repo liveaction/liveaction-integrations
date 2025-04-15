@@ -4,10 +4,16 @@ import re
 import os
 import ssl
 import json
-import urllib.request, urllib.parse
+import urllib.request
 import time
 import sys
 import json
+from helper.livenx import create_request
+from helper.livenx import get_livenx_inventory
+
+liveNxApiHost = os.getenv("LIVENX_API_HOST")
+liveNxApiPort = os.getenv("LIVENX_API_PORT")
+liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
 CURRENT_NODE_INDEX = 0
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -29,21 +35,6 @@ class ConfigLoader:
 
 config_loader = ConfigLoader()
 
-liveNxApiHost = os.getenv("LIVENX_API_HOST")
-liveNxApiPort = os.getenv("LIVENX_API_PORT")
-liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
-
-def create_request(url, data = None):
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    headers = {
-        "Authorization": "Bearer " + liveNxApiToken
-    }
-    api_url = "https://" + liveNxApiHost + ":" + liveNxApiPort + url
-
-    request = urllib.request.Request(api_url, headers=headers, data = data)
-    return request, ctx
 
 def get_livenx_nodes():
     '''
@@ -106,25 +97,6 @@ def get_livenx_nodes():
     
     return []
 
-
-def get_livenx_inventory():
-
-    api_url = "/v1/devices"
-
-    request, ctx = create_request(api_url)
-    request.add_header("Content-Type", "application/json")
-    request.add_header("accept", "application/json")
-    
-    # Specify the request method as POST
-    request.method = "GET"
-
-    json_data = None
-    with urllib.request.urlopen(request, context=ctx) as response:
-        response_data = response.read().decode('utf-8')
-        # Parse the JSON response
-        json_data = json.loads(response_data)
-    
-    return json_data
 
 # livenx_config.py
 

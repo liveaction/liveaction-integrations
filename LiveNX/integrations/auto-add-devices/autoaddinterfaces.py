@@ -8,7 +8,7 @@ from multiprocessing import Process
 import urllib
 import ssl
 import json
-
+from helper.livenx import get_livenx_inventory, add_interface
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -55,8 +55,6 @@ clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
 clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "clickhouse-server/cacerts/ca.crt")
 clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "clickhouse-server/cacerts/ca.key")
 
-
-
 class ConfigLoader:
     def __init__(self, config_dir="config"):
         self.config_dir = config_dir
@@ -92,47 +90,12 @@ class InterfaceMonitor:
         self.client = connect_with_tls(host=clickHouseHost, port=clickHouseApiPort, user=clickHouseUsername, password=clickHousePassword, database='livenx_flowdb', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
         self.previous_interfaces: Dict[str, Set[Tuple[int, int]]] = {}
 
-    def add_interface(self, device_serial: str, if_index: int, ip4: str):
-        interface = config_loader.interface_defaults.copy()
-        interface.update({
-            "ifIndex": if_index,
-            "name": f"dummyseed_eth{if_index}/0",
-            "address": ip4,
-            "wan": False,
-            "xcon": False,
-            "label": "",
-            "stringTags": ""
-        })
-        payload = {
-            "devices": [
-                {
-                "deviceSerial": f"{device_serial}",
-                "interfaces": [{interface}]
-                }
-            ]
-        }
-        
-        try:
-            # Create the request and add the Content-Type header
-            request, ctx = create_request(f"/v1/devices/virtual/interfaces", json.dumps(payload).encode('utf-8'))
-            logging.info(payload)
-            request.add_header("Content-Type", "application/json")
-            request.add_header("accept", "application/json")
-            # Specify the request method as POST
-            request.method = "POST"
-            
-            with urllib.request.urlopen(request, context=ctx) as response:
-                response_data = response.read().decode('utf-8')
-                logging.info(response_data)
-        except Exception as err:
-            logging.error(f"Error on /v1/devices/virtual/interface API Call {err}")
-
-    def get_interfaces(self) -> Dict[str, Set[Tuple[int, int]]]:
+    def get_interface_from_clickhouse(self) -> Dict[str, Set[Tuple[int, int]]]:
         # get all interfaces that aren't marked with dummyseed
         query = """
         SELECT DISTINCT DeviceSerial, IngressIfIndex, EgressIfIndex
         FROM livenx_flowdb.basic_entity_1m_dist
-        WHERE time >= now() - INTERVAL 5 MINUTE AND IngressIfName NOT LIKE '%dummyseed_eth%' AND EgressIfName NOT LIKE '%dummyseed_eth%'
+        WHERE time >= now() - INTERVAL 5 MINUTE AND IngressIfName NOT LIKE '%Interface%' AND EgressIfName NOT LIKE '%Interface%'
         """
         
         current_interfaces = {}
@@ -145,28 +108,26 @@ class InterfaceMonitor:
             
         return current_interfaces
     
-    def compare_interfaces(self, current: Dict[str, Set[Tuple[int, int]]]):
-        for device, interfaces in current.items():
-            if device in self.previous_interfaces:
-                new_interfaces = interfaces - self.previous_interfaces[device]
-                if new_interfaces:
-                    logging.info(f"New interfaces for {device}: {new_interfaces}")
-                    for ingress, egress in new_interfaces:
-                        self.add_interface(device, ingress, "")
-                        self.add_interface(device, egress, "")
-            else:
-                logging.info(f"New device detected: {device} with interfaces: {interfaces}")
-                for ingress, egress in new_interfaces:
-                    self.add_interface(device, ingress, "")
-                    self.add_interface(device, egress, "")
-    
+    def update_interfaces(self, livenx_inventory: Dict[str, Set[Tuple[int, str]]], current_interfaces: Dict[str, Set[Tuple[int, int]]]):
+        # Add the interfaces to the LiveNX inventory if the ifIndex is not already present
+        for device_serial, interfaces in livenx_inventory.items():
+            if device_serial not in current_interfaces:
+                current_interfaces[device_serial] = set()
+            
+            for if_index, ip4 in interfaces:
+                if (if_index, ip4) not in current_interfaces[device_serial]:
+                    add_interface(device_serial, if_index, ip4)
+                    logging.info(f"Added interface {if_index} with IP {ip4} to device {device_serial}")
+                    current_interfaces[device_serial].add((if_index, ip4))
+                else:
+                    logging.info(f"Interface {if_index} with IP {ip4} already exists for device {device_serial}")
+
     def run(self):
         while True:
             try:
-                current_interfaces = self.get_interfaces()
-                if self.previous_interfaces:
-                    self.compare_interfaces(current_interfaces)
-                self.previous_interfaces = current_interfaces
+                livenx_inventory = get_livenx_inventory()
+                current_interfaces = self.get_interface_from_clickhouse()
+                self.update_interfaces(livenx_inventory, current_interfaces)
                 time.sleep(300)  # Wait 5 minutes
                 
             except Exception as e:
