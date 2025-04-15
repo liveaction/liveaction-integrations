@@ -9,6 +9,9 @@ liveNxApiHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
+if not liveNxApiHost or not liveNxApiPort or not liveNxApiToken:
+    raise EnvironmentError("Environment variables LIVENX_API_HOST, LIVENX_API_PORT, and LIVENX_API_TOKEN must be set.")
+
 
 def add_interface(device_serial: str, if_index: int, ip4: str):
     """ HTTP PUT JON FORMAT
@@ -54,7 +57,7 @@ def add_interface(device_serial: str, if_index: int, ip4: str):
         "devices": [
             {
             "deviceSerial": f"{device_serial}",
-            "interfaces": f"[{interface}]"
+            "interfaces": [interface]
             }
         ]
     }
