@@ -9,6 +9,39 @@ import urllib
 import ssl
 import json
 
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def get_cickhouse_password():
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
+
+    <clickhouse>
+    <users>
+        <default>
+        <password replace="true">Fmx.VB.dTr74d</password>
+        </default>
+    </users>
+    </clickhouse>
+    """
+
+    try:
+        with open('/etc/clickhouse-server/users.d/users.xml', 'r') as f:
+            password = f.read()
+            # Extract the password using regex
+            import re
+            match = re.search(r'<password replace="true">(.+?)</password>', password)
+            if match:  
+                password = match.group(1)
+                logging.info("Password extracted from XML file.")
+                return password
+    except FileNotFoundError:
+        pass
+    
+    password = os.getenv("CLICKHOUSE_PASSWORD", "")
+    return None
+    
 # Retrieve environment variables
 liveNxApiHost = os.getenv("LIVENX_API_HOST","")
 liveNxApiPort = os.getenv("LIVENX_API_PORT","")
@@ -16,14 +49,13 @@ liveNxApiToken = os.getenv("LIVENX_API_TOKEN","")
 
 clickHouseHost = os.getenv("CLICKHOUSE_HOST","localhost")
 clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","default")
-clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","default")
-clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","9000")
+clickHousePassword = get_cickhouse_password()
+clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","9440")
 clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
 clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "clickhouse-server/cacerts/ca.crt")
 clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "clickhouse-server/cacerts/ca.key")
 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ConfigLoader:
     def __init__(self, config_dir="config"):
