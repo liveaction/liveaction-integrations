@@ -11,10 +11,39 @@ liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
 
 def add_interface(device_serial: str, if_index: int, ip4: str):
+    """ HTTP PUT JON FORMAT
+    {
+  "devices": [
+    {
+      "deviceSerial": "John's Device",
+      "interfaces": [
+        {
+          "ifIndex": "0",
+          "name": "Interface 0",
+          "address": "123.123.123.123",
+          "subnetMask": "255.255.255.0",
+          "description": "First interface",
+          "serviceProvider": "A Service Provider",
+          "inputCapacity": "1000000",
+          "outputCapacity": "1000000",
+          "wan": false,
+          "xcon": false,
+          "label": "John's Interface Label",
+          "stringTags": "MyTag1,MyTag2"
+        }
+      ]
+    }
+  ]
+}"""
     interface = {
         "ifIndex": f"{if_index}",
         "name": f"Interface{if_index}/0",
         "address": ip4,
+        "subnetMask": "255.255.255.0",
+        "description": f"Interface {if_index}",
+        "serviceProvider": "",
+        "inputCapacity": "1000000",
+        "outputCapacity": "1000000",
         "wan": False,
         "xcon": False,
         "label": "",
