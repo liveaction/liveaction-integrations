@@ -1,5 +1,5 @@
 import ssl
-import urllib.request, urllib.parse
+import urllib.request
 import os
 import json
 import logging
