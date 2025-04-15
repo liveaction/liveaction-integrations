@@ -1,6 +1,6 @@
 {
     "ifIndex": "0",
-    "name": "Interface/0",
+    "name": "Interface0/0",
     "subnetMask": "255.255.255.0",
     "description": "",
     "serviceProvider": "",

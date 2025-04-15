@@ -13,51 +13,56 @@ if not liveNxApiHost or not liveNxApiPort or not liveNxApiToken:
     raise EnvironmentError("Environment variables LIVENX_API_HOST, LIVENX_API_PORT, and LIVENX_API_TOKEN must be set.")
 
 
-def add_interface(device_serial: str, if_index: int, ip4: str):
-    """ HTTP PUT JON FORMAT
+def set_interfaces(device_serial: str, ifIndexes: list[int], ip4: str):
+    """ HTTP PUT JSON FORMAT
     {
+ {
   "devices": [
     {
-      "deviceSerial": "John's Device",
+      "deviceSerial": "FOC3070X0F33088",
       "interfaces": [
         {
-          "ifIndex": "0",
-          "name": "Interface 0",
-          "address": "123.123.123.123",
-          "subnetMask": "255.255.255.0",
-          "description": "First interface",
-          "serviceProvider": "A Service Provider",
-          "inputCapacity": "1000000",
-          "outputCapacity": "1000000",
-          "wan": false,
-          "xcon": false,
-          "label": "John's Interface Label",
-          "stringTags": "MyTag1,MyTag2"
+          "interfaceName": "GigabitEthernet1",
+          "config": {
+            "serviceProvider": "A Service Provider",
+            "inputCapacity": 1000000,
+            "outputCapacity": 1000000,
+            "wan": false,
+            "xcon": false,
+            "label": "John's Interface Label",
+            "stringTags": "MyTag1,MyTag2",
+            "address": "123.123.123.123",
+            "subnetMask": "255.255.255.0"
+          }
         }
       ]
     }
   ]
 }"""
-    interface = {
-        "ifIndex": f"{if_index}",
-        "name": f"Interface{if_index}/0",
-        "address": ip4,
-        "subnetMask": "255.255.255.0",
-        "description": f"Interface {if_index}",
-        "serviceProvider": "",
-        "inputCapacity": "1000000",
-        "outputCapacity": "1000000",
-        "wan": False,
-        "xcon": False,
-        "label": "",
-        "stringTags": ""
-    }
-    print(interface)
+    interfaces = []
+    payload = {}
+    for if_index in ifIndexes:
+        interface = {
+            "interfaceName": f"Interface{if_index}/0",
+            "config": {
+                "serviceProvider": "",
+                "inputCapacity": 1000000,
+                "outputCapacity": 1000000,
+                "wan": False,
+                "xcon": False,
+                "label": f"Interface{if_index}/0",
+                "stringTags": "",
+                "address": ip4,
+                "subnetMask": ""
+            }
+        }
+        interfaces.append(interface)
+
     payload = {
         "devices": [
             {
             "deviceSerial": f"{device_serial}",
-            "interfaces": [interface]
+            "interfaces": interfaces
             }
         ]
     }
