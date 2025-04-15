@@ -113,7 +113,7 @@ class InterfaceMonitor:
         for device_serial, interfaces in livenx_inventory.items():
             if device_serial not in current_interfaces:
                 current_interfaces[device_serial] = set()
-            
+            print(interfaces) 
             for if_index, ip4 in interfaces:
                 if (if_index, ip4) not in current_interfaces[device_serial]:
                     add_interface(device_serial, if_index, ip4)
