@@ -10,7 +10,7 @@ liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
 
-def add_interface(self, device_serial: str, if_index: int, ip4: str):
+def add_interface(device_serial: str, if_index: int, ip4: str):
     interface ={
         "ifIndex": if_index,
         "name": f"Interface{if_index}/0",

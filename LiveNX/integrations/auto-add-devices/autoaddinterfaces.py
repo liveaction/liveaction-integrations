@@ -105,13 +105,13 @@ class InterfaceMonitor:
             if device_serial not in current_interfaces:
                 current_interfaces[device_serial] = set()
             current_interfaces[device_serial].add((ingress, egress))
-            
+           
         return current_interfaces
     
     def update_interfaces(self, livenx_inventory: Dict[str, Set[Tuple[int, str]]], current_interfaces: Dict[str, Set[Tuple[int, int]]]):
         # Add the interfaces to the LiveNX inventory if the ifIndex is not already present
         for device in livenx_inventory.get('devices', []):
-            device_serial = device.get('deviceSerial')
+            device_serial = device.get('serial')
             if not device_serial:
                 continue
             
@@ -122,16 +122,19 @@ class InterfaceMonitor:
             # Check if the device serial is in the current interfaces
             if device_serial not in current_interfaces:
                 current_interfaces[device_serial] = set()
-            for interface in interfaces:
-                if_index = interface.get('ifIndex')
-                if not if_index:
+            for current_interface in current_interfaces[device_serial]:
+                print(current_interface)
+                if_index = current_interface(0)
+                if if_index == None:
                     continue
                 
                 # Check if the interface is already present in the current interfaces
+                print(current_interfaces[device_serial])
                 if (if_index, 0) not in current_interfaces[device_serial]:
                     # Add the interface to the LiveNX inventory
                     ip4 = interface.get('address')
-                    add_interface(device_serial, if_index, ip4)
+                    print(interface)
+                    #add_interface(device_serial, if_index, ip4)
                     logging.info(f"Added interface {if_index} for device {device_serial}")
                     
                     # Update the current interfaces to include the new interface
