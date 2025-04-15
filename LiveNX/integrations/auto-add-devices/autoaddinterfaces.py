@@ -110,18 +110,33 @@ class InterfaceMonitor:
     
     def update_interfaces(self, livenx_inventory: Dict[str, Set[Tuple[int, str]]], current_interfaces: Dict[str, Set[Tuple[int, int]]]):
         # Add the interfaces to the LiveNX inventory if the ifIndex is not already present
-        for device_serial, interfaces in livenx_inventory.items():
+        for device in livenx_inventory.get('devices', []):
+            device_serial = device.get('deviceSerial')
+            if not device_serial:
+                continue
+            
+            interfaces = device.get('interfaces', [])
+            if not interfaces:
+                continue
+            
+            # Check if the device serial is in the current interfaces
             if device_serial not in current_interfaces:
                 current_interfaces[device_serial] = set()
-            print(interfaces) 
-            for if_index, ip4 in interfaces:
-                if (if_index, ip4) not in current_interfaces[device_serial]:
+            for interface in interfaces:
+                if_index = interface.get('ifIndex')
+                if not if_index:
+                    continue
+                
+                # Check if the interface is already present in the current interfaces
+                if (if_index, 0) not in current_interfaces[device_serial]:
+                    # Add the interface to the LiveNX inventory
+                    ip4 = interface.get('address')
                     add_interface(device_serial, if_index, ip4)
-                    logging.info(f"Added interface {if_index} with IP {ip4} to device {device_serial}")
-                    current_interfaces[device_serial].add((if_index, ip4))
-                else:
-                    logging.info(f"Interface {if_index} with IP {ip4} already exists for device {device_serial}")
-
+                    logging.info(f"Added interface {if_index} for device {device_serial}")
+                    
+                    # Update the current interfaces to include the new interface
+                    current_interfaces[device_serial].add((if_index, 0))
+                    
     def run(self):
         while True:
             try:
