@@ -118,25 +118,24 @@ class InterfaceMonitor:
             interfaces = device.get('interfaces', [])
             if not interfaces:
                 continue
-            
             ip4 = interfaces[0].get('address')
             # Check if the device serial is in the current interfaces
-            if device_serial not in current_interfaces:
-                current_interfaces[device_serial] = set()
             existing_interfaces = []
             for interface in interfaces:
+                print(interface)
                 existing_interfaces.append(interface.get('ifIndex'))
             for current_interface in current_interfaces[device_serial]:
+                print(current_interface)
                 if current_interface[0] not in existing_interfaces:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
+                    logging.info(f"Added interface {current_interface[0]} to device {device_serial} with ip {ip4}")
                     add_interface(device_serial, current_interface[0], ip4)
-                    logging.info(f"Added interface {current_interface[0]} to device {device_serial}")
                 if current_interface[1] not in existing_interfaces:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
+                    logging.info(f"Added interface {current_interface[1]} to device {device_serial} with ip {ip4}")
                     add_interface(device_serial, current_interface[1], ip4)
-                    logging.info(f"Added interface {current_interface[1]} to device {device_serial}")
 
     def run(self):
         while True:

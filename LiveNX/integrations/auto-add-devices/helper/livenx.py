@@ -11,8 +11,8 @@ liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
 
 def add_interface(device_serial: str, if_index: int, ip4: str):
-    interface ={
-        "ifIndex": if_index,
+    interface = {
+        "ifIndex": f"{if_index}",
         "name": f"Interface{if_index}/0",
         "address": ip4,
         "wan": False,
@@ -20,23 +20,25 @@ def add_interface(device_serial: str, if_index: int, ip4: str):
         "label": "",
         "stringTags": ""
     }
+    print(interface)
     payload = {
         "devices": [
             {
             "deviceSerial": f"{device_serial}",
-            "interfaces": [{interface}]
+            "interfaces": f"[{interface}]"
             }
         ]
     }
-    
+   
+    print(payload)
     try:
         # Create the request and add the Content-Type header
         request, ctx = create_request(f"/v1/devices/virtual/interfaces", json.dumps(payload).encode('utf-8'))
         logging.info(payload)
         request.add_header("Content-Type", "application/json")
         request.add_header("accept", "application/json")
-        # Specify the request method as POST
-        request.method = "POST"
+        # Specify the request method as PUT
+        request.method = "PUT"
         
         with urllib.request.urlopen(request, context=ctx) as response:
             response_data = response.read().decode('utf-8')
