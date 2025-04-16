@@ -252,7 +252,7 @@ def write_samplicator_config_to_file():
                     break
               if node_ip:
                 if ip_address:
-                  line = f"{ip_address}/24: {node_ip}/2055\n"
+                  line = f"{ip_address}: {node_ip}/2055\n"
                   local_logger.debug(f"Writing line to config file: {line.strip()}")
                   config_file.write(line)
     except Exception as err:
