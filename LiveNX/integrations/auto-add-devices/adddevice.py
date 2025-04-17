@@ -8,6 +8,7 @@ import urllib.request
 import time
 import sys
 import json
+import gzip
 from helper.livenx import create_request
 from helper.livenx import get_livenx_inventory
 
@@ -162,7 +163,10 @@ def readFile(filename=None):
         # Read file and return
         ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})') 
 
-        with open(filename) as rf:
+        # Check if the file is gzipped
+        open_func = gzip.open if filename.endswith('.gz') else open
+
+        with open_func(filename, 'rt') as rf:  # 'rt' mode for reading text
             for line in rf.readlines():                
                 if "received flow packet for unknown device" in line or "Flow packet received from unknown device" in line:
                     ip = ip_pattern.search(line)

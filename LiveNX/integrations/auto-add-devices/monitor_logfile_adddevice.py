@@ -27,7 +27,7 @@ def monitor_directory(continuous):
         try:
             current_time = int(time.time())
             for filename in os.listdir(directory_to_monitor):
-                if (filename.startswith("LivenxNode_") or filename.startswith("LivenxServer_")) and filename.endswith(".log"):
+                if (filename.startswith("LivenxNode_") or filename.startswith("LivenxServer_")):
                     filepath = os.path.join(directory_to_monitor, filename)
                     last_modified = os.path.getmtime(filepath)
 
@@ -40,8 +40,8 @@ def monitor_directory(continuous):
                 local_logger.info("Stopping directory monitoring.")
                 break
 
-            # Remove old entries from the cache (older than 3 seconds)
-            file_cache = {path: mtime for path, mtime in file_cache.items() if current_time - mtime <= 3}
+            # Remove old entries from the cache (older than 60 seconds)
+            file_cache = {path: mtime for path, mtime in file_cache.items() if current_time - mtime <= 60}
 
             time.sleep(1)  # Polling interval
         except KeyboardInterrupt:
