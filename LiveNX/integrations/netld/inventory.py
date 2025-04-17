@@ -89,7 +89,7 @@ def create_livenx_device_from_netld_device(nodeid, netld_device):
     #livenx_device['groupId'] = str(uuid.uuid4())
     #livenx_device['groupName'] = ""
     livenx_device['stringTags'] = ""
-    livenx_device['userDefinedSampleRatio'] = 2
+    livenx_device['userDefinedSampleRatio'] = 1
     local_logger.info(livenx_device)
     return livenx_device
 

@@ -193,7 +193,7 @@ def add_to_livenx_inventory(livenx_inventory):
       "groupId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
       "groupName": "NYC Device Group",
       "stringTags": "MyTag1,MyTag2",
-      "userDefinedSampleRatio": 2,
+      "userDefinedSampleRatio": 1,
       "interfaces": [
         {
           "ifIndex": "0",
