@@ -2,7 +2,6 @@ import argparse
 import logging
 import re
 import os
-import ssl
 import json
 import urllib.request
 import time
@@ -294,12 +293,15 @@ def main(args):
         local_logger.debug("No IP to add")
       else:
         local_logger.debug(f"List of IPs to add: {ip_list}")   
-        livenx_invenory = map_ip_to_livenx_inventory(ip_list)
-        # Add IP to LiveNX
-        if isinstance(livenx_invenory, dict) and len(livenx_invenory.get('devices',[])) > 0:
-          add_to_livenx_inventory(livenx_invenory)
-        else:
-          local_logger.info("No device to add") 
+        new_device_inventory = None
+        for i in range(0, len(ip_list), 10):  # Process in chunks of 10
+            chunk = ip_list[i:i + 10]
+            new_device_inventory = map_ip_to_livenx_inventory(chunk)
+            # Add IP to LiveNX
+            if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
+                add_to_livenx_inventory(new_device_inventory)
+            else:
+                local_logger.info("No device to add")
 
       if args.continuous is False:
         break
