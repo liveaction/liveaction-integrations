@@ -8,6 +8,7 @@ import time
 import sys
 import json
 import gzip
+import time
 from helper.livenx import create_request
 from helper.livenx import get_livenx_inventory
 
@@ -216,24 +217,28 @@ def add_to_livenx_inventory(livenx_inventory):
   
     '''
 
-    try:
-      # Convert the device list to a JSON string and encode it to bytes
-      data = json.dumps(livenx_inventory).encode('utf-8')
-      local_logger.info("Adding device to LiveNX {livenx_inventory}")
+    for attempt in range(3):  # Retry up to 3 times
+        try:
+            # Convert the device list to a JSON string and encode it to bytes
+            data = json.dumps(livenx_inventory).encode('utf-8')
+            local_logger.info(f"Adding device to LiveNX {livenx_inventory}")
 
-      # Create the request and add the Content-Type header
-      request, ctx = create_request("/v1/devices/virtual", data)
-      local_logger.debug(data)
-      request.add_header("Content-Type", "application/json")
-      request.add_header("accept", "application/json")
-      # Specify the request method as POST
-      request.method = "POST"
-      
-      with urllib.request.urlopen(request, context=ctx) as response:
-          response_data = response.read().decode('utf-8')
-          local_logger.debug(response_data)
-    except Exception as err:
-        local_logger.error(f"Error on /v1/devices/virtual API Call {err}")
+            # Create the request and add the Content-Type header
+            request, ctx = create_request("/v1/devices/virtual", data)
+            local_logger.debug(data)
+            request.add_header("Content-Type", "application/json")
+            request.add_header("accept", "application/json")
+            # Specify the request method as POST
+            request.method = "POST"
+
+            with urllib.request.urlopen(request, context=ctx) as response:
+                response_data = response.read().decode('utf-8')
+                local_logger.debug(response_data)
+            break  # Exit the loop if the request is successful
+        except Exception as err:
+            local_logger.error(f"Error on /v1/devices/virtual API Call (Attempt {attempt + 1}/3): {err}")
+            if attempt < 2:  # Only sleep if this is not the last attempt
+                time.sleep(5)
 
 
 def write_samplicator_config_to_file():
