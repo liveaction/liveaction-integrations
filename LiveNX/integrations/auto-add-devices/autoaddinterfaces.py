@@ -123,7 +123,7 @@ class InterfaceMonitor:
             existing_interfaces = []
             for interface in interfaces:
                 existing_interfaces.append(interface.get('ifIndex'))
-            logging.info(f"EXISTING={existing_interfaces}")
+            logging.debug(f"EXISTING={existing_interfaces}")
             final_interfaces = existing_interfaces.copy()
             current_device_interfaces = current_interfaces.get(device_serial, set())
             for current_interface in current_device_interfaces:
@@ -140,7 +140,7 @@ class InterfaceMonitor:
 
             # only add a new set of interfaces if the list of interfaces change
             if len(final_interfaces) != len(existing_interfaces):
-                logging.info(f"FINAL={final_interfaces}")
+                logging.debug(f"FINAL={final_interfaces}")
                 set_interfaces(device_serial, final_interfaces, ip4)
 
     def run(self):
