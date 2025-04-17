@@ -124,24 +124,25 @@ class InterfaceMonitor:
             existing_interfaces = []
             for interface in interfaces:
                 existing_interfaces.append(interface.get('ifIndex'))
-            print(f"EXISTING={existing_interfaces}")
-            final_interfaces = []
+            logging.info(f"EXISTING={existing_interfaces}")
+            final_interfaces = existing_interfaces.copy()
             current_device_interfaces = current_interfaces.get(device_serial, set())
             for current_interface in current_device_interfaces:
-                print(current_interface)
-                if current_interface[0] not in existing_interfaces:
+                if current_interface[0] not in final_interfaces:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
                     logging.info(f"Added interface {current_interface[0]} to device {device_serial} with ip {ip4}")
                     final_interfaces.append(current_interface[0])
-                if current_interface[1] not in existing_interfaces:
+                if current_interface[1] not in final_interfaces:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
                     logging.info(f"Added interface {current_interface[1]} to device {device_serial} with ip {ip4}")
                     final_interfaces.append(current_interface[1])
-                break
-            print(f"FINAL={final_interfaces}")
-            set_interfaces(device_serial, final_interfaces, ip4)
+
+            # only add a new set of interfaces if the list of interfaces change
+            if len(final_interfaces) != len(existing_interfaces):
+                logging.info(f"FINAL={final_interfaces}")
+                set_interfaces(device_serial, final_interfaces, ip4)
 
     def run(self):
         while True:

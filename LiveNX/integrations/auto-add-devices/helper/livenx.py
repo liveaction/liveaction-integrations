@@ -98,7 +98,7 @@ def create_request(url, data = None):
 
 def get_livenx_inventory():
 
-    api_url = "/v1/devices"
+    api_url = "/v1/devices?includeHistorical=false"
 
     request, ctx = create_request(api_url)
     request.add_header("Content-Type", "application/json")
