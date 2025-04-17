@@ -99,7 +99,6 @@ def get_livenx_ch_inventory():
 
   except Exception as e:
       local_logger.error(f"An error occurred while querying ClickHouse: {e}")
-      print(f"An error occurred while querying ClickHouse: {e}")
   finally:
       client.disconnect()
   return {"devices": livenx_ch_inventory}
@@ -478,10 +477,8 @@ def remove_from_livenx_ch_inventory(livenx_inventory):
             # Execute the DELETE statement
             client.execute(delete_query, {'device_id': device_id})
             local_logger.info(f"Device with ID {device_id} removed successfully.")
-            print(f"Device with ID {device_id} removed successfully.")
         except Exception as e:
             local_logger.error(f"Error removing device with ID {device_id}: {e}")
-            print(f"Error removing device with ID {data['id']}: {e}")
 
 def get_livenx_nodes():
     '''

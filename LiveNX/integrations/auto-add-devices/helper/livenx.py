@@ -68,7 +68,6 @@ def set_interfaces(device_serial: str, ifIndexes: list[int], ip4: str):
     }
   
     j = json.dumps(payload).encode('utf-8')
-    print(j)
     try:
         # Create the request and add the Content-Type header
         request, ctx = create_request(f"/v1/devices/virtual/interfaces", j)

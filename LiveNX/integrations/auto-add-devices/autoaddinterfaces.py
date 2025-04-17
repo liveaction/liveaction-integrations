@@ -119,7 +119,6 @@ class InterfaceMonitor:
             if len(interfaces) == 0:
                 continue
             ip4 = interfaces[0].get('address')
-            print(interfaces)
             # Check if the device serial is in the current interfaces
             existing_interfaces = []
             for interface in interfaces:
