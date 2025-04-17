@@ -17,7 +17,7 @@ if not os.path.isdir(directory_to_monitor):
 
 # Function to run adddevice.py with the filename as an argument in the background
 def run_adddevice(logfile, file_event_type):
-    local_logger.info(f"Processing file event type {file_event_type} in background: {logfile}")
+    local_logger.debug(f"Processing file event type {file_event_type} in background: {logfile}")
     subprocess.Popen(["python3", "adddevice.py", "--logfile", logfile])
 
 # Function to monitor the directory for new or modified files
