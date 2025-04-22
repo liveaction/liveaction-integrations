@@ -51,7 +51,7 @@ def set_interfaces(device_serial: str, ifIndexes: list[int], ip4: str):
             "serviceProvider": "",
             "inputCapacity": "1000000",
             "outputCapacity": "1000000",
-            "wan": False,
+            "wan": True,
             "xcon": False,
             "label": f"Interface{if_index}/0",
             "stringTags": "",

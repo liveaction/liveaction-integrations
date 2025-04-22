@@ -41,9 +41,9 @@ def monitor_directory(continuous):
                 break
 
             # Remove old entries from the cache (older than 60 seconds)
-            file_cache = {path: mtime for path, mtime in file_cache.items() if current_time - mtime <= 60}
+            file_cache = {path: mtime for path, mtime in file_cache.items() if current_time - mtime <= 300}
 
-            time.sleep(1)  # Polling interval
+            time.sleep(300)  # Polling interval
         except KeyboardInterrupt:
             local_logger.info("Stopping directory monitoring.")
             break
