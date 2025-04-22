@@ -95,7 +95,7 @@ class InterfaceMonitor:
         query = """
         SELECT DISTINCT DeviceSerial, IngressIfIndex, EgressIfIndex
         FROM livenx_flowdb.basic_entity_1m_dist
-        WHERE time >= now() - INTERVAL 5 MINUTE AND IngressIfName NOT LIKE '%Interface%' AND EgressIfName NOT LIKE '%Interface%'
+        WHERE time >= now() - INTERVAL 15 MINUTE AND IngressIfName NOT LIKE '%Interface%' AND EgressIfName NOT LIKE '%Interface%'
         """
         
         current_interfaces = {}
