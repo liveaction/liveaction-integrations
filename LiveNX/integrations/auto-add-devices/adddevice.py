@@ -158,6 +158,7 @@ def readFile(filename=None):
     if filename is None:
         local_logger.info("File name is missing")
         exit(1)
+    local_logger.info(f"MONITORING {filename}")
     ip_list = []
     try:
         # Read file and return
@@ -311,7 +312,7 @@ def main(args):
       if args.continuous is False:
         break
 
-      time.sleep(1)
+      time.sleep(60)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
