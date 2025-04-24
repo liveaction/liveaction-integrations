@@ -267,9 +267,45 @@ def write_samplicator_config_to_file():
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config {err}")
 
+def add_test_devices(num_devices):
+    try:
+        livenx_inventory = {}
+        livenx_devices = []
+        nodes = get_livenx_nodes()
+        
+        for i in range(num_devices):
+            # Generate IP addresses across a larger range (10.x.x.x)
+            octet1 = 10
+            octet2 = (i // (256 * 256)) % 256  # Second octet
+            octet3 = (i // 256) % 256          # Third octet
+            octet4 = i % 256                   # Fourth octet
+            ip_address = f"{octet1}.{octet2}.{octet3}.{octet4}"
+            
+            target_node = choose_target_node(nodes)
+            if not target_node:
+                local_logger.error("No available target nodes to assign devices.")
+                break
+            
+            nodeid = target_node['id']
+            livenx_devices.append(create_livenx_device_from_ip(nodeid, ip_address, config_loader))
+            
+            # Add devices in chunks of 10 to avoid memory issues
+            if len(livenx_devices) >= 10 or i == num_devices - 1:
+                livenx_inventory['devices'] = livenx_devices
+                add_to_livenx_inventory(livenx_inventory)
+                livenx_devices = []  # Reset the list for the next batch
+
+    except Exception as err:
+        local_logger.error(f"Error adding test devices: {err}")
+        
 def main(args):
     ## trace input arguments
     local_logger.debug(args)
+
+    if args.addtestdevices is not None and args.addtestdevices > 0:
+        # Write outtest devices
+        add_test_devices(args.addtestdevices)
+        exit(1)
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
@@ -313,5 +349,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
+    parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
     args = parser.parse_args()
     main(args)
