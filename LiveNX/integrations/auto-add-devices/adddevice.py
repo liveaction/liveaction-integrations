@@ -430,6 +430,17 @@ def write_samplicator_config_to_files(max_subnets):
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
 
+        # check every device to see if the node ip it was previously assigned to has changed
+        for device in livenx_inventory.get('devices', []):
+            device_ip = device.get('address')
+            if device_ip:
+                # Check if the device IP is in the new subnets
+                for subnet in subnets:
+                    if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
+                        # If it is, update the node IP for that device
+                        node_ip = node_ips[subnets.index(subnet) % len(node_ips)]
+                        local_logger.debug(f"Updating device {device['hostName']} to new node IP: {node_ip}")
+                        device['nodeId'] = node_ip
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config: {err}")
 
