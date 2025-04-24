@@ -25,23 +25,19 @@ def monitor_directory(continuous):
     file_cache = {}  # Cache to store file modification times
     while True:
         try:
-            current_time = int(time.time())
             for filename in os.listdir(directory_to_monitor):
                 if (filename.startswith("LivenxNode_") or filename.startswith("LivenxServer_")):
                     filepath = os.path.join(directory_to_monitor, filename)
                     last_modified = os.path.getmtime(filepath)
 
                     # Check if the file is new or modified
-                    if filepath not in file_cache or file_cache[filepath] < last_modified:
+                    if filepath not in file_cache:
                         file_event_type = "New File" if filepath not in file_cache else "Modified File"
                         file_cache[filepath] = last_modified
                         run_adddevice(filepath, file_event_type)
             if continuous == False:
                 local_logger.info("Stopping directory monitoring.")
                 break
-
-            # Remove old entries from the cache (older than 60 seconds)
-            file_cache = {path: mtime for path, mtime in file_cache.items() if current_time - mtime <= 300}
 
             time.sleep(300)  # Polling interval
         except KeyboardInterrupt:

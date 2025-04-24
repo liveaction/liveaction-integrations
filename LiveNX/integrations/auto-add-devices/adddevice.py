@@ -309,15 +309,9 @@ def main(args):
             else:
                 local_logger.info("No device to add")
 
-      if args.continuous is False:
-        break
-
-      time.sleep(60)
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
-    parser.add_argument('--continuous', action="store_true", help='Run it continuously')
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
     args = parser.parse_args()
     main(args)
