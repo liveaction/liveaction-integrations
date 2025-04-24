@@ -294,7 +294,7 @@ def group_ips_into_subnets(ip_addresses: List[str], max_subnets: int = 2000) -> 
                 # Check if they can be merged (same version)
                 if type(subnet1) == type(subnet2):
                     # Find the smallest supernet that contains both
-                    prefixlen = min(subnet1.prefixlen, subnet2.prefixlen) - 1
+                    prefixlen = min(subnet1.prefixlen, subnet2.prefixlen)
                     while prefixlen >= 0:
                         supernet1 = subnet1.supernet(new_prefix=prefixlen)
                         # Correct way to check if subnet2 is contained in supernet1
@@ -524,12 +524,12 @@ def test_group_ips_into_subnets():
     assert result == ["192.168.1.1/32"], "Single IP should return single /32 subnet"
     
     # Test case 3: IPv6 address
-    #result = group_ips_into_subnets(["2001:db8::1"])
-    #assert result == ["2001:db8::1/128"], "IPv6 address should return single /128 subnet"
+    result = group_ips_into_subnets(["2001:db8::1"])
+    assert result == ["2001:db8::1/128"], "IPv6 address should return single /128 subnet"
     
     # Test case 4: Mixed IPv4 and IPv6
-    #result = group_ips_into_subnets(["192.168.1.1", "2001:db8::1"])
-    #assert set(result) == {"192.168.1.1/32", "2001:db8::1/128"}, "Mixed IP versions should work"
+    result = group_ips_into_subnets(["192.168.1.1", "2001:db8::1"])
+    assert set(result) == {"192.168.1.1/32", "2001:db8::1/128"}, "Mixed IP versions should work"
     
     # Test case 5: Duplicate IPs
     result = group_ips_into_subnets(["192.168.1.1", "192.168.1.1", "192.168.1.1"])
@@ -590,6 +590,8 @@ def test_group_ips_into_subnets():
 
 
 if __name__ == "__main__":
+    #test_group_ips_into_subnets()
+    #exit(1)
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
