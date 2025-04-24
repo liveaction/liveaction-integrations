@@ -242,7 +242,6 @@ def add_to_livenx_inventory(livenx_inventory):
                 time.sleep(5)
 
 
-
 import ipaddress
 from typing import List, Set
 
@@ -292,13 +291,14 @@ def group_ips_into_subnets(ip_addresses: List[str], max_subnets: int = 2000) -> 
                 subnet1 = subnets[i]
                 subnet2 = subnets[i + 1]
                 
-                # Check if they can be merged (same version, and supernet contains both)
+                # Check if they can be merged (same version)
                 if type(subnet1) == type(subnet2):
                     # Find the smallest supernet that contains both
                     prefixlen = min(subnet1.prefixlen, subnet2.prefixlen) - 1
                     while prefixlen >= 0:
                         supernet1 = subnet1.supernet(new_prefix=prefixlen)
-                        if subnet2 in supernet1:
+                        # Correct way to check if subnet2 is contained in supernet1
+                        if subnet2.subnet_of(supernet1):
                             # Merge and replace the two subnets with the supernet
                             subnets[i] = supernet1
                             subnets.pop(i + 1)
@@ -327,7 +327,8 @@ def group_ips_into_subnets(ip_addresses: List[str], max_subnets: int = 2000) -> 
                         subnet2 = ipv4_subnets[i + 1]
                         # Find common supernet with one bit less
                         supernet = subnet1.supernet(new_prefix=subnet1.prefixlen - 1)
-                        if subnet2 in supernet:
+                        # Correct check for subnet containment
+                        if subnet2.subnet_of(supernet):
                             # Replace with supernet
                             subnets.remove(subnet1)
                             subnets.remove(subnet2)
@@ -342,7 +343,8 @@ def group_ips_into_subnets(ip_addresses: List[str], max_subnets: int = 2000) -> 
                         subnet2 = ipv6_subnets[i + 1]
                         # Find common supernet with one bit less
                         supernet = subnet1.supernet(new_prefix=subnet1.prefixlen - 1)
-                        if subnet2 in supernet:
+                        # Correct check for subnet containment
+                        if subnet2.subnet_of(supernet):
                             # Replace with supernet
                             subnets.remove(subnet1)
                             subnets.remove(subnet2)
@@ -380,13 +382,15 @@ def find_common_supernet(net1, net2):
         try:
             # Try to find a supernet that contains both
             supernet1 = net1.supernet(new_prefix=prefixlen)
-            if net2 in supernet1:
+            # Correct check for subnet containment
+            if net2.subnet_of(supernet1):
                 return supernet1
         except ValueError:
             pass
         prefixlen -= 1
     
     return None
+
 def write_samplicator_config_to_files(max_subnets):
     try:
         livenx_inventory = get_livenx_inventory()
@@ -497,6 +501,93 @@ def main(args):
                 add_to_livenx_inventory(new_device_inventory)
             else:
                 local_logger.info("No device to add")
+
+
+import unittest
+import ipaddress
+from typing import List
+
+
+def test_group_ips_into_subnets():
+    """
+    Tests the group_ips_into_subnets function with various scenarios.
+    """
+    # Import the function if it's in another module
+    # from your_module import group_ips_into_subnets
+    
+    # Test case 1: Empty list
+    result = group_ips_into_subnets([])
+    assert result == [], "Empty input should return empty list"
+    
+    # Test case 2: Single IP
+    result = group_ips_into_subnets(["192.168.1.1"])
+    assert result == ["192.168.1.1/32"], "Single IP should return single /32 subnet"
+    
+    # Test case 3: IPv6 address
+    #result = group_ips_into_subnets(["2001:db8::1"])
+    #assert result == ["2001:db8::1/128"], "IPv6 address should return single /128 subnet"
+    
+    # Test case 4: Mixed IPv4 and IPv6
+    #result = group_ips_into_subnets(["192.168.1.1", "2001:db8::1"])
+    #assert set(result) == {"192.168.1.1/32", "2001:db8::1/128"}, "Mixed IP versions should work"
+    
+    # Test case 5: Duplicate IPs
+    result = group_ips_into_subnets(["192.168.1.1", "192.168.1.1", "192.168.1.1"])
+    assert result == ["192.168.1.1/32"], "Duplicate IPs should be removed"
+    
+    # Test case 6: Sequential IPs that can be merged
+    result = group_ips_into_subnets(["192.168.1.0", "192.168.1.1", "192.168.1.2", "192.168.1.3"], max_subnets=1)
+    print(result)
+    assert result == ["192.168.1.0/30"], "Sequential IPs should merge into a single subnet"
+    
+    # Test case 7: IPs that cannot be perfectly merged
+    result = group_ips_into_subnets(["192.168.1.1", "192.168.1.3", "192.168.1.5", "192.168.1.7"], max_subnets=1)
+    assert result == ["192.168.1.0/29"], "Non-sequential IPs should merge into smallest containing subnet"
+    
+    # Test case 8: Force merge with max_subnets
+    large_list = [f"192.168.{i}.{j}" for i in range(10) for j in range(10)]  # 100 IPs
+    result = group_ips_into_subnets(large_list, max_subnets=5)
+    assert len(result) <= 5, f"Result should have at most 5 subnets, got {len(result)}"
+    
+    # Test case 9: Invalid IPs
+    result = group_ips_into_subnets(["192.168.1.1", "invalid_ip", "10.0.0.1"])
+    assert set(result) == {"192.168.1.1/32", "10.0.0.1/32"}, "Invalid IPs should be ignored"
+    
+    # Test case 10: Different IP blocks
+    result = group_ips_into_subnets(["10.0.0.1", "172.16.0.1", "192.168.1.1"], max_subnets=3)
+    assert set(result) == {"10.0.0.1/32", "172.16.0.1/32", "192.168.1.1/32"}, "Different IP blocks should remain separate"
+    
+    # Test case 11: Max subnets larger than needed
+    result = group_ips_into_subnets(["192.168.1.1", "192.168.1.2"], max_subnets=10)
+    assert len(result) <= 10, "Should respect max_subnets even when not needed"
+    
+    # Test case 12: IPv6 merging
+    ipv6_list = [f"2001:db8::{i}" for i in range(10)]
+    result = group_ips_into_subnets(ipv6_list, max_subnets=1)
+    assert len(result) == 1, "IPv6 addresses should merge correctly"
+    
+    # Test case 13: Very large number of IPs
+    # This is a more intensive test - comment out if performance is a concern
+    large_ip_list = [f"10.{i}.{j}.{k}" for i in range(5) for j in range(5) for k in range(5)]  # 125 IPs
+    result = group_ips_into_subnets(large_ip_list, max_subnets=10)
+    assert len(result) <= 10, f"Should handle large lists and respect max_subnets, got {len(result)}"
+    
+    # Test case 14: Verify all original IPs are covered by resulting subnets
+    test_ips = ["192.168.1.1", "192.168.1.5", "10.0.0.1"]
+    result = group_ips_into_subnets(test_ips, max_subnets=2)
+    assert len(result) <= 2, "Should respect max_subnets constraint"
+    
+    # Convert result subnets to ipaddress objects
+    result_networks = [ipaddress.ip_network(subnet) for subnet in result]
+    
+    # Check that each original IP is contained in at least one of the result subnets
+    for ip_str in test_ips:
+        ip = ipaddress.ip_address(ip_str)
+        is_contained = any(ip in network for network in result_networks)
+        assert is_contained, f"IP {ip} should be contained in at least one subnet"
+    
+    print("All tests passed!")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
