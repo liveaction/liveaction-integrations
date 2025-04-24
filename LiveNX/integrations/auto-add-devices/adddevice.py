@@ -17,7 +17,7 @@ liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
 CURRENT_NODE_INDEX = 0
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 local_logger = logging.getLogger(__name__)
 
 class ConfigLoader:
@@ -261,7 +261,7 @@ def write_samplicator_config_to_file():
                     break
               if node_ip:
                 if ip_address:
-                  line = f"{ip_address}: {node_ip}/2055\n"
+                  line = f"{ip_address}/255.255.255.255: {node_ip}/2055\n"
                   local_logger.debug(f"Writing line to config file: {line.strip()}")
                   config_file.write(line)
     except Exception as err:
