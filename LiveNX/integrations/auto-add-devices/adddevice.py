@@ -267,13 +267,13 @@ def write_samplicator_config_to_file():
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config {err}")
 
-def add_test_devices(num_devices):
+def add_test_devices(start_num, num_devices):
     try:
         livenx_inventory = {}
         livenx_devices = []
         nodes = get_livenx_nodes()
         
-        for i in range(num_devices):
+        for i in range(start_num, start_num + num_devices):
             # Generate IP addresses across a larger range (10.x.x.x)
             octet1 = 10
             octet2 = (i // (256 * 256)) % 256  # Second octet
@@ -290,7 +290,7 @@ def add_test_devices(num_devices):
             livenx_devices.append(create_livenx_device_from_ip(nodeid, ip_address, config_loader))
             
             # Add devices in chunks of 10 to avoid memory issues
-            if len(livenx_devices) >= 10 or i == num_devices - 1:
+            if len(livenx_devices) >= 10 or i == start_num + num_devices - 1:
                 livenx_inventory['devices'] = livenx_devices
                 add_to_livenx_inventory(livenx_inventory)
                 livenx_devices = []  # Reset the list for the next batch
@@ -304,7 +304,7 @@ def main(args):
 
     if args.addtestdevices is not None and args.addtestdevices > 0:
         # Write outtest devices
-        add_test_devices(args.addtestdevices)
+        add_test_devices(args.addtestdevicesstartnum, args.addtestdevices)
         exit(1)
 
     if args.writesamplicatorconfig:
@@ -350,5 +350,6 @@ if __name__ == "__main__":
     parser.add_argument("--logfile", type=str, help="Add Log file")
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
+    parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
     args = parser.parse_args()
     main(args)

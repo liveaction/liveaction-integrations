@@ -6,7 +6,7 @@
     "serviceProvider": "",
     "inputCapacity": "1000000",
     "outputCapacity": "1000000",
-    "wan": false,
+    "wan": true,
     "xcon": false,
     "label": "",
     "stringTags": ""
