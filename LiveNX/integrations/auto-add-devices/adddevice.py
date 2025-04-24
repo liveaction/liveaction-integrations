@@ -417,7 +417,8 @@ def write_samplicator_config_to_files(max_subnets):
         with open(config_filename, 'w') as config_file:
             for i, subnet in enumerate(subnets):
                 node_ip = node_ips[i % len(node_ips)]  # Cycle through node IPs
-                line = f"{subnet}: {node_ip}/2055\n"
+                dotted_notation = str(ipaddress.ip_network(subnet).netmask)
+                line = f"{dotted_notation}: {node_ip}/2055\n"
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
 
