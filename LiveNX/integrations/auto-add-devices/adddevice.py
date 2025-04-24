@@ -89,7 +89,13 @@ def get_livenx_nodes():
           
           # Return the nodes field if it exists
           if 'nodes' in json_data:
-              return json_data['nodes']
+              nodes = json_data['nodes']
+              ret_nodes = []
+              for node in nodes:
+                  # Check if the node is local
+                  if node.get('local', False):
+                      ret_nodes.append(node)
+              return ret_nodes
           else:
               # Handle the case where 'nodes' doesn't exist
               return []
