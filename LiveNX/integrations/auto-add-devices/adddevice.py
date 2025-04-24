@@ -242,30 +242,46 @@ def add_to_livenx_inventory(livenx_inventory):
                 time.sleep(5)
 
 
-def write_samplicator_config_to_file():
+def write_samplicator_config_to_files(max_ips):
     try:
-        #
-        # 0.0.0.0/0: 10.4.205.205/2055
-        # 0.0.0.0/0: 10.4.205.213/2055
         livenx_inventory = get_livenx_inventory()
         livenx_nodes = get_livenx_nodes()
         config_filename = "samplicator_config.conf"
         with open(config_filename, 'w') as config_file:
-          for device in livenx_inventory.get('devices', []):
-              ip_address = device.get('address')
-              node_id = device.get('nodeId')
-              for node in livenx_nodes:
-                node_ip = node.get('ipAddress')
-                if node['id'] == node_id:
-                    local_logger.debug(f"Node IP: {node_ip}")
-                    break
-              if node_ip:
-                if ip_address:
-                  line = f"{ip_address}/255.255.255.255: {node_ip}/2055\n"
-                  local_logger.debug(f"Writing line to config file: {line.strip()}")
-                  config_file.write(line)
+            for i, device in enumerate(livenx_inventory.get('devices', [])):
+                if i >= max_ips:
+                    break  # Stop if the maximum number of IPs is reached
+
+                ip_address = device.get('address')
+                node_id = device.get('nodeId')
+                node_ip = None
+
+                for node in livenx_nodes:
+                    if node['id'] == node_id:
+                        node_ip = node.get('ipAddress')
+                        local_logger.debug(f"Node IP: {node_ip}")
+                        break
+
+                if node_ip and ip_address:
+                    # Dynamically calculate the subnet mask based on max_ips
+                    subnet_mask = calculate_subnet_mask(max_ips)
+                    line = f"{ip_address}/{subnet_mask}: {node_ip}/2055\n"
+                    local_logger.debug(f"Writing line to config file: {line.strip()}")
+                    config_file.write(line)
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config {err}")
+
+
+def calculate_subnet_mask(max_ips):
+    """
+    Calculate the subnet mask based on the maximum number of IPs.
+    """
+    # Determine the number of bits needed for the subnet mask
+    import math
+    bits_needed = math.ceil(math.log2(max_ips))
+    subnet_bits = 32 - bits_needed
+    subnet_mask = (0xFFFFFFFF << bits_needed) & 0xFFFFFFFF
+    return f"{(subnet_mask >> 24) & 0xFF}.{(subnet_mask >> 16) & 0xFF}.{(subnet_mask >> 8) & 0xFF}.{subnet_mask & 0xFF}"
 
 def add_test_devices(start_num, num_devices):
     try:
@@ -309,7 +325,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_file()
+        write_samplicator_config_to_files()
         exit(1)
 
     if args.logfile is None:
@@ -349,6 +365,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
+    parser.add_argument('--writesamplicatorconfigmaxips', type=int, help='The maximum number of IPs to write out to the config file')
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
     parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
     args = parser.parse_args()
