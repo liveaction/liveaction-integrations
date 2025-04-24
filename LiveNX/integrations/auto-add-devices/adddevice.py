@@ -242,46 +242,183 @@ def add_to_livenx_inventory(livenx_inventory):
                 time.sleep(5)
 
 
-def write_samplicator_config_to_files(max_ips):
+
+import ipaddress
+from typing import List, Set
+
+
+def group_ips_into_subnets(ip_addresses: List[str], max_subnets: int = 2000) -> List[str]:
+    """
+    Groups a list of IP addresses into subnets, ensuring the total number of subnets
+    doesn't exceed the specified maximum.
+    
+    Args:
+        ip_addresses: List of IP address strings
+        max_subnets: Maximum number of subnets to generate (default: 2000)
+        
+    Returns:
+        List of subnet strings in CIDR notation
+    """
+    # Convert string IPs to ipaddress objects and remove duplicates
+    unique_ips = set()
+    for ip in ip_addresses:
+        try:
+            unique_ips.add(ipaddress.ip_address(ip.strip()))
+        except ValueError:
+            print(f"Warning: Invalid IP address ignored: {ip}")
+    
+    # Sort IPs numerically
+    sorted_ips = sorted(unique_ips)
+    
+    if not sorted_ips:
+        return []
+    
+    # Start with single IP subnets (maximum specificity)
+    subnets = []
+    for ip in sorted_ips:
+        if isinstance(ip, ipaddress.IPv4Address):
+            subnets.append(ipaddress.IPv4Network(f"{ip}/32", strict=False))
+        else:  # IPv6
+            subnets.append(ipaddress.IPv6Network(f"{ip}/128", strict=False))
+    
+    # If we have too many subnets, we need to consolidate
+    if len(subnets) > max_subnets:
+        # Keep merging adjacent subnets until we're under the limit
+        while len(subnets) > max_subnets:
+            merged = False
+            i = 0
+            
+            while i < len(subnets) - 1:
+                subnet1 = subnets[i]
+                subnet2 = subnets[i + 1]
+                
+                # Check if they can be merged (same version, and supernet contains both)
+                if type(subnet1) == type(subnet2):
+                    # Find the smallest supernet that contains both
+                    prefixlen = min(subnet1.prefixlen, subnet2.prefixlen) - 1
+                    while prefixlen >= 0:
+                        supernet1 = subnet1.supernet(new_prefix=prefixlen)
+                        if subnet2 in supernet1:
+                            # Merge and replace the two subnets with the supernet
+                            subnets[i] = supernet1
+                            subnets.pop(i + 1)
+                            merged = True
+                            break
+                        prefixlen -= 1
+                
+                if merged:
+                    break
+                i += 1
+                
+            # If we can't merge any more, but still have too many subnets,
+            # we'll have to be more aggressive with merging
+            if not merged and len(subnets) > max_subnets:
+                # Group by IP version
+                ipv4_subnets = [s for s in subnets if isinstance(s, ipaddress.IPv4Network)]
+                ipv6_subnets = [s for s in subnets if isinstance(s, ipaddress.IPv6Network)]
+                
+                # For each version, merge the smallest subnets first
+                if ipv4_subnets:
+                    ipv4_subnets.sort(key=lambda x: x.prefixlen, reverse=True)
+                    for i in range(len(ipv4_subnets) - 1):
+                        if len(subnets) <= max_subnets:
+                            break
+                        subnet1 = ipv4_subnets[i]
+                        subnet2 = ipv4_subnets[i + 1]
+                        # Find common supernet with one bit less
+                        supernet = subnet1.supernet(new_prefix=subnet1.prefixlen - 1)
+                        if subnet2 in supernet:
+                            # Replace with supernet
+                            subnets.remove(subnet1)
+                            subnets.remove(subnet2)
+                            subnets.append(supernet)
+                
+                if ipv6_subnets and len(subnets) > max_subnets:
+                    ipv6_subnets.sort(key=lambda x: x.prefixlen, reverse=True)
+                    for i in range(len(ipv6_subnets) - 1):
+                        if len(subnets) <= max_subnets:
+                            break
+                        subnet1 = ipv6_subnets[i]
+                        subnet2 = ipv6_subnets[i + 1]
+                        # Find common supernet with one bit less
+                        supernet = subnet1.supernet(new_prefix=subnet1.prefixlen - 1)
+                        if subnet2 in supernet:
+                            # Replace with supernet
+                            subnets.remove(subnet1)
+                            subnets.remove(subnet2)
+                            subnets.append(supernet)
+            
+            # If we still can't get under the limit, force merge closest subnets
+            if not merged and len(subnets) > max_subnets:
+                # Sort by prefix length (smallest networks first)
+                subnets.sort(key=lambda x: x.prefixlen, reverse=True)
+                # Merge the two smallest networks
+                if len(subnets) >= 2:
+                    subnet1 = subnets[0]
+                    subnet2 = subnets[1]
+                    if type(subnet1) == type(subnet2):
+                        # Find smallest common supernet
+                        common_net = find_common_supernet(subnet1, subnet2)
+                        if common_net:
+                            subnets.remove(subnet1)
+                            subnets.remove(subnet2)
+                            subnets.append(common_net)
+    
+    # Convert networks back to CIDR strings
+    return [str(subnet) for subnet in subnets]
+
+
+def find_common_supernet(net1, net2):
+    """Find the smallest common supernet for two networks."""
+    if type(net1) != type(net2):
+        return None
+    
+    # Start with smallest possible supernet
+    prefixlen = min(net1.prefixlen, net2.prefixlen) - 1
+    
+    while prefixlen >= 0:
+        try:
+            # Try to find a supernet that contains both
+            supernet1 = net1.supernet(new_prefix=prefixlen)
+            if net2 in supernet1:
+                return supernet1
+        except ValueError:
+            pass
+        prefixlen -= 1
+    
+    return None
+def write_samplicator_config_to_files(max_subnets):
     try:
         livenx_inventory = get_livenx_inventory()
         livenx_nodes = get_livenx_nodes()
         config_filename = "samplicator_config.conf"
+        ip_addresses = []
+
+        # Collect all IP addresses from the inventory
+        for device in livenx_inventory.get('devices', []):
+            ip_address = device.get('address')
+            if ip_address:
+                ip_addresses.append(ip_address)
+
+        # Group IPs into subnets
+        subnets = group_ips_into_subnets(ip_addresses, max_subnets=max_subnets)
+
+        # Ensure we have node IPs to distribute subnets
+        node_ips = [node.get('ipAddress') for node in livenx_nodes if node.get('ipAddress')]
+        if not node_ips:
+            local_logger.error("No node IPs available for distribution.")
+            return
+
+        # Distribute subnets evenly across node IPs
         with open(config_filename, 'w') as config_file:
-            for i, device in enumerate(livenx_inventory.get('devices', [])):
-                if i >= max_ips:
-                    break  # Stop if the maximum number of IPs is reached
+            for i, subnet in enumerate(subnets):
+                node_ip = node_ips[i % len(node_ips)]  # Cycle through node IPs
+                line = f"{subnet}: {node_ip}/2055\n"
+                local_logger.debug(f"Writing line to config file: {line.strip()}")
+                config_file.write(line)
 
-                ip_address = device.get('address')
-                node_id = device.get('nodeId')
-                node_ip = None
-
-                for node in livenx_nodes:
-                    if node['id'] == node_id:
-                        node_ip = node.get('ipAddress')
-                        local_logger.debug(f"Node IP: {node_ip}")
-                        break
-
-                if node_ip and ip_address:
-                    # Dynamically calculate the subnet mask based on max_ips
-                    subnet_mask = calculate_subnet_mask(max_ips)
-                    line = f"{ip_address}/{subnet_mask}: {node_ip}/2055\n"
-                    local_logger.debug(f"Writing line to config file: {line.strip()}")
-                    config_file.write(line)
     except Exception as err:
-        local_logger.error(f"Error writing out samplicator config {err}")
-
-
-def calculate_subnet_mask(max_ips):
-    """
-    Calculate the subnet mask based on the maximum number of IPs.
-    """
-    # Determine the number of bits needed for the subnet mask
-    import math
-    bits_needed = math.ceil(math.log2(max_ips))
-    subnet_bits = 32 - bits_needed
-    subnet_mask = (0xFFFFFFFF << bits_needed) & 0xFFFFFFFF
-    return f"{(subnet_mask >> 24) & 0xFF}.{(subnet_mask >> 16) & 0xFF}.{(subnet_mask >> 8) & 0xFF}.{subnet_mask & 0xFF}"
+        local_logger.error(f"Error writing out samplicator config: {err}")
 
 def add_test_devices(start_num, num_devices):
     try:
@@ -325,7 +462,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_files(args.writesamplicatorconfigmaxips)
+        write_samplicator_config_to_files(args.writesamplicatorconfigmaxsubnets)
         exit(1)
 
     if args.logfile is None:
@@ -365,7 +502,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
-    parser.add_argument('--writesamplicatorconfigmaxips', type=int, help='The maximum number of IPs to write out to the config file')
+    parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
     parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
     args = parser.parse_args()
