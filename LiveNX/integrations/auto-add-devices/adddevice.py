@@ -325,7 +325,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_files()
+        write_samplicator_config_to_files(args.writesamplicatorconfigmaxips)
         exit(1)
 
     if args.logfile is None:
