@@ -11,6 +11,9 @@ import gzip
 import time
 from helper.livenx import create_request
 from helper.livenx import get_livenx_inventory
+import ipaddress
+from typing import List
+
 
 liveNxApiHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
@@ -250,7 +253,7 @@ def add_to_livenx_inventory(livenx_inventory):
 
 
 import ipaddress
-from typing import List, Set
+from typing import List
 
 
 def group_ips_into_subnets(ip_addresses: List[str], max_subnets: int = 2000) -> List[str]:
@@ -502,20 +505,19 @@ def main(args):
         local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is Nonelive")
         exit(1)
 
-    while True:
       ## Get list of IPs from log file  
-      ip_list = readFile(args.logfile)
+    ip_list = readFile(args.logfile)
       ## Map IP to LiveNX Inventory 
-      original_livenx_inventory = get_livenx_inventory()
+    original_livenx_inventory = get_livenx_inventory()
       
-      for livenx_device in original_livenx_inventory.get('devices',[]):          
+    for livenx_device in original_livenx_inventory.get('devices',[]):          
         try:
           ip_list.remove(livenx_device['address'])
         except Exception as err:
             pass
-      if len(ip_list) < 1:
+    if len(ip_list) < 1:
         local_logger.debug("No IP to add")
-      else:
+    else:
         local_logger.debug(f"List of IPs to add: {ip_list}")   
         new_device_inventory = None
         for i in range(0, len(ip_list), 10):  # Process in chunks of 10
@@ -526,11 +528,6 @@ def main(args):
                 add_to_livenx_inventory(new_device_inventory)
             else:
                 local_logger.info("No device to add")
-
-
-import unittest
-import ipaddress
-from typing import List
 
 
 def test_group_ips_into_subnets():
