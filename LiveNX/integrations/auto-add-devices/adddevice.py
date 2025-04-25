@@ -436,11 +436,13 @@ def write_samplicator_config_to_files(max_subnets):
             if device_ip:
                 # Check if the device IP is in the new subnets
                 for subnet in subnets:
+                    print(f'device_ip={device_ip}, subnet={subnet}')
                     if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
                         # If it is, update the node IP for that device
                         node_ip = node_ips[subnets.index(subnet) % len(node_ips)]
                         local_logger.debug(f"Updating device {device['hostName']} to new node IP: {node_ip}")
                         device['nodeId'] = node_ip
+                        break
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config: {err}")
 
