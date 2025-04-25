@@ -401,7 +401,28 @@ def find_common_supernet(net1, net2):
     
     return None
 
-def write_samplicator_config_to_files(max_subnets):
+def move_devices(subnets):
+    try:
+        # check every device to see if the node ip it was previously assigned to has changed
+        for device in livenx_inventory.get('devices', []):
+            device_ip = device.get('address')
+            if device_ip:
+                # Sort subnets by prefix length (smallest subnets first)
+                sorted_subnets = sorted(subnets, key=lambda subnet: ipaddress.ip_network(subnet).prefixlen, reverse=True)
+
+                # Check if the device IP is in the smallest matching subnet
+                for subnet in sorted_subnets:
+                    print(f'device_ip={device_ip}, subnet={subnet}')
+                    if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
+                        # If it is, update the node IP for that device
+                        node_ip = node_ips[sorted_subnets.index(subnet) % len(node_ips)]
+                        local_logger.debug(f"Updating device {device['hostName']} to new node IP: {node_ip}")
+                        device['nodeId'] = node_ip
+                        break
+    except Exception as err:
+        local_logger.error(f"Error moving devices: {err}")
+
+def write_samplicator_config_to_files(max_subnets, movedevices):
     try:
         livenx_inventory = get_livenx_inventory()
         livenx_nodes = get_livenx_nodes()
@@ -433,22 +454,8 @@ def write_samplicator_config_to_files(max_subnets):
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
 
-        # check every device to see if the node ip it was previously assigned to has changed
-        for device in livenx_inventory.get('devices', []):
-            device_ip = device.get('address')
-            if device_ip:
-                # Sort subnets by prefix length (smallest subnets first)
-                sorted_subnets = sorted(subnets, key=lambda subnet: ipaddress.ip_network(subnet).prefixlen, reverse=True)
-                
-                # Check if the device IP is in the smallest matching subnet
-                for subnet in sorted_subnets:
-                    print(f'device_ip={device_ip}, subnet={subnet}')
-                    if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
-                        # If it is, update the node IP for that device
-                        node_ip = node_ips[sorted_subnets.index(subnet) % len(node_ips)]
-                        local_logger.debug(f"Updating device {device['hostName']} to new node IP: {node_ip}")
-                        device['nodeId'] = node_ip
-                        break
+        if movedevices:
+            move_devices(subnets)
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config: {err}")
 
@@ -494,7 +501,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_files(args.writesamplicatorconfigmaxsubnets)
+        write_samplicator_config_to_files(args.writesamplicatorconfigmaxsubnets, args.movedevices)
         exit(1)
 
     if args.logfile is None:
@@ -617,6 +624,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
+    parser.add_argument('--movedevices', action="store_true", help='Move the devices between nodes if needed')
     parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
     parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
