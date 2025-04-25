@@ -102,6 +102,17 @@
                 "--devicefile", "${workspaceFolder}/LiveNX/config-audit/config/device-list.csv", "--clickhouse"
             ],
             "envFile": "${workspaceFolder}/LiveNX/config-audit/.env"
+        },
+        {
+            "name": "Python Debugger: config-audit pnc",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--devicefile", "${workspaceFolder}/LiveNX/config-audit/config/device-list.csv", "--username", "admin", "--password", "password", "--sqlite"
+            ],
+            "envFile": "${workspaceFolder}/LiveNX/config-audit/.env"
         }
     ]
 }

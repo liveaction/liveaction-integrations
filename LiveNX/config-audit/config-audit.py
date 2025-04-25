@@ -14,15 +14,6 @@ import urllib.parse
 from datetime import datetime
 from netmiko import ConnectHandler
 
-clickHouseHost = os.getenv("CLICKHOUSE_HOST","localhost")
-clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","default")
-clickHousePassword = os.getenv("CLICKHOUSE_PASSWORD","default")
-clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","9000")
-clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
-clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
-clickhouseKeyfile = os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
-
-
 GITHUB_REPO_URL = "https://raw.githubusercontent.com/liveaction/liveaction-integrations/refs/heads/main/LiveNX/configs/"
     
 def create_netmiko_list(original_devices):
@@ -33,7 +24,8 @@ def create_netmiko_list(original_devices):
     return device_list_copy
 
 # Read device list from CSV
-def read_device_list(device_csv):
+def read_device_list(args):
+    device_csv = args.devicefile
     devices = []
     try:
         with open(device_csv, "r") as csvfile:
@@ -78,9 +70,9 @@ def read_device_list(device_csv):
                     "Poll_Routing": row.get("POLL ROUTING", "").strip().lower() == "true",
                     "Poll_Lan": row.get("POLL LAN", "").strip().lower() == "true",
                     "Poll_Interval_Msec": int(row.get("POLL INTERVAL (MSEC)", "0").strip() or 0),
-                    "Username": row.get("USERNAME", "admin").strip(),
-                    "Password": row.get("PASSWORD", "admin").strip(),
-                    "Golden_File": row.get("GOLDEN FILE", "").strip(),
+                    "Username": row.get("USERNAME", args.username).strip(),
+                    "Password": row.get("PASSWORD", args.password).strip(),
+                    "Golden_File": row.get("GOLDEN_FILE", "").strip(),
                 })
 
 
@@ -293,10 +285,14 @@ def compare_configs(running_config, golden_config, skip_regex_file=None):
 
 # Main execution logic
 def main(args):
-    devices = read_device_list(args.devicefile)
+    devices = read_device_list(args)
     netmiko_device_list = create_netmiko_list(devices)
     skip_regex_file = os.path.join(os.getcwd(), "LiveNX/config-audit/config/skip-regexes.txt")
-
+    run_output_file = open(os.path.join(os.getcwd(), "run-output-file.txt"), "w")
+    run_output_file.write(f"Device Audit started at {datetime.now()}\n\n")
+    total_success = 0
+    total_failed = 0
+    total_errors = 0
     for netmiko_device in netmiko_device_list:
         device = devices[netmiko_device_list.index(netmiko_device)]
         # Create subdirectories and file for each device
@@ -326,14 +322,29 @@ def main(args):
             output_file.write(f"Device: {netmiko_device['host']}\n")
             output_file.write(diff + "\n\n")
 
+            if diff != "":
+                total_failed += 1
+            else:   
+                total_success += 1
+
         except FileNotFoundError as fnf_error:
+            total_errors += 1
             handle_error(output_file, netmiko_device['host'], fnf_error)
         except ValueError as val_error:
+            total_errors += 1
             handle_error(output_file, netmiko_device['host'], val_error)
         except Exception as e:
+            total_errors += 1
             handle_error(output_file, netmiko_device['host'], e)
         finally:
             output_file.close()
+
+    run_output_file.write(f"Device Audit completed at {datetime.now()}\n")
+    run_output_file.write(f"Total devices: {len(devices)}\n")
+    run_output_file.write(f"Total success: {total_success}\n")
+    run_output_file.write(f"Total failed: {total_failed}\n")
+    run_output_file.write(f"Total errors: {total_errors}\n")
+    run_output_file.close()
 
 def handle_error(output_file, device_host, error):
     error_type = type(error).__name__
@@ -343,6 +354,8 @@ def handle_error(output_file, device_host, error):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Audit config files.")
     parser.add_argument("--devicefile",  type=str, required=True, default='', help='The device list to read in CSV')
+    parser.add_argument("--username",  type=str, required=True, default='', help='Username to login to devices')
+    parser.add_argument("--password",  type=str, required=True, default='', help='Password to login to devices')
     parser.add_argument("--sqlite", default=False, action="store_true", help="Save configs to sqlite")
     args = parser.parse_args()
     main(args)
