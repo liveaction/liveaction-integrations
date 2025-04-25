@@ -434,12 +434,15 @@ def write_samplicator_config_to_files(max_subnets):
         for device in livenx_inventory.get('devices', []):
             device_ip = device.get('address')
             if device_ip:
-                # Check if the device IP is in the new subnets
-                for subnet in subnets:
+                # Sort subnets by prefix length (smallest subnets first)
+                sorted_subnets = sorted(subnets, key=lambda subnet: ipaddress.ip_network(subnet).prefixlen, reverse=True)
+                
+                # Check if the device IP is in the smallest matching subnet
+                for subnet in sorted_subnets:
                     print(f'device_ip={device_ip}, subnet={subnet}')
                     if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
                         # If it is, update the node IP for that device
-                        node_ip = node_ips[subnets.index(subnet) % len(node_ips)]
+                        node_ip = node_ips[sorted_subnets.index(subnet) % len(node_ips)]
                         local_logger.debug(f"Updating device {device['hostName']} to new node IP: {node_ip}")
                         device['nodeId'] = node_ip
                         break
