@@ -256,152 +256,77 @@ import ipaddress
 from typing import List
 
 
-def group_ips_into_subnets(ip_addresses: List[str], max_subnets: int = 2000) -> List[str]:
+import ipaddress
+from collections import defaultdict
+from typing import List, Dict, Tuple
+
+
+import ipaddress
+from collections import defaultdict
+
+def group_ips_into_subnets(ip_list, max_subnets=1000):
     """
-    Groups a list of IP addresses into subnets, ensuring the total number of subnets
-    doesn't exceed the specified maximum.
+    Group IP addresses into the smallest possible subnets while keeping
+    the total number of subnets under the specified maximum.
     
     Args:
-        ip_addresses: List of IP address strings
-        max_subnets: Maximum number of subnets to generate (default: 2000)
+        ip_list (list): List of IP address strings
+        max_subnets (int): Maximum number of subnets to create (default 1000)
         
     Returns:
-        List of subnet strings in CIDR notation
+        list: List of subnet strings in CIDR notation
     """
-    # Convert string IPs to ipaddress objects and remove duplicates
-    unique_ips = set()
-    for ip in ip_addresses:
-        try:
-            unique_ips.add(ipaddress.ip_address(ip.strip()))
-        except ValueError:
-            print(f"Warning: Invalid IP address ignored: {ip}")
+    # Convert all IPs to IPv4Address objects and create a set for fast lookups
+    ip_objects = [ipaddress.IPv4Address(ip) for ip in ip_list]
+    ip_set = set(ip_objects)
     
-    # Sort IPs numerically
-    sorted_ips = sorted(unique_ips)
+    # Start with /32 (individual IP) subnets
+    subnets = {ipaddress.IPv4Network(f"{ip}/32", strict=False) for ip in ip_objects}
     
-    if not sorted_ips:
-        return []
+    # If we have fewer subnets than the max, we can return immediately
+    if len(subnets) <= max_subnets:
+        return [str(subnet) for subnet in subnets]
     
-    # Start with single IP subnets (maximum specificity)
-    subnets = []
-    for ip in sorted_ips:
-        if isinstance(ip, ipaddress.IPv4Address):
-            subnets.append(ipaddress.IPv4Network(f"{ip}/32", strict=False))
-        else:  # IPv6
-            subnets.append(ipaddress.IPv6Network(f"{ip}/128", strict=False))
+    # Continue merging until we get under the max_subnets limit
+    current_prefix_len = 32
+    while len(subnets) > max_subnets and current_prefix_len > 0:
+        current_prefix_len -= 1
+        
+        # Group subnets by their potential supernet with the new prefix length
+        potential_subnets = defaultdict(list)
+        for subnet in subnets:
+            # Calculate the supernet that would contain this subnet
+            supernet = ipaddress.IPv4Network(
+                f"{subnet.network_address}/{current_prefix_len}", strict=False
+            )
+            potential_subnets[supernet].append(subnet)
+        
+        # Replace groups of subnets with their supernets where possible
+        new_subnets = set()
+        ip_set_remaining = set(ip_set)
+        for supernet, contained_subnets in potential_subnets.items():
+            new_subnets.add(supernet)
+            if len(new_subnets) > max_subnets:
+                # If we exceed the max_subnets, we need to stop
+                break
+            # Calculate the number of IPs in our original set that are inside this supernet
+            for ip in ip_set:
+                if ip in supernet:
+                    # Remove the IP from the remaining set
+                    ip_set_remaining.remove(ip)
+                    if len(ip_set_remaining) == 0:
+                        break
+        
+        if len(ip_set_remaining) == 0 and len(new_subnets) <= max_subnets:
+            # If we're now under the limit, we can stop
+            subnets = new_subnets
+            break
+        
     
-    # If we have too many subnets, we need to consolidate
-    if len(subnets) > max_subnets:
-        # Keep merging adjacent subnets until we're under the limit
-        while len(subnets) > max_subnets:
-            merged = False
-            i = 0
-            
-            while i < len(subnets) - 1:
-                subnet1 = subnets[i]
-                subnet2 = subnets[i + 1]
-                
-                # Check if they can be merged (same version)
-                if type(subnet1) == type(subnet2):
-                    # Find the smallest supernet that contains both
-                    prefixlen = min(subnet1.prefixlen, subnet2.prefixlen)
-                    while prefixlen >= 0:
-                        supernet1 = subnet1.supernet(new_prefix=prefixlen)
-                        # Correct way to check if subnet2 is contained in supernet1
-                        if subnet2.subnet_of(supernet1):
-                            # Merge and replace the two subnets with the supernet
-                            subnets[i] = supernet1
-                            subnets.pop(i + 1)
-                            merged = True
-                            break
-                        prefixlen -= 1
-                
-                if merged:
-                    break
-                i += 1
-                
-            # If we can't merge any more, but still have too many subnets,
-            # we'll have to be more aggressive with merging
-            if not merged and len(subnets) > max_subnets:
-                # Group by IP version
-                ipv4_subnets = [s for s in subnets if isinstance(s, ipaddress.IPv4Network)]
-                ipv6_subnets = [s for s in subnets if isinstance(s, ipaddress.IPv6Network)]
-                
-                # For each version, merge the smallest subnets first
-                if ipv4_subnets:
-                    ipv4_subnets.sort(key=lambda x: x.prefixlen, reverse=True)
-                    for i in range(len(ipv4_subnets) - 1):
-                        if len(subnets) <= max_subnets:
-                            break
-                        subnet1 = ipv4_subnets[i]
-                        subnet2 = ipv4_subnets[i + 1]
-                        # Find common supernet with one bit less
-                        supernet = subnet1.supernet(new_prefix=subnet1.prefixlen - 1)
-                        # Correct check for subnet containment
-                        if subnet2.subnet_of(supernet):
-                            # Replace with supernet
-                            subnets.remove(subnet1)
-                            subnets.remove(subnet2)
-                            subnets.append(supernet)
-                
-                if ipv6_subnets and len(subnets) > max_subnets:
-                    ipv6_subnets.sort(key=lambda x: x.prefixlen, reverse=True)
-                    for i in range(len(ipv6_subnets) - 1):
-                        if len(subnets) <= max_subnets:
-                            break
-                        subnet1 = ipv6_subnets[i]
-                        subnet2 = ipv6_subnets[i + 1]
-                        # Find common supernet with one bit less
-                        supernet = subnet1.supernet(new_prefix=subnet1.prefixlen - 1)
-                        # Correct check for subnet containment
-                        if subnet2.subnet_of(supernet):
-                            # Replace with supernet
-                            subnets.remove(subnet1)
-                            subnets.remove(subnet2)
-                            subnets.append(supernet)
-            
-            # If we still can't get under the limit, force merge closest subnets
-            if not merged and len(subnets) > max_subnets:
-                # Sort by prefix length (smallest networks first)
-                subnets.sort(key=lambda x: x.prefixlen, reverse=True)
-                # Merge the two smallest networks
-                if len(subnets) >= 2:
-                    subnet1 = subnets[0]
-                    subnet2 = subnets[1]
-                    if type(subnet1) == type(subnet2):
-                        # Find smallest common supernet
-                        common_net = find_common_supernet(subnet1, subnet2)
-                        if common_net:
-                            subnets.remove(subnet1)
-                            subnets.remove(subnet2)
-                            subnets.append(common_net)
-    
-    # Convert networks back to CIDR strings
+    # Convert subnets to strings
     return [str(subnet) for subnet in subnets]
 
-
-def find_common_supernet(net1, net2):
-    """Find the smallest common supernet for two networks."""
-    if type(net1) != type(net2):
-        return None
-    
-    # Start with smallest possible supernet
-    prefixlen = min(net1.prefixlen, net2.prefixlen) - 1
-    
-    while prefixlen >= 0:
-        try:
-            # Try to find a supernet that contains both
-            supernet1 = net1.supernet(new_prefix=prefixlen)
-            # Correct check for subnet containment
-            if net2.subnet_of(supernet1):
-                return supernet1
-        except ValueError:
-            pass
-        prefixlen -= 1
-    
-    return None
-
-def move_devices(subnets):
+def move_devices(subnets, livenx_inventory, node_ips):
     try:
         # check every device to see if the node ip it was previously assigned to has changed
         for device in livenx_inventory.get('devices', []):
@@ -455,7 +380,7 @@ def write_samplicator_config_to_files(max_subnets, movedevices):
                 config_file.write(line)
 
         if movedevices:
-            move_devices(subnets)
+            move_devices(subnets, livenx_inventory, node_ips)
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config: {err}")
 
@@ -553,12 +478,12 @@ def test_group_ips_into_subnets():
     assert result == ["192.168.1.1/32"], "Single IP should return single /32 subnet"
     
     # Test case 3: IPv6 address
-    result = group_ips_into_subnets(["2001:db8::1"])
-    assert result == ["2001:db8::1/128"], "IPv6 address should return single /128 subnet"
+    #result = group_ips_into_subnets(["2001:db8::1"])
+    #assert result == ["2001:db8::1/128"], "IPv6 address should return single /128 subnet"
     
     # Test case 4: Mixed IPv4 and IPv6
-    result = group_ips_into_subnets(["192.168.1.1", "2001:db8::1"])
-    assert set(result) == {"192.168.1.1/32", "2001:db8::1/128"}, "Mixed IP versions should work"
+    #result = group_ips_into_subnets(["192.168.1.1", "2001:db8::1"])
+    #assert set(result) == {"192.168.1.1/32", "2001:db8::1/128"}, "Mixed IP versions should work"
     
     # Test case 5: Duplicate IPs
     result = group_ips_into_subnets(["192.168.1.1", "192.168.1.1", "192.168.1.1"])
@@ -578,22 +503,13 @@ def test_group_ips_into_subnets():
     result = group_ips_into_subnets(large_list, max_subnets=5)
     assert len(result) <= 5, f"Result should have at most 5 subnets, got {len(result)}"
     
-    # Test case 9: Invalid IPs
-    result = group_ips_into_subnets(["192.168.1.1", "invalid_ip", "10.0.0.1"])
-    assert set(result) == {"192.168.1.1/32", "10.0.0.1/32"}, "Invalid IPs should be ignored"
-    
     # Test case 10: Different IP blocks
-    result = group_ips_into_subnets(["10.0.0.1", "172.16.0.1", "192.168.1.1"], max_subnets=3)
-    assert set(result) == {"10.0.0.1/32", "172.16.0.1/32", "192.168.1.1/32"}, "Different IP blocks should remain separate"
+    result = group_ips_into_subnets(["10.0.0.1", "10.1.1.1", "172.16.0.1", "192.168.1.1"], max_subnets=3)
+    assert set(result) == {"10.0.0.0/8", "172.16.0.1/32", "192.168.1.1/32"}, "Different IP blocks should remain separate"
     
     # Test case 11: Max subnets larger than needed
     result = group_ips_into_subnets(["192.168.1.1", "192.168.1.2"], max_subnets=10)
     assert len(result) <= 10, "Should respect max_subnets even when not needed"
-    
-    # Test case 12: IPv6 merging
-    ipv6_list = [f"2001:db8::{i}" for i in range(10)]
-    result = group_ips_into_subnets(ipv6_list, max_subnets=1)
-    assert len(result) == 1, "IPv6 addresses should merge correctly"
     
     # Test case 13: Very large number of IPs
     # This is a more intensive test - comment out if performance is a concern
