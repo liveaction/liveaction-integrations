@@ -113,3 +113,85 @@ def get_livenx_inventory():
         json_data = json.loads(response_data)
     
     return json_data
+
+
+def get_livenx_nodes():
+    '''
+    {
+  "meta": {
+    "href": "https://35.92.47.26:8093/v1/nodes",
+    "http": {
+      "method": "GET",
+      "statusCode": 200,
+      "statusReason": "OK"
+    }
+  },
+  "nodes": [
+    {
+      "id": "f081fe53-b472-4561-990c-0626918cac33",
+      "name": "Local/Server",
+      "ipAddress": "Local",
+      "local": true,
+      "state": "Connected",
+      "startTime": "2024-08-13T23:25:17.866Z",
+      "timeZoneId": "Etc/UTC",
+      "timeStamp": "2024-08-16T00:00:00.007Z",
+      "specificationsConformanceStatus": "FAIL",
+      "performanceStatus": "WARNING"
+    },
+    {
+      "id": "5bbb56cc-754b-4842-93a5-8842e1eb7a25",
+      "name": "livenx-node-livenca",
+      "ipAddress": "10.51.6.82",
+      "local": false,
+      "state": "Connected",
+      "startTime": "2024-08-13T23:43:32.990Z",
+      "timeZoneId": "Etc/UTC",
+      "timeStamp": "2024-08-16T00:00:00.771Z",
+      "specificationsConformanceStatus": "PASS",
+      "performanceStatus": "OK"
+    }
+  ]
+}
+    '''
+    try:
+      api_url = "/v1/nodes"
+      request, ctx = create_request(api_url)
+      request.add_header("accept", "application/json")
+
+      ## TO DO Try Except to handle http request timeout or exception
+      with urllib.request.urlopen(request, context=ctx) as response:
+          response_data = response.read().decode('utf-8')
+          # Parse the JSON response
+          json_data = json.loads(response_data)
+          
+          # Return the nodes field if it exists
+          if 'nodes' in json_data:
+              nodes = json_data['nodes']
+              ret_nodes = []
+              for node in nodes:
+                  # Check if the node is local
+                  print(node)
+                  if node.get('local', False) == False:
+                      ret_nodes.append(node)
+              return ret_nodes
+          else:
+              # Handle the case where 'nodes' doesn't exist
+              return []
+    except Exception as err:
+        logging.error(f"Error while call /v1/nodes: {err}")
+    
+    return []
+
+def get_livenx_node_id_from_ip(nodes, ip: str):
+    """
+    Get the node id from the ip address
+    """
+    try:
+        for node in nodes:
+            if node['ipAddress'] == ip:
+                return node['id']
+    except Exception as err:
+        logging.error(f"Error while getting IP: {err}")
+    
+    return None
