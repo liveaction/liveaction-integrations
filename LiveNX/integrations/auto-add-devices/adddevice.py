@@ -477,7 +477,7 @@ def main(args):
 
 
                 # If the last added time is older than 5 minutes, move the devices
-                if last_added_time > 0.0 and (time.time() - last_added_time) > args.numsecstowaitbeforerebalance and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
+                if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance) and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
                     local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds.")
                     # Move devices if needed
                     write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
