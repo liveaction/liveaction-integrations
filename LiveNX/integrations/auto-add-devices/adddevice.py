@@ -474,12 +474,12 @@ def main(args):
                         if num_devices_added > 0:
                             last_added_time = current_time
 
-                local_logger.info(f"No new devices added since {int(time.time() - last_added_time)} seconds ({last_added_time}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
+                local_logger.info(f"No new devices added since {int(time.time() - last_added_time)} seconds (int{last_added_time}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
                 # If the last added time is older than 5 minutes, move the devices
                 if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance) and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
                     local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds.")
                     # Move devices if needed
-                    write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+                    write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.samplicatorhost, args.writesamplicatorconfigmaxsubnets, args.movedevices)
 
                     # Restart the Samplicator service
                     restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
@@ -501,7 +501,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.samplicatorhost, args.writesamplicatorconfigmaxsubnets, args.movedevices)
         exit(1)
 
     if args.logfile is None:
