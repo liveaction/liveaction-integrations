@@ -4,7 +4,7 @@ import os
 from helper.clickhouse import connect_with_tls
 from typing import Dict, Set, Tuple
 from multiprocessing import Process
-#import requests
+import argparse
 import urllib
 import ssl
 import json
@@ -13,7 +13,7 @@ from helper.livenx import get_livenx_inventory, set_interfaces
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def get_cickhouse_password():
+def get_clickhouse_password():
     """
     <?xml version="1.0" encoding="UTF-8"?>
 
@@ -49,7 +49,7 @@ liveNxApiToken = os.getenv("LIVENX_API_TOKEN","")
 
 clickHouseHost = os.getenv("CLICKHOUSE_HOST","localhost")
 clickHouseUsername = os.getenv("CLICKHOUSE_USERNAME","default")
-clickHousePassword = get_cickhouse_password()
+clickHousePassword = get_clickhouse_password()
 clickHouseApiPort = os.getenv("CLICKHOUSE_PORT","9440")
 clickhouseCACerts = os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
 clickhouseCertfile = os.getenv("CLICKHOUSE_CERTFILE", "clickhouse-server/cacerts/ca.crt")
@@ -170,3 +170,18 @@ def start_interface_monitor():
     except Exception as e:
         logging.error(f"Failed to start interface monitor: {e}")
         raise
+
+def main(args):
+    if args.daemon:
+        process = start_interface_monitor()
+        process.join()
+    else:
+        monitor = InterfaceMonitor()
+        monitor.run()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process Auto add interfaces from clickhouse")
+    parser.add_argument("--daemon", type=bool, help="Run as a daemon")
+    args = parser.parse_args()
+    main(args)

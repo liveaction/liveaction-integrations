@@ -117,7 +117,7 @@ def readLiveNXLogFile(filename=None):
                         ipAddress = ip[0]
                         if ipAddress not in ip_list:
                           ip_list.append(ipAddress)
-        local_logger.debug(f"List of IPs {ip_list}")
+        local_logger.debug(f"List of IPs from log file {filename} {ip_list}")
         return ip_list
     except Exception as err:
         local_logger.error(f"Error while reading log file {err}")
@@ -140,7 +140,7 @@ def readMissingIPsLogFile(filename=None):
         with open_func(filename, 'rt') as rf:  # 'rt' mode for reading text
             for line in rf.readlines():
                 ip_list.append(line.strip())
-        local_logger.debug(f"Samplicator Missing IPs List of IPs {ip_list}")
+        local_logger.debug(f"List of IPs from Samplicator {ip_list}")
         return ip_list
     except Exception as err:
         local_logger.error(f"Error while reading log file {err}")
