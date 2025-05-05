@@ -569,7 +569,6 @@ def test_group_ips_into_subnets():
     
     # Test case 6: Sequential IPs that can be merged
     result = group_ips_into_subnets(["192.168.1.0", "192.168.1.1", "192.168.1.2", "192.168.1.3"], max_subnets=1)
-    print(result)
     assert result == ["192.168.1.0/30"], "Sequential IPs should merge into a single subnet"
     
     # Test case 7: IPs that cannot be perfectly merged

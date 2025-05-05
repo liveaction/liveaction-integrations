@@ -8,10 +8,12 @@ import argparse
 import urllib
 import ssl
 import json
+import sys
 from helper.livenx import get_livenx_inventory, set_interfaces
 
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+local_logger = logging.getLogger(__name__)
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_clickhouse_password():
     """
@@ -64,7 +66,7 @@ class ConfigLoader:
             with open(os.path.join(self.config_dir, filename), 'r') as f:
                 return json.load(f)
         except Exception as e:
-            logging.error(f"Error loading {filename}: {str(e)}")
+            local_logger.error(f"Error loading {filename}: {str(e)}")
             return {}
 
 config_loader = ConfigLoader()
@@ -84,7 +86,7 @@ def create_request(url, data = None):
 class InterfaceMonitor:
     def __init__(self, connection_params: Dict=None):
         if not(os.path.isfile(clickhouseCertfile) and os.path.isfile(clickhouseKeyfile)):
-            logging.error(f"Missing env clickhouse certificate file: {clickhouseCertfile} or key F=file: {clickhouseKeyfile}")
+            local_logger.error(f"Missing env clickhouse certificate file: {clickhouseCertfile} or key F=file: {clickhouseKeyfile}")
             exit(1)
         self.client = connect_with_tls(host=clickHouseHost, port=clickHouseApiPort, user=clickHouseUsername, password=clickHousePassword, database='livenx_flowdb', ca_certs=clickhouseCACerts, certfile=clickhouseCertfile, keyfile=clickhouseKeyfile)
         self.previous_interfaces: Dict[str, Set[Tuple[int, int]]] = {}
@@ -122,24 +124,24 @@ class InterfaceMonitor:
             existing_interfaces = []
             for interface in interfaces:
                 existing_interfaces.append(interface.get('ifIndex'))
-            logging.debug(f"EXISTING={existing_interfaces}")
+            local_logger.debug(f"EXISTING={existing_interfaces}")
             final_interfaces = existing_interfaces.copy()
             current_device_interfaces = current_interfaces.get(device_serial, set())
             for current_interface in current_device_interfaces:
                 if current_interface[0] not in final_interfaces:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
-                    logging.info(f"Added interface {current_interface[0]} to device {device_serial} with ip {ip4}")
+                    local_logger.info(f"Added interface {current_interface[0]} to device {device_serial} with ip {ip4}")
                     final_interfaces.append(current_interface[0])
                 if current_interface[1] not in final_interfaces:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
-                    logging.info(f"Added interface {current_interface[1]} to device {device_serial} with ip {ip4}")
+                    local_logger.info(f"Added interface {current_interface[1]} to device {device_serial} with ip {ip4}")
                     final_interfaces.append(current_interface[1])
 
             # only add a new set of interfaces if the list of interfaces change
             if len(final_interfaces) != len(existing_interfaces):
-                logging.debug(f"FINAL={final_interfaces}")
+                local_logger.debug(f"FINAL={final_interfaces}")
                 set_interfaces(device_serial, final_interfaces, ip4)
 
     def run(self):
@@ -151,7 +153,7 @@ class InterfaceMonitor:
                 time.sleep(300)  # Wait 5 minutes
                 
             except Exception as e:
-                logging.error(f"Error during monitoring: {e}")
+                local_logger.error(f"Error during monitoring: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying on error
     
 
@@ -164,10 +166,10 @@ def start_interface_monitor():
         process = Process(target=start_monitor, args=())
         process.daemon = True  # Set the process as a daemon
         process.start()
-        logging.info("Interface monitor started successfully.")
+        local_logger.info("Interface monitor started successfully.")
         return process
     except Exception as e:
-        logging.error(f"Failed to start interface monitor: {e}")
+        local_logger.error(f"Failed to start interface monitor: {e}")
         raise
 
 def main(args):

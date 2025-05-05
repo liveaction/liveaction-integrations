@@ -171,7 +171,6 @@ def get_livenx_nodes():
               ret_nodes = []
               for node in nodes:
                   # Check if the node is local
-                  print(node)
                   if node.get('local', False) == False:
                       ret_nodes.append(node)
               return ret_nodes
