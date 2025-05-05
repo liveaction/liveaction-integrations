@@ -34,7 +34,6 @@ def get_clickhouse_password():
             match = re.search(r'<password replace="true">(.+?)</password>', password)
             if match:  
                 password = match.group(1)
-                logging.info("Password extracted from XML file.")
                 return password
     except FileNotFoundError:
         pass
