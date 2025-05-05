@@ -349,7 +349,8 @@ def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfi
     except Exception as err:
         local_logger.error(f"Error while restarting Samplicator: {err}")
 
-def write_samplicator_config_to_files(samplicator_config_file_path, samplicatorhost, samplicatorport, max_subnets, movedevices):
+def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets, movedevices):
+    should_restart_samplicator = False
     try:
         livenx_inventory = get_livenx_inventory()
         livenx_nodes = get_livenx_nodes()
@@ -384,9 +385,11 @@ def write_samplicator_config_to_files(samplicator_config_file_path, samplicatorh
             modified_devices = move_devices(subnets, livenx_inventory, node_ips)
             if len(modified_devices) > 0:
                 local_logger.info(f"Moved devices: {modified_devices}")
-                restart_samplicator(samplicator_config_file_path, samplicator_config_file_path, samplicatorhost, samplicatorport)
+                should_restart_samplicator = True
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config: {err}")
+
+    return should_restart_samplicator
 
 def add_test_devices(start_num, num_devices):
     try:
@@ -479,10 +482,11 @@ def main(args):
                 if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance) and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
                     local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds.")
                     # Move devices if needed
-                    write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.samplicatorhost, args.samplicatorport, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+                    should_restart_samplicator = write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
 
-                    # Restart the Samplicator service
-                    restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
+                    if should_restart_samplicator:
+                        # Restart the Samplicator service
+                        restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
                     last_added_time = 0.0
                 time.sleep(5)  # Sleep for a while before checking again
             except KeyboardInterrupt:
@@ -501,7 +505,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.samplicatorhost, args.samplicatorport, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
         exit(1)
 
     if args.logfile is None:
