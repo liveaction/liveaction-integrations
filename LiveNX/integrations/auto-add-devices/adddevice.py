@@ -131,7 +131,6 @@ def readMissingIPsLogFile(filename=None):
     if filename is None:
         local_logger.info("File name is missing")
         exit(1)
-    local_logger.info(f"MONITORING {filename}")
     ip_list = []
     try:
         # Check if the file is gzipped
@@ -345,7 +344,7 @@ def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfi
                 f.write("1.2.3.4/255.255.255.255: 127.0.0.1/9999")
                 f.close()
         
-        os.system(f"{samplicatorfilepath} -c {samplicatorconfigfilepath} -i {montoripfile} -p {samplicatorport} -s {samplicatorhost} -f")
+        os.system(f"{samplicatorfilepath} -S -c {samplicatorconfigfilepath} -i {montoripfile} -p {samplicatorport} -s {samplicatorhost} -f")
     except Exception as err:
         local_logger.error(f"Error while restarting Samplicator: {err}")
 
