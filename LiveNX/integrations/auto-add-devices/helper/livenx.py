@@ -79,7 +79,7 @@ def set_interfaces(device_serial: str, ifIndexes: list[int], ip4: str):
         
         with urllib.request.urlopen(request, context=ctx) as response:
             response_data = response.read().decode('utf-8')
-            logging.info(response_data)
+            logging.debug(response_data)
     except Exception as err:
         logging.error(f"Error on /v1/devices/virtual/interfaces API Call {err}")
 

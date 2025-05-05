@@ -95,7 +95,7 @@ class InterfaceMonitor:
         # get all interfaces that aren't marked with dummyseed
         query = """
         SELECT DISTINCT DeviceSerial, IngressIfIndex, EgressIfIndex
-        FROM livenx_flowdb.basic_entity_1m_dist
+        FROM livenx_flowdb.basic_entity_5m_dist
         WHERE time >= now() - INTERVAL 15 MINUTE AND IngressIfName NOT LIKE '%Interface%' AND EgressIfName NOT LIKE '%Interface%'
         """
         
