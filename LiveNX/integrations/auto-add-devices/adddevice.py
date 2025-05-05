@@ -431,7 +431,7 @@ def monitor_ip_file(filename):
     else:
         # get existing livenx inventory
         original_livenx_inventory = get_livenx_inventory()
-        local_logger.debug(f"List of IPs to add: {ip_list}")   
+        local_logger.debug(f"List of IPs from Samplicator IP file: {ip_list}")   
         new_device_inventory = None
         # Remove existing IPs from the list
         for livenx_device in original_livenx_inventory.get('devices',[]):
@@ -472,10 +472,8 @@ def main(args):
                         num_devices_added = monitor_ip_file(args.monitoripfile)
                         if num_devices_added > 0:
                             last_added_time = current_time
-                    else:
-                        local_logger.info(f"File {args.monitoripfile} has not been modified.")
 
-
+                local_logger.info(f"File {args.monitoripfile} has not been modified in {time.time() - current_time} seconds. Will rebalance after no modification for {args.numsecstowaitbeforerebalance} seconds.")
                 # If the last added time is older than 5 minutes, move the devices
                 if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance) and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
                     local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds.")
@@ -526,7 +524,7 @@ def main(args):
     if len(ip_list) < 1:
         local_logger.debug("No IP to add")
     else:
-        local_logger.debug(f"List of IPs to add: {ip_list}")   
+        local_logger.debug(f"List of IPs to add from Log File: {ip_list}")   
         new_device_inventory = None
         for i in range(0, len(ip_list), 10):  # Process in chunks of 10
             chunk = ip_list[i:i + 10]
