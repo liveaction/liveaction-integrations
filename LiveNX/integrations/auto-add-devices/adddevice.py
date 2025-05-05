@@ -477,8 +477,8 @@ def main(args):
 
 
                 # If the last added time is older than 5 minutes, move the devices
-                if last_added_time > 0.0 and (time.time() - last_added_time) > 300 and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
-                    local_logger.info(f"File {args.monitoripfile} has not been modified for 5 minutes.")
+                if last_added_time > 0.0 and (time.time() - last_added_time) > args.numsecstowaitbeforerebalance and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
+                    local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds.")
                     # Move devices if needed
                     write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
 
@@ -625,5 +625,6 @@ if __name__ == "__main__":
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
     parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
     parser.add_argument('--monitoripfile', type=str, help='The log file to monitor for IP addresses')
+    parser.add_argument('--numsecstowaitbeforerebalance', nargs='?', const=300, type=int, default=300)
     args = parser.parse_args()
     main(args)
