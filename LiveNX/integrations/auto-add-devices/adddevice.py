@@ -205,7 +205,7 @@ def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", req
             if attempt < 2:  # Only sleep if this is not the last attempt
                 time.sleep(5)
 
-def group_ips_into_subnets(ip_list, max_subnets=1000):
+def group_ips_into_subnets(ip_list, max_subnets=1000, init_prefix_len=32):
     """
     Group IP addresses into the smallest possible subnets while keeping
     the total number of subnets under the specified maximum.
@@ -221,15 +221,16 @@ def group_ips_into_subnets(ip_list, max_subnets=1000):
     ip_objects = [ipaddress.IPv4Address(ip) for ip in ip_list]
     ip_set = set(ip_objects)
     
+    # Continue merging until we get under the max_subnets limit
+    current_prefix_len = init_prefix_len
+
     # Start with /32 (individual IP) subnets
-    subnets = {ipaddress.IPv4Network(f"{ip}/32", strict=False) for ip in ip_objects}
+    subnets = {ipaddress.IPv4Network(f"{ip}/{current_prefix_len}", strict=False) for ip in ip_objects}
     
     # If we have fewer subnets than the max, we can return immediately
     if len(subnets) <= max_subnets:
         return [str(subnet) for subnet in subnets]
     
-    # Continue merging until we get under the max_subnets limit
-    current_prefix_len = 32
     while len(subnets) > max_subnets and current_prefix_len > 0:
         current_prefix_len -= 1
         
