@@ -345,7 +345,7 @@ def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfi
                 f.write("1.2.3.4/255.255.255.255: 127.0.0.1/9999")
                 f.close()
         
-        os.system(f"{samplicatorfilepath} -S -c {samplicatorconfigfilepath} -i {montoripfile} -p {samplicatorport} -s {samplicatorhost} -f")
+        os.system(f"{samplicatorfilepath} -n -o -S -c {samplicatorconfigfilepath} -i {montoripfile} -p {samplicatorport} -s {samplicatorhost} -f")
     except Exception as err:
         local_logger.error(f"Error while restarting Samplicator: {err}")
 
