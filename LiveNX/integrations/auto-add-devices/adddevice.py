@@ -14,6 +14,8 @@ from helper.livenx import get_livenx_inventory, get_livenx_nodes, get_livenx_nod
 import ipaddress
 from collections import defaultdict
 
+from autoaddinterfaces import InterfaceMonitor
+
 
 
 liveNxApiHost = os.getenv("LIVENX_API_HOST")
@@ -479,22 +481,30 @@ def main(args):
 
                 local_logger.info(f"No new devices added since {int(time.time() - last_added_time)} seconds ({int(last_added_time)}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
                 # If the last added time is older than 5 minutes, move the devices
-                if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance) and args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
-                    local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds.")
-                    # Move devices if needed
-                    should_restart_samplicator = write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+                if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance):
 
-                    if should_restart_samplicator:
-                        # Restart the Samplicator service
-                        restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
+                    if args.addinterfaces: 
+                        # Add interfaces to the devices
+                        local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds. Running auto add interfaces operation.")
+                        interface_monitor = InterfaceMonitor()
+                        interface_monitor.run_one_cycle()                        
+
+                    if args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
+                        local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds. Running rebalance operation.")
+                        # Move devices if needed
+                        should_restart_samplicator = write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+
+                        if should_restart_samplicator:
+                            # Restart the Samplicator service
+                            restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
                     last_added_time = 0.0
-                time.sleep(5)  # Sleep for a while before checking again
+                time.sleep(60)  # Sleep for a while before checking again
             except KeyboardInterrupt:
                 local_logger.info("Monitoring interrupted by user.")
                 break
             except Exception as e: 
                 local_logger.error(f"Error while monitoring IP file: {e}")
-                time.sleep(5)
+                time.sleep(60)
                 continue
         exit(1)
 
@@ -623,6 +633,7 @@ if __name__ == "__main__":
     parser.add_argument('--samplicatorhost', type=str, help='Samplicator host')
     parser.add_argument('--samplicatorport', type=int, help='Samplicator port')
     parser.add_argument('--movedevices', action="store_true", help='Move the devices between nodes if needed')
+    parser.add_argument('--addinterfaces', action="store_true", help='Add interfaces to the devices'
     parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
     parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')

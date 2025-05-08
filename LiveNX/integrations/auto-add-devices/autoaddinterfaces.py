@@ -144,14 +144,19 @@ class InterfaceMonitor:
                 local_logger.debug(f"FINAL={final_interfaces}")
                 set_interfaces(device_serial, final_interfaces, ip4)
 
+    def run_one_cycle(self):
+        try:
+            livenx_inventory = get_livenx_inventory()
+            current_interfaces = self.get_interface_from_clickhouse()
+            self.update_interfaces(livenx_inventory, current_interfaces)
+        except Exception as e:
+            local_logger.error(f"Error during monitoring: {e}")
+
     def run(self):
         while True:
             try:
-                livenx_inventory = get_livenx_inventory()
-                current_interfaces = self.get_interface_from_clickhouse()
-                self.update_interfaces(livenx_inventory, current_interfaces)
-                time.sleep(300)  # Wait 5 minutes
-                
+                self.run_one_cycle()
+                time.sleep(900)  # Wait 1 minute before the next cycle                
             except Exception as e:
                 local_logger.error(f"Error during monitoring: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying on error
