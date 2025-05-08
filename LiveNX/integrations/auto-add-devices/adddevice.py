@@ -465,6 +465,7 @@ def main(args):
     if args.monitoripfile is not None:
         restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
         last_added_time = 0.0
+        last_autoadded_interface_time = 0.0
         current_time = 0.0
         while True:
             try:
@@ -481,13 +482,7 @@ def main(args):
 
                 local_logger.info(f"No new devices added since {int(time.time() - last_added_time)} seconds ({int(last_added_time)}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
                 # If the last added time is older than 5 minutes, move the devices
-                if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance):
-
-                    if args.addinterfaces: 
-                        # Add interfaces to the devices
-                        local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds. Running auto add interfaces operation.")
-                        interface_monitor = InterfaceMonitor()
-                        interface_monitor.run_one_cycle()                        
+                if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance):                     
 
                     if args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
                         local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds. Running rebalance operation.")
@@ -498,6 +493,14 @@ def main(args):
                             # Restart the Samplicator service
                             restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
                     last_added_time = 0.0
+
+                # Run the autoadd interfaces every 5 minutes
+                if args.addinterfaces and (time.time() - last_autoadded_interface_time) > args.numsecstowaitbeforeaddinginterfaces:
+                    local_logger.info(f"Last autoadded interface waittime expired ({args.numsecstowaitbeforeaddinginterfaces} seconds). Running auto add interfaces operation.")
+                    interface_monitor = InterfaceMonitor()
+                    interface_monitor.run_one_cycle()                        
+                    last_autoadded_interface_time = time.time()
+
                 time.sleep(60)  # Sleep for a while before checking again
             except KeyboardInterrupt:
                 local_logger.info("Monitoring interrupted by user.")
@@ -639,5 +642,6 @@ if __name__ == "__main__":
     parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
     parser.add_argument('--monitoripfile', type=str, help='The log file to monitor for IP addresses')
     parser.add_argument('--numsecstowaitbeforerebalance', nargs='?', const=300, type=int, default=300)
+    parser.add_argument('--numsecstowaitbeforeaddinginterfaces', nargs='?', const=300, type=int, default=300)
     args = parser.parse_args()
     main(args)
