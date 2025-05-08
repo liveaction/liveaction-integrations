@@ -465,7 +465,7 @@ def main(args):
     if args.monitoripfile is not None:
         restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
         last_added_time = 0.0
-        last_autoadded_interface_time = 0.0
+        last_autoadded_interface_time = time.time()
         current_time = 0.0
         while True:
             try:

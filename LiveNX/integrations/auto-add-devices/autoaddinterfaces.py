@@ -141,6 +141,13 @@ class InterfaceMonitor:
 
             # only add a new set of interfaces if the list of interfaces change
             if len(final_interfaces) != len(existing_interfaces):
+                # delete the dummy interfaces
+                for existing_interface in existing_interfaces:
+                    if interface.get('name') == "DummyInterface0/0":
+                        local_logger.info(f"Deleted {interface.get('name')} index {interface.get('ifIndex')} from device {device_serial} with ip {ip4}")
+                        ifIndex = existing_interface.get('ifIndex')
+                        if ifIndex != None:
+                            final_interfaces.remove(ifIndex)
                 local_logger.debug(f"FINAL={final_interfaces}")
                 set_interfaces(device_serial, final_interfaces, ip4)
 
