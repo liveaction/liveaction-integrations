@@ -636,7 +636,7 @@ if __name__ == "__main__":
     parser.add_argument('--samplicatorhost', type=str, help='Samplicator host')
     parser.add_argument('--samplicatorport', type=int, help='Samplicator port')
     parser.add_argument('--movedevices', action="store_true", help='Move the devices between nodes if needed')
-    parser.add_argument('--addinterfaces', action="store_true", help='Add interfaces to the devices'
+    parser.add_argument('--addinterfaces', action="store_true", help='Add interfaces to the devices')
     parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
     parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
