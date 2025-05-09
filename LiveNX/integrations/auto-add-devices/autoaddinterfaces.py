@@ -122,34 +122,36 @@ class InterfaceMonitor:
             ip4 = interfaces[0].get('address')
             # Check if the device serial is in the current interfaces
             existing_interfaces = []
+            final_interfaces_indicies = []
             for interface in interfaces:
-                existing_interfaces.append(interface.get('ifIndex'))
-            local_logger.debug(f"EXISTING={existing_interfaces}")
-            final_interfaces = existing_interfaces.copy()
+                existing_interfaces.append(interface)
+
+            for existing_interface in existing_interfaces:
+                final_interfaces_indicies.append(existing_interface.get('ifIndex'))
+            local_logger.debug(f"EXISTING={final_interfaces_indicies}")                    
             current_device_interfaces = current_interfaces.get(device_serial, set())
             for current_interface in current_device_interfaces:
-                if current_interface[0] not in final_interfaces:
+                if current_interface[0] not in final_interfaces_indicies:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
                     local_logger.info(f"Added interface {current_interface[0]} to device {device_serial} with ip {ip4}")
-                    final_interfaces.append(current_interface[0])
-                if current_interface[1] not in final_interfaces:
+                    final_interfaces_indicies.append(current_interface[0])
+                if current_interface[1] not in final_interfaces_indicies:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
                     local_logger.info(f"Added interface {current_interface[1]} to device {device_serial} with ip {ip4}")
-                    final_interfaces.append(current_interface[1])
+                    final_interfaces_indicies.append(current_interface[1])
 
             # only add a new set of interfaces if the list of interfaces change
-            if len(final_interfaces) != len(existing_interfaces):
+            if len(final_interfaces_indicies) != len(existing_interfaces):
                 # delete the dummy interfaces
                 for existing_interface in existing_interfaces:
-                    if interface.get('name') == "DummyInterface0/0":
-                        local_logger.info(f"Deleted {interface.get('name')} index {interface.get('ifIndex')} from device {device_serial} with ip {ip4}")
-                        ifIndex = existing_interface.get('ifIndex')
-                        if ifIndex != None:
-                            final_interfaces.remove(ifIndex)
-                local_logger.debug(f"FINAL={final_interfaces}")
-                set_interfaces(device_serial, final_interfaces, ip4)
+                    if existing_interface.get('name') == "DummyInterface0/0":
+                        existing_interface_ifindex = existing_interface.get('ifIndex')
+                        local_logger.info(f"Deleted {existing_interface.get('name')} index {existing_interface_ifindex} from device {device_serial} with ip {ip4}")
+                        final_interfaces_indicies.remove(existing_interface_ifindex)
+                local_logger.debug(f"FINAL={final_interfaces_indicies}")
+                set_interfaces(device_serial, final_interfaces_indicies, ip4)
 
     def run_one_cycle(self):
         try:
