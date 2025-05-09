@@ -1,14 +1,12 @@
 import os
 import subprocess
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 import time
 import logging
 import sys
 import argparse
 
 local_logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # Set the directory to monitor
 directory_to_monitor = "/data/livenx-server/data/log"
@@ -19,68 +17,67 @@ if not os.path.isdir(directory_to_monitor):
 
 # Function to run adddevice.py with the filename as an argument in the background
 def run_adddevice(logfile, file_event_type):
-    local_logger.info(f"Processing file event type {file_event_type} in background: {logfile}")
+    local_logger.debug(f"Processing file event type {file_event_type} in background: {logfile}")
     subprocess.Popen(["python3", "adddevice.py", "--logfile", logfile])
 
-# Custom event handler to monitor file creation
-class LogFileHandler(FileSystemEventHandler):
-    file_cache = {} ## store modified file with time
-    def on_created(self, event):
-        if event.is_directory:
-            return
-        if (event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxNode_")) or event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxServer_"))) and event.src_path.endswith(".log"):
-            run_adddevice(event.src_path, "New File")
-    
-    def on_modified(self, event):
+# Function to monitor the directory for new or modified files
+def monitor_directory(continuous):
+    file_cache = {}  # Cache to store file modification times
+    while True:
+        try:
+            for filename in os.listdir(directory_to_monitor):
+                if (filename.startswith("LivenxNode_") or filename.startswith("LivenxServer_")):
+                    filepath = os.path.join(directory_to_monitor, filename)
+                    last_modified = os.path.getmtime(filepath)
 
-        ## delete keys older than 3 sec
-        older_keys = []
-        for key in self.file_cache:
-            seconds = int(time.time())
-            if seconds - key[0] > 3:
-                older_keys.append(key)
-        for key in older_keys:
-            del self.file_cache[key]
-        if event.is_directory:
-            return
-        
-        if (event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxNode_")) or event.src_path.startswith(os.path.join(directory_to_monitor, "LivenxServer_"))) and event.src_path.endswith(".log"):
-            seconds = int(time.time())
-            key = (seconds, event.src_path)
-            if key in self.file_cache:
-                return
-            self.file_cache[key] = True
-            run_adddevice(event.src_path, "Modified File")
+                    # Check if the file is new or modified
+                    if filepath not in file_cache:
+                        file_event_type = "New File" if filepath not in file_cache else "Modified File"
+                        file_cache[filepath] = last_modified
+                        run_adddevice(filepath, file_event_type)
+            if continuous == False:
+                local_logger.info("Stopping directory monitoring.")
+                break
+
+            time.sleep(300)  # Polling interval
+        except KeyboardInterrupt:
+            local_logger.info("Stopping directory monitoring.")
+            break
 
 def main(args):
-    # Set up observer and event handler
-    observer = Observer()
-    event_handler = LogFileHandler()
-
-    # Monitor the directory and start observer
-    observer.schedule(event_handler, path=directory_to_monitor, recursive=False)
-    observer.start()
 
     if args.autoaddinterfaces:
         from autoaddinterfaces import start_interface_monitor
         start_interface_monitor()
-    
-    try:
-        # Check for existing files that match the pattern in the directory
+
+    # Check for existing files that match the pattern in the directory
+    if args.autoadddevices:
         for filename in os.listdir(directory_to_monitor):
             if filename.startswith("LivenxServer_") and filename.endswith(".log"):
                 run_adddevice(os.path.join(directory_to_monitor, filename), "Existing File")
-        
-        # Keep the observer running
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
 
-    observer.join()
+        if args.continuous:
+            # Start monitoring the directory
+            # Start the directory monitoring in the background
+            local_logger.info("Starting directory monitoring in the background...")
+            monitor_directory(args.continuous)
+
+    if args.continuous:
+        # Keep the script running to monitor the directory
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            local_logger.info("Stopping directory monitoring.")
+            exit(0)
+    else:
+        local_logger.info("Directory monitoring is not continuous. Exiting.")
+        exit(0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Monitor LiveNX log files for new devices")
     parser.add_argument("--autoaddinterfaces", action="store_true", help="Auto add interfaces")
+    parser.add_argument("--autoadddevices", action="store_true", help="Auto add devices")
+    parser.add_argument('--continuous', action="store_true", help='Run it continuously')
     args = parser.parse_args()
     main(args)

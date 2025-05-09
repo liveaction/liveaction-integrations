@@ -2,16 +2,29 @@ import argparse
 import logging
 import re
 import os
-import ssl
 import json
-import urllib.request, urllib.parse
+import urllib.request
 import time
 import sys
 import json
+import gzip
+import time
+from helper.livenx import create_request
+from helper.livenx import get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip
+import ipaddress
+from collections import defaultdict
+
+from autoaddinterfaces import InterfaceMonitor
 
 
-local_logger = logging.getLogger(__name__)
+
+liveNxApiHost = os.getenv("LIVENX_API_HOST")
+liveNxApiPort = os.getenv("LIVENX_API_PORT")
+liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
+
+CURRENT_NODE_INDEX = 0
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+local_logger = logging.getLogger(__name__)
 
 class ConfigLoader:
     def __init__(self, config_dir="config"):
@@ -29,103 +42,6 @@ class ConfigLoader:
 
 config_loader = ConfigLoader()
 
-liveNxApiHost = os.getenv("LIVENX_API_HOST")
-liveNxApiPort = os.getenv("LIVENX_API_PORT")
-liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
-liveNxTargetIP = os.getenv("LIVENX_TARGET_NODE_IP")
-
-def create_request(url, data = None):
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    headers = {
-        "Authorization": "Bearer " + liveNxApiToken
-    }
-    api_url = "https://" + liveNxApiHost + ":" + liveNxApiPort + url
-
-    request = urllib.request.Request(api_url, headers=headers, data = data)
-    return request, ctx
-
-def get_livenx_nodes():
-    '''
-    {
-  "meta": {
-    "href": "https://35.92.47.26:8093/v1/nodes",
-    "http": {
-      "method": "GET",
-      "statusCode": 200,
-      "statusReason": "OK"
-    }
-  },
-  "nodes": [
-    {
-      "id": "f081fe53-b472-4561-990c-0626918cac33",
-      "name": "Local/Server",
-      "ipAddress": "Local",
-      "local": true,
-      "state": "Connected",
-      "startTime": "2024-08-13T23:25:17.866Z",
-      "timeZoneId": "Etc/UTC",
-      "timeStamp": "2024-08-16T00:00:00.007Z",
-      "specificationsConformanceStatus": "FAIL",
-      "performanceStatus": "WARNING"
-    },
-    {
-      "id": "5bbb56cc-754b-4842-93a5-8842e1eb7a25",
-      "name": "livenx-node-livenca",
-      "ipAddress": "10.51.6.82",
-      "local": false,
-      "state": "Connected",
-      "startTime": "2024-08-13T23:43:32.990Z",
-      "timeZoneId": "Etc/UTC",
-      "timeStamp": "2024-08-16T00:00:00.771Z",
-      "specificationsConformanceStatus": "PASS",
-      "performanceStatus": "OK"
-    }
-  ]
-}
-    '''
-    try:
-      api_url = "/v1/nodes"
-      request, ctx = create_request(api_url)
-      request.add_header("accept", "application/json")
-
-      ## TO DO Try Except to handle http request timeout or exception
-      with urllib.request.urlopen(request, context=ctx) as response:
-          response_data = response.read().decode('utf-8')
-          # Parse the JSON response
-          json_data = json.loads(response_data)
-          
-          # Return the nodes field if it exists
-          if 'nodes' in json_data:
-              return json_data['nodes']
-          else:
-              # Handle the case where 'nodes' doesn't exist
-              return []
-    except Exception as err:
-        local_logger.error(f"Error while call /v1/nodes: {err}")
-    
-    return []
-
-
-def get_livenx_inventory():
-
-    api_url = "/v1/devices"
-
-    request, ctx = create_request(api_url)
-    request.add_header("Content-Type", "application/json")
-    request.add_header("accept", "application/json")
-    
-    # Specify the request method as POST
-    request.method = "GET"
-
-    json_data = None
-    with urllib.request.urlopen(request, context=ctx) as response:
-        response_data = response.read().decode('utf-8')
-        # Parse the JSON response
-        json_data = json.loads(response_data)
-    
-    return json_data
 
 # livenx_config.py
 
@@ -152,30 +68,64 @@ def create_livenx_device_from_ip(nodeid, ip_address, config_loader):
         'address': ip_address
     })
     
-    local_logger.info(livenx_device)
+    local_logger.debug(livenx_device)
     return livenx_device
 
+def choose_target_node(nodes):
+    global CURRENT_NODE_INDEX
+    nodes = [node for node in nodes if not node.get('local', False)]  # Filter out local nodes
+    if not nodes:
+        return None
+    CURRENT_NODE_INDEX %= len(nodes)  # Ensure index wraps around
+    target_node = nodes[CURRENT_NODE_INDEX]
+    CURRENT_NODE_INDEX += 1
+    return target_node
 
 def map_ip_to_livenx_inventory(ip_list):
     livenx_inventory = {}
     livenx_devices = []
     nodes = get_livenx_nodes()
-    node = None
-    nodeid = None
-    for node in nodes:
-      if node['ipAddress'] == liveNxTargetIP:
-        nodeid = node['id']
-        break
-    if nodeid == None:
-        local_logger.info(f"Node Id doesnot match with liveNx Target IP")
-        return 
+    
     for ip in ip_list:
+        target_node = choose_target_node(nodes)
+        nodeid = target_node['id']
         livenx_devices.append(create_livenx_device_from_ip(nodeid, ip, config_loader))
     
     livenx_inventory['devices'] = livenx_devices
     return livenx_inventory
 
-def readFile(filename=None):
+def readLiveNXLogFile(filename=None):
+    """
+        Read file Method
+        Parameter: filename    
+    """
+    if filename is None:
+        local_logger.info("File name is missing")
+        exit(1)
+    local_logger.info(f"MONITORING {filename}")
+    ip_list = []
+    try:
+        # Read file and return
+        ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})') 
+
+        # Check if the file is gzipped
+        open_func = gzip.open if filename.endswith('.gz') else open
+
+        with open_func(filename, 'rt') as rf:  # 'rt' mode for reading text
+            for line in rf.readlines():                
+                if "received flow packet for unknown device" in line or "Flow packet received from unknown device" in line:
+                    ip = ip_pattern.search(line)
+                    if ip:
+                        ipAddress = ip[0]
+                        if ipAddress not in ip_list:
+                          ip_list.append(ipAddress)
+        local_logger.debug(f"List of IPs from log file {filename} {ip_list}")
+        return ip_list
+    except Exception as err:
+        local_logger.error(f"Error while reading log file {err}")
+        return []
+    
+def readMissingIPsLogFile(filename=None):
     """
         Read file Method
         Parameter: filename    
@@ -185,24 +135,19 @@ def readFile(filename=None):
         exit(1)
     ip_list = []
     try:
-        # Read file and return
-        ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})') 
+        # Check if the file is gzipped
+        open_func = gzip.open if filename.endswith('.gz') else open
 
-        with open(filename) as rf:
-            for line in rf.readlines():                
-                if "received flow packet for unknown device" in line or "Flow packet received from unknown device" in line:
-                    ip = ip_pattern.search(line)
-                    if ip:
-                        ipAddress = ip[0]
-                        if ipAddress not in ip_list:
-                          ip_list.append(ipAddress)
-        local_logger.info(f"List of IPs {ip_list}")
+        with open_func(filename, 'rt') as rf:  # 'rt' mode for reading text
+            for line in rf.readlines():
+                ip_list.append(line.strip())
+        local_logger.debug(f"Number of IPs from Samplicator {len(ip_list)}")
         return ip_list
     except Exception as err:
         local_logger.error(f"Error while reading log file {err}")
         return []
 
-def add_to_livenx_inventory(livenx_inventory):
+def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", request_method="POST"):
 
     '''
     {
@@ -216,7 +161,7 @@ def add_to_livenx_inventory(livenx_inventory):
       "groupId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
       "groupName": "NYC Device Group",
       "stringTags": "MyTag1,MyTag2",
-      "userDefinedSampleRatio": 2,
+      "userDefinedSampleRatio": 1,
       "interfaces": [
         {
           "ifIndex": "0",
@@ -239,66 +184,464 @@ def add_to_livenx_inventory(livenx_inventory):
   
     '''
 
-    try:
-      # Convert the device list to a JSON string and encode it to bytes
-      data = json.dumps(livenx_inventory).encode('utf-8')
+    for attempt in range(3):  # Retry up to 3 times
+        try:
+            # Convert the device list to a JSON string and encode it to bytes
+            data = json.dumps(livenx_inventory).encode('utf-8')
+            local_logger.info(f"Adding device to LiveNX {livenx_inventory}")
 
-      # Create the request and add the Content-Type header
-      request, ctx = create_request("/v1/devices/virtual", data)
-      local_logger.info(data)
-      request.add_header("Content-Type", "application/json")
-      request.add_header("accept", "application/json")
-      # Specify the request method as POST
-      request.method = "POST"
-      
-      with urllib.request.urlopen(request, context=ctx) as response:
-          response_data = response.read().decode('utf-8')
-          local_logger.info(response_data)
+            # Create the request and add the Content-Type header
+            request, ctx = create_request(urlpath, data)
+            local_logger.debug(data)
+            request.add_header("Content-Type", "application/json")
+            request.add_header("accept", "application/json")
+            # Specify the request method as POST
+            request.method = request_method
+
+            with urllib.request.urlopen(request, context=ctx) as response:
+                response_data = response.read().decode('utf-8')
+                local_logger.debug(response_data)
+            break  # Exit the loop if the request is successful
+        except Exception as err:
+            local_logger.error(f"Error on /v1/devices/virtual API Call (Attempt {attempt + 1}/3): {err}")
+            if attempt < 2:  # Only sleep if this is not the last attempt
+                time.sleep(5)
+
+def group_ips_into_subnets(ip_list, max_subnets=1000, init_prefix_len=32):
+    """
+    Group IP addresses into the smallest possible subnets while keeping
+    the total number of subnets under the specified maximum.
+    
+    Args:
+        ip_list (list): List of IP address strings
+        max_subnets (int): Maximum number of subnets to create (default 1000)
+        
+    Returns:
+        list: List of subnet strings in CIDR notation
+    """
+    # Convert all IPs to IPv4Address objects and create a set for fast lookups
+    ip_objects = [ipaddress.IPv4Address(ip) for ip in ip_list]
+    ip_set = set(ip_objects)
+    
+    # Continue merging until we get under the max_subnets limit
+    current_prefix_len = init_prefix_len
+
+    # Start with /32 (individual IP) subnets
+    subnets = {ipaddress.IPv4Network(f"{ip}/{current_prefix_len}", strict=False) for ip in ip_objects}
+    
+    # If we have fewer subnets than the max, we can return immediately
+    if len(subnets) <= max_subnets:
+        return [str(subnet) for subnet in subnets]
+    
+    while len(subnets) > max_subnets and current_prefix_len > 0:
+        current_prefix_len -= 1
+        
+        # Group subnets by their potential supernet with the new prefix length
+        potential_subnets = defaultdict(list)
+        for subnet in subnets:
+            # Calculate the supernet that would contain this subnet
+            supernet = ipaddress.IPv4Network(
+                f"{subnet.network_address}/{current_prefix_len}", strict=False
+            )
+            potential_subnets[supernet].append(subnet)
+        
+        # Replace groups of subnets with their supernets where possible
+        new_subnets = set()
+        ip_set_remaining = set(ip_set)
+        for supernet, contained_subnets in potential_subnets.items():
+            new_subnets.add(supernet)
+            if len(new_subnets) > max_subnets:
+                # If we exceed the max_subnets, we need to stop
+                break
+            # Calculate the number of IPs in our original set that are inside this supernet
+            for ip in ip_set:
+                if ip in supernet:
+                    # Remove the IP from the remaining set
+                    ip_set_remaining.remove(ip)
+                    if len(ip_set_remaining) == 0:
+                        break
+        
+        if len(ip_set_remaining) == 0 and len(new_subnets) <= max_subnets:
+            # If we're now under the limit, we can stop
+            subnets = new_subnets
+            break
+        
+    
+    # Convert subnets to strings
+    return [str(subnet) for subnet in subnets]
+
+def move_devices(subnets, livenx_inventory, node_ips):
+    modified_devices = []
+    nodes = get_livenx_nodes()
+    try:
+        # check every device to see if the node ip it was previously assigned to has changed
+        for device in livenx_inventory.get('devices', []):
+            device_ip = device.get('address')
+            if device_ip:
+                # Sort subnets by prefix length (smallest subnets first)
+                sorted_subnets = sorted(subnets, key=lambda subnet: ipaddress.ip_network(subnet).prefixlen, reverse=True)
+
+                # Check if the device IP is in the smallest matching subnet
+                for subnet in sorted_subnets:
+                    if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
+                        # If it is, update the node IP for that device
+                        new_node_ip = node_ips[sorted_subnets.index(subnet) % len(node_ips)]
+                        current_device_node_id = device.get('nodeId')
+                        new_node_id = get_livenx_node_id_from_ip(nodes, new_node_ip)
+                        if current_device_node_id != new_node_id:
+                            # Update the device's node ID in the inventory
+                            if new_node_id:
+                                local_logger.debug(f"Current device node ID: {current_device_node_id}, New node ID: {new_node_id}")
+                                if current_device_node_id != new_node_id:
+                                    # Update the device's node ID
+                                    local_logger.debug(f"Updating device {device['hostName']} to new node ID: {new_node_id}")
+                                    device_spec = {"deviceSerial": device['serial'], "config": {"nodeId": new_node_id}}
+                                    modified_devices.append(device_spec)
+                        break
+
+        # If there are modified devices, update them in LiveNX
+        if len(modified_devices) > 0:
+            # chunk the devices to avoid memory issues
+            chunk_size = 10
+            livenx_inventory = {}
+            for i in range(0, len(modified_devices), chunk_size):
+                chunk = modified_devices[i:i + chunk_size]
+                livenx_inventory['devices'] = chunk
+                add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/config", request_method="PUT")
+
     except Exception as err:
-        local_logger.error(f"Error on /v1/devices/virtual API Call {err}")
+        local_logger.error(f"Error moving devices: {err}")
+    return modified_devices
+
+def restart_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfile, samplicatorhost, samplicatorport):
+    """
+    Restart the Samplicator service.
+    """
+    try:
+        stop_samplicator()
+        start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfile, samplicatorhost, samplicatorport)
+    except Exception as err:
+        local_logger.error(f"Error while restarting Samplicator: {err}")
+
+def stop_samplicator():
+    """
+    Restart the Samplicator service.
+    """
+    try:
+        # run killall samplicate command
+        local_logger.info("Killing all Samplicator processes...")
+        os.system("killall samplicate")
+    except Exception as err:
+        local_logger.error(f"Error while restarting Samplicator: {err}")
+
+def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfile, samplicatorhost="127.0.0.1", samplicatorport=2055):
+    """
+    Start the Samplicator service.
+    """
+    try:
+        local_logger.info("Starting samplicator service...")
+        # run the restart command
+        if os.path.exists(samplicatorconfigfilepath) == False:
+            # create an empty file
+            with open(samplicatorconfigfilepath, 'w') as f:
+                f.write("1.2.3.4/255.255.255.255: 127.0.0.1/9999")
+                f.close()
+        
+        os.system(f"{samplicatorfilepath} -n -o -S -c {samplicatorconfigfilepath} -i {montoripfile} -p {samplicatorport} -s {samplicatorhost} -f")
+    except Exception as err:
+        local_logger.error(f"Error while restarting Samplicator: {err}")
+
+def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets, movedevices):
+    should_restart_samplicator = False
+    try:
+        livenx_inventory = get_livenx_inventory()
+        livenx_nodes = get_livenx_nodes()
+        ip_addresses = []
+
+        # Collect all IP addresses from the inventory
+        for device in livenx_inventory.get('devices', []):
+            ip_address = device.get('address')
+            if ip_address:
+                ip_addresses.append(ip_address)
+
+        # Group IPs into subnets
+        subnets = group_ips_into_subnets(ip_addresses, max_subnets=max_subnets)
+
+        # Ensure we have node IPs to distribute subnets
+        node_ips = [node.get('ipAddress') for node in livenx_nodes if node.get('ipAddress')]
+        if not node_ips:
+            local_logger.error("No node IPs available for distribution.")
+            return
+
+        # Distribute subnets evenly across node IPs
+        with open(samplicator_config_file_path, 'w') as config_file:
+            for i, subnet in enumerate(subnets):
+                node_ip = node_ips[i % len(node_ips)]  # Cycle through node IPs
+                ip = str(ipaddress.ip_network(subnet)).split('/')[0]
+                dotted_notation = str(ipaddress.ip_network(subnet).netmask)
+                line = f"{ip}/{dotted_notation}: {node_ip}/2055\n"
+                local_logger.debug(f"Writing line to config file: {line.strip()}")
+                config_file.write(line)
+
+        if movedevices:
+            modified_devices = move_devices(subnets, livenx_inventory, node_ips)
+            if len(modified_devices) > 0:
+                local_logger.info(f"Moved devices: {modified_devices}")
+                should_restart_samplicator = True
+    except Exception as err:
+        local_logger.error(f"Error writing out samplicator config: {err}")
+
+    return should_restart_samplicator
+
+def add_test_devices(start_num, num_devices):
+    try:
+        livenx_inventory = {}
+        livenx_devices = []
+        nodes = get_livenx_nodes()
+        
+        for i in range(start_num, start_num + num_devices):
+            # Generate IP addresses across a larger range (10.x.x.x)
+            octet1 = 10
+            octet2 = (i // (256 * 256)) % 256  # Second octet
+            octet3 = (i // 256) % 256          # Third octet
+            octet4 = i % 256                   # Fourth octet
+            ip_address = f"{octet1}.{octet2}.{octet3}.{octet4}"
+            
+            target_node = choose_target_node(nodes)
+            if not target_node:
+                local_logger.error("No available target nodes to assign devices.")
+                break
+            
+            nodeid = target_node['id']
+            livenx_devices.append(create_livenx_device_from_ip(nodeid, ip_address, config_loader))
+            
+            # Add devices in chunks of 10 to avoid memory issues
+            if len(livenx_devices) >= 10 or i == start_num + num_devices - 1:
+                livenx_inventory['devices'] = livenx_devices
+                add_to_livenx_inventory(livenx_inventory)
+                livenx_devices = []  # Reset the list for the next batch
+
+    except Exception as err:
+        local_logger.error(f"Error adding test devices: {err}")
+
+def monitor_ip_file(filename):
+    """
+    Monitor a log file for IP addresses and add them to LiveNX.
+    """
+    local_logger.info(f"Monitoring {filename} for IP addresses.")
+    ip_list = readMissingIPsLogFile(filename)
+    
+    if len(ip_list) < 1:
+        local_logger.debug("No IP to add")
+    else:
+        # get existing livenx inventory
+        original_livenx_inventory = get_livenx_inventory()
+        local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_list)}")   
+        new_device_inventory = None
+        # Remove existing IPs from the list
+        for livenx_device in original_livenx_inventory.get('devices',[]):
+            try:
+              ip_list.remove(livenx_device['address'])
+            except Exception as err:
+                pass
+        if len(ip_list) < 1:
+            local_logger.debug("No IP to add")
+        else:
+            for i in range(0, len(ip_list), 10):  # Process in chunks of 10
+                chunk = ip_list[i:i + 10]
+                new_device_inventory = map_ip_to_livenx_inventory(chunk)
+                # Add IP to LiveNX
+                if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
+                    add_to_livenx_inventory(new_device_inventory)
+                else:
+                    local_logger.info("No device to add")
+    return len(ip_list)
 
 
 def main(args):
     ## trace input arguments
-    local_logger.info(args)
+    local_logger.debug(args)
+
+    if args.monitoripfile is not None:
+        restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
+        last_added_time = 0.0
+        last_autoadded_interface_time = time.time()
+        current_time = 0.0
+        while True:
+            try:
+                # check if the file exists
+                if os.path.exists(args.monitoripfile):
+
+                    # Check if the file has been modified since the last check
+                    current_time = os.path.getmtime(args.monitoripfile)
+                    if current_time > last_added_time:
+                        local_logger.info(f"File {args.monitoripfile} has been modified.")
+                        num_devices_added = monitor_ip_file(args.monitoripfile)
+                        if num_devices_added > 0:
+                            last_added_time = current_time
+
+                local_logger.info(f"No new devices added since {int(time.time() - last_added_time)} seconds ({int(last_added_time)}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
+                # If the last added time is older than 5 minutes, move the devices
+                if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance):                     
+
+                    if args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
+                        local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds. Running rebalance operation.")
+                        # Move devices if needed
+                        should_restart_samplicator = write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+
+                        if should_restart_samplicator:
+                            # Restart the Samplicator service
+                            restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
+                    last_added_time = 0.0
+
+                # Run the autoadd interfaces every 5 minutes
+                if args.addinterfaces and (time.time() - last_autoadded_interface_time) > args.numsecstowaitbeforeaddinginterfaces:
+                    local_logger.info(f"Last autoadded interface waittime expired ({args.numsecstowaitbeforeaddinginterfaces} seconds). Running auto add interfaces operation.")
+                    interface_monitor = InterfaceMonitor()
+                    interface_monitor.run_one_cycle()                        
+                    last_autoadded_interface_time = time.time()
+
+                time.sleep(60)  # Sleep for a while before checking again
+            except KeyboardInterrupt:
+                local_logger.info("Monitoring interrupted by user.")
+                break
+            except Exception as e: 
+                local_logger.error(f"Error while monitoring IP file: {e}")
+                time.sleep(60)
+                continue
+        exit(1)
+
+    if args.addtestdevices is not None and args.addtestdevices > 0:
+        # Write outtest devices
+        add_test_devices(args.addtestdevicesstartnum, args.addtestdevices)
+        exit(1)
+
+    if args.writesamplicatorconfig:
+        # Write the samplicator config
+        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+        exit(1)
 
     if args.logfile is None:
         local_logger.info("Missing log file")
         exit(1)
     
-    if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None or liveNxTargetIP is None:
-        local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is None or {liveNxTargetIP}")
+    if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None:
+        local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is Nonelive")
         exit(1)
 
-    while True:
       ## Get list of IPs from log file  
-      ip_list = readFile(args.logfile)
-      ## Map IP to Linenx Inventory 
-      orginal_livenx_inventory = get_livenx_inventory()
-      for livenx_device in orginal_livenx_inventory.get('devices',[]):          
+    ip_list = readLiveNXLogFile(args.logfile)
+      ## Map IP to LiveNX Inventory 
+    original_livenx_inventory = get_livenx_inventory()
+      
+    for livenx_device in original_livenx_inventory.get('devices',[]):          
         try:
           ip_list.remove(livenx_device['address'])
         except Exception as err:
             pass
-      if len(ip_list) < 1:
-        local_logger.info("No IP to add")
-      else:
-        local_logger.info(f"List of IPs to add: {ip_list}")   
-        livenx_invenory = map_ip_to_livenx_inventory(ip_list)
-        # Add IP to LiveNX
-        if isinstance(livenx_invenory, dict) and len(livenx_invenory.get('devices',[])) > 0:
-          add_to_livenx_inventory(livenx_invenory)
-        else:
-          local_logger.info("No device to add") 
+    if len(ip_list) < 1:
+        local_logger.debug("No IP to add")
+    else:
+        local_logger.debug(f"List of IPs to add from Log File: {ip_list}")   
+        new_device_inventory = None
+        for i in range(0, len(ip_list), 10):  # Process in chunks of 10
+            chunk = ip_list[i:i + 10]
+            new_device_inventory = map_ip_to_livenx_inventory(chunk)
+            # Add IP to LiveNX
+            if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
+                add_to_livenx_inventory(new_device_inventory)
+            else:
+                local_logger.info("No device to add")
 
-      if args.continuous is False:
-        break
 
-      time.sleep(1)
+def test_group_ips_into_subnets():
+    """
+    Tests the group_ips_into_subnets function with various scenarios.
+    """
+    # Import the function if it's in another module
+    # from your_module import group_ips_into_subnets
+    
+    # Test case 1: Empty list
+    result = group_ips_into_subnets([])
+    assert result == [], "Empty input should return empty list"
+    
+    # Test case 2: Single IP
+    result = group_ips_into_subnets(["192.168.1.1"])
+    assert result == ["192.168.1.1/32"], "Single IP should return single /32 subnet"
+    
+    # Test case 3: IPv6 address
+    #result = group_ips_into_subnets(["2001:db8::1"])
+    #assert result == ["2001:db8::1/128"], "IPv6 address should return single /128 subnet"
+    
+    # Test case 4: Mixed IPv4 and IPv6
+    #result = group_ips_into_subnets(["192.168.1.1", "2001:db8::1"])
+    #assert set(result) == {"192.168.1.1/32", "2001:db8::1/128"}, "Mixed IP versions should work"
+    
+    # Test case 5: Duplicate IPs
+    result = group_ips_into_subnets(["192.168.1.1", "192.168.1.1", "192.168.1.1"])
+    assert result == ["192.168.1.1/32"], "Duplicate IPs should be removed"
+    
+    # Test case 6: Sequential IPs that can be merged
+    result = group_ips_into_subnets(["192.168.1.0", "192.168.1.1", "192.168.1.2", "192.168.1.3"], max_subnets=1)
+    assert result == ["192.168.1.0/30"], "Sequential IPs should merge into a single subnet"
+    
+    # Test case 7: IPs that cannot be perfectly merged
+    result = group_ips_into_subnets(["192.168.1.1", "192.168.1.3", "192.168.1.5", "192.168.1.7"], max_subnets=1)
+    assert result == ["192.168.1.0/29"], "Non-sequential IPs should merge into smallest containing subnet"
+    
+    # Test case 8: Force merge with max_subnets
+    large_list = [f"192.168.{i}.{j}" for i in range(10) for j in range(10)]  # 100 IPs
+    result = group_ips_into_subnets(large_list, max_subnets=5)
+    assert len(result) <= 5, f"Result should have at most 5 subnets, got {len(result)}"
+    
+    # Test case 10: Different IP blocks
+    result = group_ips_into_subnets(["10.0.0.1", "10.1.1.1", "172.16.0.1", "192.168.1.1"], max_subnets=3)
+    assert set(result) == {"10.0.0.0/8", "172.16.0.1/32", "192.168.1.1/32"}, "Different IP blocks should remain separate"
+    
+    # Test case 11: Max subnets larger than needed
+    result = group_ips_into_subnets(["192.168.1.1", "192.168.1.2"], max_subnets=10)
+    assert len(result) <= 10, "Should respect max_subnets even when not needed"
+    
+    # Test case 13: Very large number of IPs
+    # This is a more intensive test - comment out if performance is a concern
+    large_ip_list = [f"10.{i}.{j}.{k}" for i in range(5) for j in range(5) for k in range(5)]  # 125 IPs
+    result = group_ips_into_subnets(large_ip_list, max_subnets=10)
+    assert len(result) <= 10, f"Should handle large lists and respect max_subnets, got {len(result)}"
+    
+    # Test case 14: Verify all original IPs are covered by resulting subnets
+    test_ips = ["192.168.1.1", "192.168.1.5", "10.0.0.1"]
+    result = group_ips_into_subnets(test_ips, max_subnets=2)
+    assert len(result) <= 2, "Should respect max_subnets constraint"
+    
+    # Convert result subnets to ipaddress objects
+    result_networks = [ipaddress.ip_network(subnet) for subnet in result]
+    
+    # Check that each original IP is contained in at least one of the result subnets
+    for ip_str in test_ips:
+        ip = ipaddress.ip_address(ip_str)
+        is_contained = any(ip in network for network in result_networks)
+        assert is_contained, f"IP {ip} should be contained in at least one subnet"
+    
+    print("All tests passed!")
+
 
 if __name__ == "__main__":
+    #test_group_ips_into_subnets()
+    #exit(1)
     parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
     parser.add_argument("--logfile", type=str, help="Add Log file")
-    parser.add_argument('--continuous', action="store_true", help='Run it continuously')
+    parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
+    parser.add_argument('--samplicatorpath', type=str, help='Samplicator path')
+    parser.add_argument('--samplicatorconfigfilepath', type=str, help='Samplicator config path')
+    parser.add_argument('--samplicatorhost', type=str, help='Samplicator host')
+    parser.add_argument('--samplicatorport', type=int, help='Samplicator port')
+    parser.add_argument('--movedevices', action="store_true", help='Move the devices between nodes if needed')
+    parser.add_argument('--addinterfaces', action="store_true", help='Add interfaces to the devices')
+    parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
+    parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
+    parser.add_argument('--addtestdevicesstartnum', type=int, help='The starting index number for the test devices at 10.x.x.x.')
+    parser.add_argument('--monitoripfile', type=str, help='The log file to monitor for IP addresses')
+    parser.add_argument('--numsecstowaitbeforerebalance', nargs='?', const=300, type=int, default=300)
+    parser.add_argument('--numsecstowaitbeforeaddinginterfaces', nargs='?', const=300, type=int, default=300)
     args = parser.parse_args()
     main(args)

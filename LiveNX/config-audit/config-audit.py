@@ -53,7 +53,6 @@ def connect_to_clickhouse(host, port, user, password, database, ca_certs='/path/
             certfile=tls_params.get("certfile"),
             keyfile=tls_params.get("keyfile"),
         )
-        print("Connected to ClickHouse with TLS successfully!")
         return client
 
     except Exception as e:

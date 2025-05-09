@@ -1,12 +1,12 @@
 {
     "ifIndex": "0",
-    "name": "dummyseed_eth0/0",
+    "name": "DummyInterface0/0",
     "subnetMask": "255.255.255.0",
     "description": "",
     "serviceProvider": "",
     "inputCapacity": "1000000",
     "outputCapacity": "1000000",
-    "wan": false,
+    "wan": true,
     "xcon": false,
     "label": "",
     "stringTags": ""
