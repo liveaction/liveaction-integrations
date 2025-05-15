@@ -297,6 +297,8 @@ def move_devices(subnets, livenx_inventory, node_ips):
                                     local_logger.debug(f"Updating device {device['hostName']} to new node ID: {new_node_id}")
                                     device_spec = {"deviceSerial": device['serial'], "config": {"nodeId": new_node_id}}
                                     modified_devices.append(device_spec)
+                        else:
+                            local_logger.debug(f"Not moving device {device['hostName']}")
                         break
 
         # If there are modified devices, update them in LiveNX
