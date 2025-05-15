@@ -509,25 +509,25 @@ def main(args):
                 local_logger.error(f"Error while monitoring IP file: {e}")
                 time.sleep(60)
                 continue
-        exit(1)
+        exit(0)
 
     if args.addtestdevices is not None and args.addtestdevices > 0:
         # Write outtest devices
         add_test_devices(args.addtestdevicesstartnum, args.addtestdevices)
-        exit(1)
+        exit(0)
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
         write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
-        exit(1)
+        exit(0)
 
     if args.logfile is None:
         local_logger.info("Missing log file")
-        exit(1)
+        exit(0)
     
     if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None:
         local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is Nonelive")
-        exit(1)
+        exit(0)
 
       ## Get list of IPs from log file  
     ip_list = readLiveNXLogFile(args.logfile)
