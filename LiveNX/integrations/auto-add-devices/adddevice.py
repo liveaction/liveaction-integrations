@@ -297,7 +297,6 @@ def move_devices(subnets, livenx_inventory, node_ips):
                                     local_logger.debug(f"Updating device {device['hostName']} to new node ID: {new_node_id}")
                                     device_spec = {"deviceSerial": device['serial'], "config": {"nodeId": new_node_id}}
                                     modified_devices.append(device_spec)
-                                    break
                         else:
                             local_logger.debug(f"Not moving device {device['hostName']}")
                         break
@@ -464,6 +463,10 @@ def monitor_ip_file(filename):
 def main(args):
     ## trace input arguments
     local_logger.debug(args)
+
+    if args.restartsamplicator:
+        restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
+        exit(0)
 
     if args.monitoripfile is not None:
         restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
@@ -638,6 +641,7 @@ if __name__ == "__main__":
     parser.add_argument('--samplicatorconfigfilepath', type=str, help='Samplicator config path')
     parser.add_argument('--samplicatorhost', type=str, help='Samplicator host')
     parser.add_argument('--samplicatorport', type=int, help='Samplicator port')
+    parser.add_argument('--restartsamplicator', action="store_true", help='Restart samplicator if needed')
     parser.add_argument('--movedevices', action="store_true", help='Move the devices between nodes if needed')
     parser.add_argument('--addinterfaces', action="store_true", help='Add interfaces to the devices')
     parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
