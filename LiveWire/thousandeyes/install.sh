@@ -6,4 +6,4 @@ source ./.env
 
 curl -Os https://downloads.thousandeyes.com/agent/install_thousandeyes.sh
 chmod +x install_thousandeyes.sh
-./install_thousandeyes.sh -l /var/log -b "${THOUSANDEYES_TOKEN}"
+./install_thousandeyes.sh -l /var/log "${THOUSANDEYES_TOKEN}"
