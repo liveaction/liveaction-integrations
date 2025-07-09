@@ -482,7 +482,7 @@ def main(args):
                     current_time = os.path.getmtime(args.monitoripfile)
                     if current_time > last_added_time:
                         local_logger.info(f"File {args.monitoripfile} has been modified.")
-                        num_devices_added = monitor_ip_file(args.monitoripfile. args.includeserver)
+                        num_devices_added = monitor_ip_file(args.monitoripfile, args.includeserver)
                         if num_devices_added > 0:
                             last_added_time = current_time
 
