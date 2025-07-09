@@ -73,7 +73,7 @@ def create_livenx_device_from_ip(nodeid, ip_address, config_loader):
 
 def choose_target_node(nodes):
     global CURRENT_NODE_INDEX
-    nodes = [node for node in nodes if not node.get('local', False)]  # Filter out local nodes
+    nodes = [node for node in nodes]
     if not nodes:
         return None
     CURRENT_NODE_INDEX %= len(nodes)  # Ensure index wraps around
