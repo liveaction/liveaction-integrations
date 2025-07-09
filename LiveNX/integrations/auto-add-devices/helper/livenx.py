@@ -172,6 +172,9 @@ def get_livenx_nodes(include_server: bool = False):
               for node in nodes:
                   # Check if the node is local, if it is the server, or if include_server is True
                   if include_server or (node.get('local', False) == False):
+                      if node.get('ipAddress') == 'Local':
+                          # If the node is local, set the IP address to the host
+                          node['ipAddress'] = liveNxApiHost
                       ret_nodes.append(node)
               return ret_nodes
           else:

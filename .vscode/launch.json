@@ -24,6 +24,7 @@
                 "127.0.0.1",
                 "--samplicatorport",
                 "5222",
+                "--includeserver",
             ]
         },
         {
@@ -38,6 +39,15 @@
                 "1000",
                 "--writesamplicatorconfig",
                 "--movedevices",
+                "--samplicatorpath",
+                "/home/liveaction/git/samplicator/samplicate",
+                "--samplicatorconfigfilepath",
+                "/home/liveaction/git/samplicator/samplicator.conf",
+                "--samplicatorhost",
+                "127.0.0.1",
+                "--samplicatorport",
+                "5222",
+                "--includeserver",
             ]
         },
         {
