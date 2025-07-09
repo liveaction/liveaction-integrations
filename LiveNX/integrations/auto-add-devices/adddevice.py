@@ -454,9 +454,10 @@ def monitor_ip_file(filename, include_server=False):
         local_logger.debug(f"Set of IPs after removing existing devices: {ip_set}")
         if len(ip_set) < 1:
             local_logger.debug("No IP to add")
-        else:
-            for i in range(0, len(ip_set), 10):  # Process in chunks of 10
-                chunk = ip_set[i:i + 10]
+        else:  
+            ip_list = list(ip_set)              
+            for i in range(0, len(ip_list), 10):  # Process in chunks of 10
+                chunk = ip_list[i:i + 10]
                 new_device_inventory = map_ip_to_livenx_inventory(chunk, include_server=include_server)
                 # Add IP to LiveNX
                 if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
