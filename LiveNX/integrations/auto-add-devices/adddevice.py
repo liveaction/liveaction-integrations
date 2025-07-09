@@ -81,10 +81,10 @@ def choose_target_node(nodes):
     CURRENT_NODE_INDEX += 1
     return target_node
 
-def map_ip_to_livenx_inventory(ip_list):
+def map_ip_to_livenx_inventory(ip_list, include_server=False):
     livenx_inventory = {}
     livenx_devices = []
-    nodes = get_livenx_nodes()
+    nodes = get_livenx_nodes(include_server=include_server)
     
     for ip in ip_list:
         target_node = choose_target_node(nodes)
@@ -270,9 +270,9 @@ def group_ips_into_subnets(ip_list, max_subnets=1000, init_prefix_len=32):
     # Convert subnets to strings
     return [str(subnet) for subnet in subnets]
 
-def move_devices(subnets, livenx_inventory, node_ips):
+def move_devices(subnets, livenx_inventory, node_ips, include_server=False):
     modified_devices = []
-    nodes = get_livenx_nodes()
+    nodes = get_livenx_nodes(include_server=include_server)
     try:
         # check every device to see if the node ip it was previously assigned to has changed
         for device in livenx_inventory.get('devices', []):
@@ -386,7 +386,7 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
                 config_file.write(line)
 
         if movedevices:
-            modified_devices = move_devices(subnets, livenx_inventory, node_ips)
+            modified_devices = move_devices(subnets, livenx_inventory, node_ips, include_server=include_server)
             if len(modified_devices) > 0:
                 local_logger.info(f"Moved devices: {modified_devices}")
                 should_restart_samplicator = True
@@ -395,11 +395,11 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
 
     return should_restart_samplicator
 
-def add_test_devices(start_num, num_devices):
+def add_test_devices(start_num, num_devices, include_server=False):
     try:
         livenx_inventory = {}
         livenx_devices = []
-        nodes = get_livenx_nodes()
+        nodes = get_livenx_nodes(include_server=include_server)
         
         for i in range(start_num, start_num + num_devices):
             # Generate IP addresses across a larger range (10.x.x.x)
@@ -426,7 +426,7 @@ def add_test_devices(start_num, num_devices):
     except Exception as err:
         local_logger.error(f"Error adding test devices: {err}")
 
-def monitor_ip_file(filename):
+def monitor_ip_file(filename, include_server=False):
     """
     Monitor a log file for IP addresses and add them to LiveNX.
     """
@@ -451,7 +451,7 @@ def monitor_ip_file(filename):
         else:
             for i in range(0, len(ip_list), 10):  # Process in chunks of 10
                 chunk = ip_list[i:i + 10]
-                new_device_inventory = map_ip_to_livenx_inventory(chunk)
+                new_device_inventory = map_ip_to_livenx_inventory(chunk, include_server=include_server)
                 # Add IP to LiveNX
                 if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
                     add_to_livenx_inventory(new_device_inventory)
@@ -482,7 +482,7 @@ def main(args):
                     current_time = os.path.getmtime(args.monitoripfile)
                     if current_time > last_added_time:
                         local_logger.info(f"File {args.monitoripfile} has been modified.")
-                        num_devices_added = monitor_ip_file(args.monitoripfile)
+                        num_devices_added = monitor_ip_file(args.monitoripfile. args.includeserver)
                         if num_devices_added > 0:
                             last_added_time = current_time
 
@@ -519,7 +519,7 @@ def main(args):
 
     if args.addtestdevices is not None and args.addtestdevices > 0:
         # Write outtest devices
-        add_test_devices(args.addtestdevicesstartnum, args.addtestdevices)
+        add_test_devices(args.addtestdevicesstartnum, args.addtestdevices, args.includeserver)
         exit(0)
 
     if args.writesamplicatorconfig:
@@ -552,7 +552,7 @@ def main(args):
         new_device_inventory = None
         for i in range(0, len(ip_list), 10):  # Process in chunks of 10
             chunk = ip_list[i:i + 10]
-            new_device_inventory = map_ip_to_livenx_inventory(chunk)
+            new_device_inventory = map_ip_to_livenx_inventory(chunk, args.includeserver)
             # Add IP to LiveNX
             if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
                 add_to_livenx_inventory(new_device_inventory)
