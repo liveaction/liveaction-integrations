@@ -133,19 +133,19 @@ def readMissingIPsLogFile(filename=None):
     if filename is None:
         local_logger.info("File name is missing")
         exit(1)
-    ip_list = []
+    ip_set = set()  # Use a set to avoid duplicates
     try:
         # Check if the file is gzipped
         open_func = gzip.open if filename.endswith('.gz') else open
 
         with open_func(filename, 'rt') as rf:  # 'rt' mode for reading text
             for line in rf.readlines():
-                ip_list.append(line.strip())
-        local_logger.debug(f"Number of IPs from Samplicator {len(ip_list)}")
-        return ip_list
+                ip_set.add(line.strip())
+        local_logger.debug(f"Number of IPs from Samplicator {len(ip_set)}")
+        return ip_set
     except Exception as err:
         local_logger.error(f"Error while reading log file {err}")
-        return []
+        return ip_set
 
 def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", request_method="POST"):
 
@@ -431,15 +431,15 @@ def monitor_ip_file(filename, include_server=False):
     Monitor a log file for IP addresses and add them to LiveNX.
     """
     local_logger.info(f"Monitoring {filename} for IP addresses.")
-    ip_list = readMissingIPsLogFile(filename)
-    local_logger.debug(f"List of IPs from log file {filename} {ip_list}")
+    ip_set = readMissingIPsLogFile(filename)
+    local_logger.debug(f"Set of IPs from log file {filename} {ip_set}")
     
-    if len(ip_list) < 1:
+    if len(ip_set) < 1:
         local_logger.debug("No IP to add")
     else:
         # get existing livenx inventory
         original_livenx_inventory = get_livenx_inventory()
-        local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_list)}")
+        local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_set)}")
         local_logger.debug(f"Number of IPs from LiveNX: {len(original_livenx_inventory.get('devices', []))}")
         
         new_device_inventory = None
@@ -447,23 +447,23 @@ def monitor_ip_file(filename, include_server=False):
         for livenx_device in original_livenx_inventory.get('devices',[]):
             try:
               local_logger.debug(f"Removing IP {livenx_device['address']} from list")
-              ip_list.remove(livenx_device['address'])
+              ip_set.remove(livenx_device['address'])
             except Exception as err:
                 local_logger.error(f"Error removing IP {livenx_device['address']} from list: {err}")
                 pass
-        local_logger.debug(f"List of IPs after removing existing devices: {ip_list}")
-        if len(ip_list) < 1:
+        local_logger.debug(f"Set of IPs after removing existing devices: {ip_set}")
+        if len(ip_set) < 1:
             local_logger.debug("No IP to add")
         else:
-            for i in range(0, len(ip_list), 10):  # Process in chunks of 10
-                chunk = ip_list[i:i + 10]
+            for i in range(0, len(ip_set), 10):  # Process in chunks of 10
+                chunk = ip_set[i:i + 10]
                 new_device_inventory = map_ip_to_livenx_inventory(chunk, include_server=include_server)
                 # Add IP to LiveNX
                 if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
                     add_to_livenx_inventory(new_device_inventory)
                 else:
                     local_logger.info("No device to add")
-    return len(ip_list)
+    return len(ip_set)
 
 
 def main(args):
