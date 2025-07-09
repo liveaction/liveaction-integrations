@@ -115,7 +115,7 @@ def get_livenx_inventory():
     return json_data
 
 
-def get_livenx_nodes():
+def get_livenx_nodes(include_server: bool = False):
     '''
     {
   "meta": {
@@ -170,8 +170,8 @@ def get_livenx_nodes():
               nodes = json_data['nodes']
               ret_nodes = []
               for node in nodes:
-                  # Check if the node is local
-                  if node.get('local', False) == False:
+                  # Check if the node is local, if it is the server, or if include_server is True
+                  if include_server or (node.get('local', False) == False):
                       ret_nodes.append(node)
               return ret_nodes
           else:

@@ -353,11 +353,11 @@ def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfi
     except Exception as err:
         local_logger.error(f"Error while restarting Samplicator: {err}")
 
-def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets, movedevices):
+def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets, movedevices, include_server):
     should_restart_samplicator = False
     try:
         livenx_inventory = get_livenx_inventory()
-        livenx_nodes = get_livenx_nodes()
+        livenx_nodes = get_livenx_nodes(include_server=include_server)
         ip_addresses = []
 
         # Collect all IP addresses from the inventory
@@ -493,7 +493,7 @@ def main(args):
                     if args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
                         local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds. Running rebalance operation.")
                         # Move devices if needed
-                        should_restart_samplicator = write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+                        should_restart_samplicator = write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices, args.includeserver)
 
                         if should_restart_samplicator:
                             # Restart the Samplicator service
@@ -524,7 +524,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices)
+        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices, args.includeserver)
         exit(0)
 
     if args.logfile is None:
@@ -643,6 +643,7 @@ if __name__ == "__main__":
     parser.add_argument('--samplicatorport', type=int, help='Samplicator port')
     parser.add_argument('--restartsamplicator', action="store_true", help='Restart samplicator if needed')
     parser.add_argument('--movedevices', action="store_true", help='Move the devices between nodes if needed')
+    parser.add_argument('--includeserver', action="store_true", help='Include the server in the device list')
     parser.add_argument('--addinterfaces', action="store_true", help='Add interfaces to the devices')
     parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
     parser.add_argument('--addtestdevices', type=int, help='Add a number of test devices starting at 10.x.x.x.')
