@@ -438,13 +438,17 @@ def monitor_ip_file(filename, include_server=False):
     else:
         # get existing livenx inventory
         original_livenx_inventory = get_livenx_inventory()
-        local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_list)}")   
+        local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_list)}")
+        local_logger.debug(f"Number of IPs from LiveNX: {len(original_livenx_inventory.get('devices', []))}")
+        
         new_device_inventory = None
         # Remove existing IPs from the list
         for livenx_device in original_livenx_inventory.get('devices',[]):
             try:
+              local_logger.debug(f"Removing IP {livenx_device['address']} from list")
               ip_list.remove(livenx_device['address'])
             except Exception as err:
+                local_logger.error(f"Error removing IP {livenx_device['address']} from list: {err}")
                 pass
         if len(ip_list) < 1:
             local_logger.debug("No IP to add")
