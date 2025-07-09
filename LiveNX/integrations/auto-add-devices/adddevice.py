@@ -432,6 +432,7 @@ def monitor_ip_file(filename, include_server=False):
     """
     local_logger.info(f"Monitoring {filename} for IP addresses.")
     ip_list = readMissingIPsLogFile(filename)
+    local_logger.debug(f"List of IPs from log file {filename} {ip_list}")
     
     if len(ip_list) < 1:
         local_logger.debug("No IP to add")
@@ -450,6 +451,7 @@ def monitor_ip_file(filename, include_server=False):
             except Exception as err:
                 local_logger.error(f"Error removing IP {livenx_device['address']} from list: {err}")
                 pass
+        local_logger.debug(f"List of IPs after removing existing devices: {ip_list}")
         if len(ip_list) < 1:
             local_logger.debug("No IP to add")
         else:
