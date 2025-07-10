@@ -23,7 +23,9 @@ liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
 CURRENT_NODE_INDEX = 0
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout,
+    level=os.environ.get('LOGLEVEL', 'INFO').upper()
+)
 local_logger = logging.getLogger(__name__)
 
 class ConfigLoader:

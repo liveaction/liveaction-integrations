@@ -20,13 +20,13 @@ def setup_logger(name, logstdout = False, loglevel = logging.INFO) -> logging.Lo
     ## Check if Log folder exist if not create in working directory
 
     if logstdout == True:
-        logging.basicConfig(stream=sys.stdout, level=loglevel)
+        logging.basicConfig(stream=sys.stdout, level=os.environ.get('LOGLEVEL', 'INFO').upper())
         return logging.getLogger(name)
 
     if not os.path.isdir(LOG_FOLDER):
         os.mkdir(LOG_FOLDER)
         
-    logging.basicConfig(filename=f'{LOG_FOLDER}/livenx-integrations.log', level=loglevel)
+    logging.basicConfig(filename=f'{LOG_FOLDER}/livenx-integrations.log', level=os.environ.get('LOGLEVEL', 'INFO').upper())
     formatter = logging.Formatter('[%(asctime)s %(name)s %(module)s:%(lineno)s],%(levelname)-8s:%(message)s')
 
     infoLogHandler = handlers.TimedRotatingFileHandler(f'{LOG_FOLDER}/livenx-integrations.log', when="midnight")

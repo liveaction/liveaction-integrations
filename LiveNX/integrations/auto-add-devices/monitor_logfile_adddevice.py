@@ -6,7 +6,9 @@ import sys
 import argparse
 
 local_logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout,
+    level=os.environ.get('LOGLEVEL', 'INFO').upper()
+)
 
 # Set the directory to monitor
 directory_to_monitor = "/data/livenx-server/data/log"

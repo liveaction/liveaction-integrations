@@ -11,7 +11,9 @@ import json
 import sys
 from helper.livenx import get_livenx_inventory, set_interfaces
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout,
+    level=os.environ.get('LOGLEVEL', 'INFO').upper()
+)
 local_logger = logging.getLogger(__name__)
 
 
