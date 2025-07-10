@@ -100,7 +100,7 @@ def readLiveNXLogFile(filename=None):
         Parameter: filename    
     """
     if filename is None:
-        local_logger.info("File name is missing")
+        local_logger.error("File name is missing")
         exit(1)
     local_logger.info(f"MONITORING {filename}")
     ip_list = []
@@ -188,7 +188,7 @@ def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", req
         try:
             # Convert the device list to a JSON string and encode it to bytes
             data = json.dumps(livenx_inventory).encode('utf-8')
-            local_logger.info(f"Adding device to LiveNX {livenx_inventory}")
+            local_logger.debug(f"Adding device to LiveNX {livenx_inventory}")
 
             # Create the request and add the Content-Type header
             request, ctx = create_request(urlpath, data)
@@ -388,7 +388,7 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
         if movedevices:
             modified_devices = move_devices(subnets, livenx_inventory, node_ips, include_server=include_server)
             if len(modified_devices) > 0:
-                local_logger.info(f"Moved devices: {modified_devices}")
+                local_logger.debug(f"Moved devices: {modified_devices}")
                 should_restart_samplicator = True
     except Exception as err:
         local_logger.error(f"Error writing out samplicator config: {err}")
@@ -430,7 +430,7 @@ def monitor_ip_file(filename, include_server=False):
     """
     Monitor a log file for IP addresses and add them to LiveNX.
     """
-    local_logger.info(f"Monitoring {filename} for IP addresses.")
+    local_logger.debug(f"Monitoring {filename} for IP addresses.")
     ip_set = readMissingIPsLogFile(filename)
     local_logger.debug(f"Set of IPs from log file {filename} {ip_set}")
     
@@ -463,7 +463,7 @@ def monitor_ip_file(filename, include_server=False):
                 if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
                     add_to_livenx_inventory(new_device_inventory)
                 else:
-                    local_logger.info("No device to add")
+                    local_logger.debug("No device to add")
     return len(ip_set)
 
 
@@ -486,14 +486,12 @@ def main(args):
                 if os.path.exists(args.monitoripfile):
 
                     # Check if the file has been modified since the last check
-                    current_time = os.path.getmtime(args.monitoripfile)
-                    if current_time > last_added_time:
-                        local_logger.info(f"File {args.monitoripfile} has been modified.")
-                        num_devices_added = monitor_ip_file(args.monitoripfile, args.includeserver)
-                        if num_devices_added > 0:
-                            last_added_time = current_time
+                    current_time = time.time()
+                    num_devices_added = monitor_ip_file(args.monitoripfile, args.includeserver)
+                    if num_devices_added > 0:
+                        last_added_time = current_time
 
-                local_logger.info(f"No new devices added since {int(time.time() - last_added_time)} seconds ({int(last_added_time)}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
+                local_logger.debug(f"No new devices added since {int(time.time() - last_added_time)} seconds ({int(last_added_time)}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
                 # If the last added time is older than 5 minutes, move the devices
                 if last_added_time > 0.0 and (time.time() - last_added_time) > int(args.numsecstowaitbeforerebalance):                     
 
@@ -564,7 +562,7 @@ def main(args):
             if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
                 add_to_livenx_inventory(new_device_inventory)
             else:
-                local_logger.info("No device to add")
+                local_logger.debug("No device to add")
 
 
 def test_group_ips_into_subnets():

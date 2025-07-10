@@ -35,7 +35,7 @@ def main(args):
     global local_logger
     local_logger = setup_logger(__name__, args.logstdout, logging.DEBUG)
     ## trace input arguments
-    local_logger.info(args)
+    local_logger.debug(args)
     # logging.basicConfig(filename='livenx-integrations.log', level=logging.INFO)
     starttimesecs = args.starttimesecs
     endtimesecs = args.endtimesecs

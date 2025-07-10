@@ -134,12 +134,12 @@ class InterfaceMonitor:
                 if current_interface[0] not in final_interfaces_indicies:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
-                    local_logger.info(f"Added interface {current_interface[0]} to device {device_serial} with ip {ip4}")
+                    local_logger.debug(f"Added interface {current_interface[0]} to device {device_serial} with ip {ip4}")
                     final_interfaces_indicies.append(current_interface[0])
                 if current_interface[1] not in final_interfaces_indicies:
                     # Check if the interface is already added
                     # Add the interface to the LiveNX inventory
-                    local_logger.info(f"Added interface {current_interface[1]} to device {device_serial} with ip {ip4}")
+                    local_logger.debug(f"Added interface {current_interface[1]} to device {device_serial} with ip {ip4}")
                     final_interfaces_indicies.append(current_interface[1])
 
             # only add a new set of interfaces if the list of interfaces change
@@ -148,7 +148,7 @@ class InterfaceMonitor:
                 for existing_interface in existing_interfaces:
                     if existing_interface.get('name') == "DummyInterface0/0":
                         existing_interface_ifindex = existing_interface.get('ifIndex')
-                        local_logger.info(f"Deleted {existing_interface.get('name')} index {existing_interface_ifindex} from device {device_serial} with ip {ip4}")
+                        local_logger.debug(f"Deleted {existing_interface.get('name')} index {existing_interface_ifindex} from device {device_serial} with ip {ip4}")
                         final_interfaces_indicies.remove(existing_interface_ifindex)
                 local_logger.debug(f"FINAL={final_interfaces_indicies}")
                 set_interfaces(device_serial, final_interfaces_indicies, ip4)
@@ -180,7 +180,7 @@ def start_interface_monitor():
         process = Process(target=start_monitor, args=())
         process.daemon = True  # Set the process as a daemon
         process.start()
-        local_logger.info("Interface monitor started successfully.")
+        local_logger.debug("Interface monitor started successfully.")
         return process
     except Exception as e:
         local_logger.error(f"Failed to start interface monitor: {e}")
