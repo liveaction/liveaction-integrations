@@ -383,7 +383,10 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
                 node_ip = node_ips[i % len(node_ips)]  # Cycle through node IPs
                 ip = str(ipaddress.ip_network(subnet)).split('/')[0]
                 dotted_notation = str(ipaddress.ip_network(subnet).netmask)
-                line = f"{ip}/{dotted_notation}: {node_ip}/2055\n"
+                samplicator_port = 2055
+                if node_ip == '127.0.0.1':
+                    samplicator_port = 2054
+                line = f"{ip}/{dotted_notation}: {node_ip}/{samplicator_port}\n"
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
 
