@@ -17,4 +17,4 @@ COPY . .
 VOLUME ["/data/livenx-server/data/log"]
 
 # Set the entry point to the Python script
-ENTRYPOINT ["python", "./monitor_logfile_adddevice.py"]
+ENTRYPOINT ["python", "./adddevice.py"]

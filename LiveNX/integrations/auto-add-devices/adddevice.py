@@ -96,38 +96,8 @@ def map_ip_to_livenx_inventory(ip_list, include_server=False):
     livenx_inventory['devices'] = livenx_devices
     return livenx_inventory
 
-def readLiveNXLogFile(filename=None):
-    """
-        Read file Method
-        Parameter: filename    
-    """
-    if filename is None:
-        local_logger.error("File name is missing")
-        exit(1)
-    local_logger.info(f"MONITORING {filename}")
-    ip_list = []
-    try:
-        # Read file and return
-        ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})') 
-
-        # Check if the file is gzipped
-        open_func = gzip.open if filename.endswith('.gz') else open
-
-        with open_func(filename, 'rt') as rf:  # 'rt' mode for reading text
-            for line in rf.readlines():                
-                if "received flow packet for unknown device" in line or "Flow packet received from unknown device" in line:
-                    ip = ip_pattern.search(line)
-                    if ip:
-                        ipAddress = ip[0]
-                        if ipAddress not in ip_list:
-                          ip_list.append(ipAddress)
-        local_logger.debug(f"List of IPs from log file {filename} {ip_list}")
-        return ip_list
-    except Exception as err:
-        local_logger.error(f"Error while reading log file {err}")
-        return []
     
-def readMissingIPsLogFile(filename=None):
+def read_samplicator_ip_file(filename=None):
     """
         Read file Method
         Parameter: filename    
@@ -428,12 +398,12 @@ def add_test_devices(start_num, num_devices, include_server=False):
     except Exception as err:
         local_logger.error(f"Error adding test devices: {err}")
 
-def monitor_ip_file(filename, include_server=False):
+def monitor_samplicator_ip_file(filename, include_server=False):
     """
     Monitor a log file for IP addresses and add them to LiveNX.
     """
     local_logger.debug(f"Monitoring {filename} for IP addresses.")
-    ip_set = readMissingIPsLogFile(filename)
+    ip_set = read_samplicator_ip_file(filename)
     local_logger.debug(f"Set of IPs from log file {filename} {ip_set}")
     
     if len(ip_set) < 1:
@@ -489,7 +459,7 @@ def main(args):
 
                     # Check if the file has been modified since the last check
                     current_time = time.time()
-                    num_devices_added = monitor_ip_file(args.monitoripfile, args.includeserver)
+                    num_devices_added = monitor_samplicator_ip_file(args.monitoripfile, args.includeserver)
                     if num_devices_added > 0:
                         last_added_time = current_time
 
@@ -534,37 +504,10 @@ def main(args):
         write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices, args.includeserver)
         exit(0)
 
-    if args.logfile is None:
-        local_logger.info("Missing log file")
-        exit(0)
-    
     if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None:
         local_logger.error(f"Missing env parameters: {liveNxApiHost} is None or {liveNxApiPort} is None or {liveNxApiToken} is Nonelive")
         exit(0)
 
-      ## Get list of IPs from log file  
-    ip_list = readLiveNXLogFile(args.logfile)
-      ## Map IP to LiveNX Inventory 
-    original_livenx_inventory = get_livenx_inventory()
-      
-    for livenx_device in original_livenx_inventory.get('devices',[]):          
-        try:
-          ip_list.remove(livenx_device['address'])
-        except Exception as err:
-            pass
-    if len(ip_list) < 1:
-        local_logger.debug("No IP to add")
-    else:
-        local_logger.debug(f"List of IPs to add from Log File: {ip_list}")   
-        new_device_inventory = None
-        for i in range(0, len(ip_list), 10):  # Process in chunks of 10
-            chunk = ip_list[i:i + 10]
-            new_device_inventory = map_ip_to_livenx_inventory(chunk, args.includeserver)
-            # Add IP to LiveNX
-            if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
-                add_to_livenx_inventory(new_device_inventory)
-            else:
-                local_logger.debug("No device to add")
 
 
 def test_group_ips_into_subnets():
@@ -641,11 +584,10 @@ def test_group_ips_into_subnets():
 if __name__ == "__main__":
     #test_group_ips_into_subnets()
     #exit(1)
-    parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from log file")
-    parser.add_argument("--logfile", type=str, help="Add Log file")
+    parser = argparse.ArgumentParser(description="Process Auto add device to LiveNX from samplicator log file.")
     parser.add_argument('--writesamplicatorconfig', action="store_true", help='Write the samplicator config')
     parser.add_argument('--samplicatorpath', type=str, help='Samplicator path')
-    parser.add_argument('--samplicatorconfigfilepath', type=str, help='Samplicator config path')
+    parser.add_argument('--samplicatorconfigfilepath', type=str, help='Samplicator config file path')
     parser.add_argument('--samplicatorhost', type=str, help='Samplicator host')
     parser.add_argument('--samplicatorport', type=int, help='Samplicator port')
     parser.add_argument('--restartsamplicator', action="store_true", help='Restart samplicator if needed')
