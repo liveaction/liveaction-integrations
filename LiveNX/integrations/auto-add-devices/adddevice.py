@@ -22,6 +22,9 @@ liveNxApiHost = os.getenv("LIVENX_API_HOST")
 liveNxApiPort = os.getenv("LIVENX_API_PORT")
 liveNxApiToken = os.getenv("LIVENX_API_TOKEN")
 
+SAMPLICATOR_SERVER_PORT = int(os.getenv("SAMPLICATOR_SERVER_PORT", "2054"))
+SAMPLICATOR_NODE_PORT = int(os.getenv("SAMPLICATOR_NODE_PORT", "2055"))
+
 CURRENT_NODE_INDEX = 0
 logging.basicConfig(stream=sys.stdout,
     level=os.environ.get('LOGLEVEL', 'INFO').upper()
@@ -353,7 +356,10 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
                 node_ip = node_ips[i % len(node_ips)]  # Cycle through node IPs
                 ip = str(ipaddress.ip_network(subnet)).split('/')[0]
                 dotted_notation = str(ipaddress.ip_network(subnet).netmask)
-                line = f"{ip}/{dotted_notation}: {node_ip}/2055\n"
+                samplicator_port = SAMPLICATOR_NODE_PORT
+                if node_ip == '127.0.0.1':
+                    samplicator_port = SAMPLICATOR_SERVER_PORT
+                line = f"{ip}/{dotted_notation}: {node_ip}/{samplicator_port}\n"
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
 
