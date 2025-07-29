@@ -1,9 +1,6 @@
 enable
 config t
 ! FNF configuration
-interface GigabitEthernet1/0/6
-ip nbar protocol-discovery
- exit
 flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
 description DO NOT MODIFY. USED BY LIVEACTION.
 export-protocol ipfix
@@ -86,9 +83,6 @@ policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
 class LIVEACTION-CLASS-AVC
 exit
 exit
-interface GigabitEthernet1/0/6
-ip nbar protocol-discovery
-exit
 flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
 description DO NOT MODIFY. USED BY LIVEACTION.
 export-protocol ipfix
@@ -135,7 +129,6 @@ exit
 interface GigabitEthernet1/0/6
 service-policy type performance-monitor input LIVEACTION-POLICY-UNIFIED
 service-policy type performance-monitor output LIVEACTION-POLICY-UNIFIED
-ip nbar protocol-discovery
 exit
 flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
 description DO NOT MODIFY. USED BY LIVEACTION.
