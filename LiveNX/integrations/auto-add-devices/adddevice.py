@@ -269,9 +269,184 @@ def move_devices(subnets, livenx_inventory, node_ips, include_server=False):
                                 local_logger.debug(f"Current device node ID: {current_device_node_id}, New node ID: {new_node_id}")
                                 if current_device_node_id != new_node_id:
                                     local_logger.debug(f"Moving device {device['hostName']} from node {current_device_node_id} to node {new_node_id}")
-                                    # Create a device spec for modification
-                                    device_spec = device
-                                    device_spec['config']['nodeId'] = new_node_id
+                                    '''Example device:    {
+      "meta": {
+        "href": "string",
+        "queryParameters": {
+          "additionalProp1": [
+            "string"
+          ],
+          "additionalProp2": [
+            "string"
+          ],
+          "additionalProp3": [
+            "string"
+          ]
+        },
+        "http": {
+          "method": "string",
+          "statusCode": 0,
+          "statusReason": "string"
+        }
+      },
+      "href": "https://10.10.10.10:8093/v1/devices/9IRVE649AQF",
+      "id": "9IRVE649AQF",
+      "serial": "9IRVE649AQF",
+      "address": "1.1.1.1",
+      "clientIp": "10.10.10.10",
+      "systemName": "device.test.com",
+      "displaySystemName": "device.test.com [10.10.10.10 | Node1 | 9IRVE649AQF]",
+      "hostName": "device",
+      "displayHostName": "device [10.10.10.10 | Node1 | 9IRVE649AQF]",
+      "systemLocation": "West Coast Office",
+      "systemDescription": "Gigabit Routing Switch",
+      "nodeId": "843bf835-e330-45fc-a363-c407237ef4d7",
+      "osVersion": {
+        "majorNumber": 12,
+        "minorNumber": 1,
+        "indivNumber": null,
+        "indivNumberSuffix": null,
+        "newFeatureIdentifier": null,
+        "newFeatureVersion": null,
+        "versionString": null,
+        "osType": "IOS_XE"
+      },
+      "osVersionString": "12.1",
+      "vendorProduct": {
+        "model": "ciscoCSR1000v",
+        "displayName": "ciscoCSR1000v",
+        "description": "ciscoCSR1000v",
+        "vendor": {
+          "vendorName": "Cisco",
+          "vendorOid": {
+            "displayName": ".1.3.6.1.4.1.9"
+          },
+          "vendorSerialOid": {
+            "displayName": ".1.3.6.1.4.1.9.3.6.3"
+          }
+        },
+        "objectOID": {
+          "displayName": ".1.3.6.1.4.1.9.1.1537"
+        },
+        "objectOIDString": ".1.3.6.1.4.1.9.1.1537",
+        "asrModel": false
+      },
+      "site": "Western Division",
+      "isDataCenterSite": false,
+      "tags": [
+        "Corp",
+        "West"
+      ],
+      "taggedOmni": false,
+      "interfaces": {
+        "name": "Null0",
+        "abbreviatedName": "Nu0",
+        "ifIndex": 5,
+        "description": "",
+        "speed": 10000000000,
+        "type": "other",
+        "wan": false,
+        "xcon": false,
+        "interfaceState": "UP"
+      },
+      "monitorOnly": false,
+      "settings": {
+        "pollInterval": 60000,
+        "enablePoll": true,
+        "enableQosPoll": true,
+        "enableNetflowPoll": true,
+        "enableIpslaPoll": true,
+        "enableLanPoll": true,
+        "enableRoutingPoll": true,
+        "virtualDevice": false
+      },
+      "capabilities": {
+        "nbarCapable": true,
+        "netflowCollectorCapable": true,
+        "mediatraceCapable": true,
+        "extendedTraceRouteCapable": true,
+        "nbar2Capable": true,
+        "flexibleNetflowCapable": true,
+        "perfmonCapable": true,
+        "avcCapable": false,
+        "unifiedPerfmonCapable": true,
+        "hqfSupportDetected": true,
+        "ipslaCapable": true
+      },
+      "pollingSupported": {
+        "netflowPollingSupported": true,
+        "ipslaPollingSupported": true,
+        "lanPollingSupported": true,
+        "routingPollingSupported": true,
+        "qosPollingSupported": true
+      },
+      "group": {
+        "idString": "7e3cf778-770d-41fe-932d-f3cf12902e61"
+      },
+      "linkInfo": {
+        "type": "OMNI_PEEK",
+        "label": "Packet Inspection",
+        "displayValue": "Peek",
+        "rawValue": {
+          "name": "OmniPeek Web",
+          "host": "10.4.201.132",
+          "path": "/omnipeek/forensics",
+          "startTime": "2023-03-08T02:08:10.000Z",
+          "endTime": "2023-03-08T02:13:10.000Z",
+          "showDialog": true
+        }
+      },
+      "analyticsNode": "Analytics Node",
+      "state": "NOT_AVAILABLE",
+      "userDefinedSampleRatio": 100,
+      "deviceLoadedState": "NOT_AVAILABLE"
+    }'''
+                                    '''"config": {
+        "nodeId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
+        "systemName": "John's Device",
+        "systemDescription": "Device next to John's desk in room 5207",
+        "pollInterval": 60000,
+        "enablePoll": true,
+        "enableQosPoll": false,
+        "enableNetflowPoll": true,
+        "enableIpslaPoll": false,
+        "enableLanPoll": false,
+        "enableRoutingPoll": false,
+        "groupId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
+        "groupName": "NYC Device Group",
+        "stringTags": "WAN,EastCoast",
+        "site": "NYC Office",
+        "siteIpRanges": "123.123.123.0/25",
+        "isDataCenterSite": false,
+        "userDefinedSampleRatio": 2,
+        "probeIPAddress": "123.123.123.123",
+        "ipAddress": "123.123.123.123"
+      }'''
+                                    device_spec = {}
+                                    device_spec['deviceSerial'] = device['serial']
+                                    device_config_json = {}
+                                    device_config_json['nodeId'] = new_node_id
+                                    device_config_json['systemName'] = device.get('systemName', "")
+                                    device_config_json['systemDescription'] = device.get('systemDescription', "")
+                                    device_config_json['pollInterval'] = device.get('pollInterval', 60000)
+                                    device_config_json['enablePoll'] = device.get('enablePoll', True)
+                                    device_config_json['enableQosPoll'] = device.get('enableQosPoll', False)
+                                    device_config_json['enableNetflowPoll'] = device.get('enableNetflowPoll', True)
+                                    device_config_json['enableIpslaPoll'] = device.get('enableIpslaPoll', False)
+                                    device_config_json['enableLanPoll'] = device.get('enableLanPoll', False)
+                                    device_config_json['enableRoutingPoll'] = device.get('enableRoutingPoll', False)
+                                    device_config_json['groupId'] = device.get('groupId', "")
+                                    device_config_json['groupName'] = device.get('groupName', "")
+                                    tags = device.get('tags', [])
+                                    stringTags = tags if isinstance(tags, str) else ','.join(tags)
+                                    device_config_json['stringTags'] = stringTags
+                                    device_config_json['site'] = device.get('site', "")
+                                    device_config_json['siteIpRanges'] = device.get('siteIpRanges', "")
+                                    device_config_json['isDataCenterSite'] = device.get('isDataCenterSite', False)
+                                    device_config_json['userDefinedSampleRatio'] = device.get('userDefinedSampleRatio', 1)
+                                    device_config_json['probeIPAddress'] = device.get('address', "")                    
+                                    device_config_json['ipAddress'] = device.get('address', "")
+                                    device_spec['config'] = device_config_json
                                     modified_devices.append(device_spec)
                         else:
                             local_logger.debug(f"Not moving device {device['hostName']}")

@@ -1,5 +1,8 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.11-slim
+FROM python:3.11-slim-bullseye
+
+# Update system packages to patch vulnerabilities
+RUN apt-get update && apt-get upgrade -y && apt-get clean
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
