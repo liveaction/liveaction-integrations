@@ -197,3 +197,22 @@ def get_livenx_node_id_from_ip(nodes, ip: str):
         logging.error(f"Error while getting IP: {err}")
     
     return None
+
+def delete_livenx_device(device_serial: str):
+    """
+    Delete a device from LiveNX by its serial number
+    """
+    try:
+        api_url = f"/v1/devices/{device_serial}"
+        request, ctx = create_request(api_url)
+        request.add_header("Content-Type", "application/json")
+        request.add_header("accept", "application/json")
+        
+        # Specify the request method as DELETE
+        request.method = "DELETE"
+        
+        with urllib.request.urlopen(request, context=ctx) as response:
+            response_data = response.read().decode('utf-8')
+            logging.debug(response_data)
+    except Exception as err:
+        logging.error(f"Error on /v1/devices/{device_serial} API Call {err}")
