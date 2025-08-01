@@ -12,8 +12,9 @@ import ipaddress
 from collections import defaultdict
 from helper.livenx import create_request, get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip, delete_livenx_device
 
-script_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-sys.path.insert(0, os.path.join(script_dir, 'common'))
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.join(script_dir, '..', 'common')
+sys.path.insert(0, parent_dir)
 from common.livenx_inventory import add_to_livenx_inventory
 from autoaddinterfaces import InterfaceMonitor
 
