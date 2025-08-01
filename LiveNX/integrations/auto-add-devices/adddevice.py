@@ -705,6 +705,12 @@ def main(args):
                     interface_monitor.run_one_cycle()                        
                     last_autoadded_interface_time = time.time()
 
+                if args.consoliatedevices:
+                    # Consolidate devices if needed
+                    livenx_inventory = get_livenx_inventory()
+                    local_logger.debug(f"Consolidating devices in LiveNX inventory with {len(livenx_inventory.get('devices', []))} devices.")
+                    consolidate_devices(livenx_inventory.get('devices', []))
+                    local_logger.info("Device consolidation completed.")
                 time.sleep(60)  # Sleep for a while before checking again
             except KeyboardInterrupt:
                 local_logger.info("Monitoring interrupted by user.")
@@ -813,6 +819,7 @@ if __name__ == "__main__":
     parser.add_argument('--samplicatorport', type=int, help='Samplicator port')
     parser.add_argument('--restartsamplicator', action="store_true", help='Restart samplicator if needed')
     parser.add_argument('--movedevices', action="store_true", help='Move the devices between nodes if needed')
+    parser.add_argument('--consolidatedevices', action="store_true", help='Consolidate devices by merging devices that have any interface with the same address')
     parser.add_argument('--includeserver', action="store_true", help='Include the server in the device list')
     parser.add_argument('--addinterfaces', action="store_true", help='Add interfaces to the devices')
     parser.add_argument('--writesamplicatorconfigmaxsubnets', type=int, help='The maximum number of subnets to write out to the config file')
