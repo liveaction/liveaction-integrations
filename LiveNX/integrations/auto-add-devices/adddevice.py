@@ -11,11 +11,6 @@ import time
 import ipaddress
 from collections import defaultdict
 from helper.livenx import create_request, get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip, delete_livenx_device
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.join(script_dir, '..', 'common')
-sys.path.insert(0, parent_dir)
-from common.livenx_inventory import add_to_livenx_inventory
 from autoaddinterfaces import InterfaceMonitor
 
 
@@ -48,6 +43,59 @@ class ConfigLoader:
             return {}
 
 config_loader = ConfigLoader()
+
+def add_virtual_device_to_livenx_inventory(livenx_inventory):
+
+    '''
+    {
+  "devices": [
+    {
+      "nodeId": "699dbb53-1f09-4d05-f36d-0770668f510d",
+      "address": "123.123.123.123",
+      "systemName": "John's Device",
+      "systemDescription": "Device next to John's desk in room 5207",
+      "site": "NYC Office",
+      "groupId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
+      "groupName": "NYC Device Group",
+      "stringTags": "MyTag1,MyTag2",
+      "userDefinedSampleRatio": 2,
+      "interfaces": [
+        {
+          "ifIndex": "0",
+          "name": "Interface 0",
+          "address": "123.123.123.123",
+          "subnetMask": "255.255.255.0",
+          "description": "First interface",
+          "serviceProvider": "A Service Provider",
+          "inputCapacity": "1000000",
+          "outputCapacity": "1000000",
+          "wan": false,
+          "xcon": false,
+          "label": "John's Interface Label",
+          "stringTags": "MyTag1,MyTag2"
+        }
+      ]
+    }
+  ]
+}
+  
+    '''
+
+
+    # Convert the device list to a JSON string and encode it to bytes
+    data = json.dumps(livenx_inventory).encode('utf-8')
+
+    # Create the request and add the Content-Type header
+    request, ctx = create_request("/v1/devices/virtual", data)
+    local_logger.info(data)
+    request.add_header("Content-Type", "application/json")
+    request.add_header("accept", "application/json")
+    # Specify the request method as POST
+    request.method = "POST"
+    
+    with urllib.request.urlopen(request, context=ctx) as response:
+        response_data = response.read().decode('utf-8')
+        local_logger.info(response_data)
 
 
 # livenx_config.py
@@ -629,7 +677,7 @@ def add_test_devices(start_num, num_devices, include_server=False):
             # Add devices in chunks of 10 to avoid memory issues
             if len(livenx_devices) >= 10 or i == start_num + num_devices - 1:
                 livenx_inventory['devices'] = livenx_devices
-                add_to_livenx_inventory(livenx_inventory)
+                add_virtual_device_to_livenx_inventory(livenx_inventory)
                 livenx_devices = []  # Reset the list for the next batch
 
     except Exception as err:
@@ -670,7 +718,7 @@ def monitor_samplicator_ip_file(filename, include_server=False):
                 new_device_inventory = map_ip_to_livenx_inventory(chunk, include_server=include_server)
                 # Add IP to LiveNX
                 if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
-                    add_to_livenx_inventory(new_device_inventory)
+                    add_virtual_device_to_livenx_inventory(new_device_inventory)
                 else:
                     local_logger.debug("No device to add")
     return len(ip_set)
