@@ -11,6 +11,7 @@ import gzip
 import time
 from helper.livenx import create_request
 from helper.livenx import get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip, delete_livenx_device
+from helper.livenx import add_to_livenx_inventory
 import ipaddress
 from collections import defaultdict
 
@@ -280,7 +281,7 @@ def consolidate_devices(devices):
                             break
         
     # Go through the devices and call move_device on each device that has been consolidated
-    update_livenx_inventory(consolidated_devices)
+    update_livenx_device_configs(consolidated_devices)
     return consolidated_devices
 
 def create_livenx_interface_from_ip(address, config_loader):
@@ -354,7 +355,7 @@ def read_samplicator_ip_file(filename=None):
         local_logger.error(f"Error while reading log file {err}")
         return ip_set
 
-def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", request_method="POST"):
+def update_devices_in_livenx_inventory(livenx_inventory):
 
     '''
     {
@@ -390,6 +391,8 @@ def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", req
 }
   
     '''
+    urlpath="/v1/devices/config"
+    request_method="PUT"
 
     for attempt in range(3):  # Retry up to 3 times
         try:
@@ -402,7 +405,7 @@ def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", req
             local_logger.debug(data)
             request.add_header("Content-Type", "application/json")
             request.add_header("accept", "application/json")
-            # Specify the request method as POST
+            # Specify the request method as PUT
             request.method = request_method
 
             with urllib.request.urlopen(request, context=ctx) as response:
@@ -410,7 +413,7 @@ def add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/virtual", req
                 local_logger.debug(response_data)
             break  # Exit the loop if the request is successful
         except Exception as err:
-            local_logger.error(f"Error on /v1/devices/virtual API Call (Attempt {attempt + 1}/3): {err}")
+            local_logger.error(f"Error on {urlpath} API Call (Attempt {attempt + 1}/3): {err}")
             if attempt < 2:  # Only sleep if this is not the last attempt
                 time.sleep(5)
 
@@ -477,7 +480,7 @@ def group_ips_into_subnets(ip_list, max_subnets=1000, init_prefix_len=32):
     # Convert subnets to strings
     return [str(subnet) for subnet in subnets]
 
-def update_livenx_inventory(devices):
+def update_livenx_device_configs(devices):
         # If there are modified devices, update them in LiveNX
     if len(devices) > 0:
         # chunk the devices to avoid memory issues
@@ -486,7 +489,7 @@ def update_livenx_inventory(devices):
         for i in range(0, len(devices), chunk_size):
             chunk = devices[i:i + chunk_size]
             livenx_inventory['devices'] = chunk
-            add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/config", request_method="PUT")
+            update_devices_in_livenx_inventory(livenx_inventory)
 
 def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=False):
     modified_devices = []
@@ -512,7 +515,7 @@ def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_s
                         else:
                             local_logger.debug(f"Not moving device {device['hostName']}")
                         break
-        update_livenx_inventory(modified_devices)
+        update_livenx_device_configs(modified_devices)
     except Exception as err:
         local_logger.error(f"Error moving devices: {err}")
     return modified_devices
