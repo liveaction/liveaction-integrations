@@ -244,40 +244,40 @@ def consolidate_devices(devices):
     The non-SNMP device will be deleted and the SNMP device that has the same address will be moved to the same LiveNX node as the non-SNMP device.
     """
     consolidated_devices = []
-    for snmp_device in devices:
-        local_logger.debug(f"Checking device {snmp_device['hostName']}")
-        # Check if the device is an SNMP device by checking if Virtual Device setting is False
-        if snmp_device['settings'].get('virtualDevice', False) == False:
-            # Go through the interfaces of the devices to see if any inteface on any other device has the same address
-            snmp_addresses = [iface.get('address') for iface in snmp_device.get('interfaces', []) if iface.get('address')]
-            # Add primary address of the device if it exists
-            if snmp_device.get('address'):
-                snmp_addresses.append(non_snmp_device.get('address'))
-            for snmp_address in snmp_addresses:
-                local_logger.debug(f"Checking address {snmp_address} for SNMP device {snmp_device['hostName']}")
-                # Go through the rest of the devices to see if any other device interfaces has the same address
-                for non_snmp_device in devices:
-                    local_logger.debug(f"Checking other device {non_snmp_device['hostName']}")
-                    # If it is a virtual device, we will check if it has the same address as the current device
-                    if snmp_device['settings'].get('virtualDevice', False):
-                        if non_snmp_device['id'] != snmp_device['id']:
-                            local_logger.debug(f"Checking interfaces of other device {non_snmp_device['hostName']}")
-                            non_snmp_addresses = [iface.get('address') for iface in non_snmp_device.get('interfaces', []) if iface.get('address')]
-                            # Add primary address of the device if it exists
-                            if non_snmp_device.get('address'):
-                                non_snmp_addresses.append(non_snmp_device.get('address'))
-                            for non_snmp_address in non_snmp_addresses:
-                                local_logger.debug(f"Checking other address {non_snmp_address} against address {snmp_address}")
-                                if non_snmp_address == snmp_address:
-                                    # delete the non-SNMP device and move the SNMP device to the same LiveNX node as the non-SNMP device
-                                    # This is a non-SNMP device, so we will delete it
-                                    local_logger.debug(f"Deleting non-SNMP device {non_snmp_device['id']} with address {snmp_address}")
-                                    delete_livenx_device(non_snmp_device['serial'])
-                                    # Move the SNMP device to the same LiveNX node as the non-SNMP device
-                                    if non_snmp_device.get('nodeId') != snmp_device.get('nodeId'):
-                                        snmp_device['nodeId'] = non_snmp_device['nodeId']
-                                        consolidated_devices.append(non_snmp_device)                             
-                                    break
+    # get a filtered list of devices that are SNMP devices
+    snmp_devices = [device for device in devices if device.get('settings', {}).get('virtualDevice', False) == False]
+    for snmp_device in snmp_devices:
+        local_logger.debug(f"Checking SNMP device {snmp_device['hostName']}")
+        # Go through the interfaces of the devices to see if any inteface on any other device has the same address
+        snmp_addresses = [iface.get('address') for iface in snmp_device.get('interfaces', []) if iface.get('address')]
+        # Add primary address of the device if it exists
+        if snmp_device.get('address'):
+            snmp_addresses.append(snmp_device.get('address'))
+        for snmp_address in snmp_addresses:
+            local_logger.debug(f"Checking address {snmp_address} for SNMP device {snmp_device['hostName']}")
+            # Get a filtered list of devices that are not SNMP devices
+            non_snmp_devices = [device for device in devices if device.get('settings', {}).get('virtualDevice', False) == True]
+            # Go through the rest of the devices to see if any other device interfaces has the same address
+            for non_snmp_device in non_snmp_devices:
+                local_logger.debug(f"Checking other non-SNMP device {non_snmp_device['hostName']}")
+                if non_snmp_device['id'] != snmp_device['id']:
+                    local_logger.debug(f"Checking interfaces of other non-SNMP device {non_snmp_device['hostName']}")
+                    non_snmp_addresses = [iface.get('address') for iface in non_snmp_device.get('interfaces', []) if iface.get('address')]
+                    # Add primary address of the device if it exists
+                    if non_snmp_device.get('address'):
+                        non_snmp_addresses.append(non_snmp_device.get('address'))
+                    for non_snmp_address in non_snmp_addresses:
+                        local_logger.debug(f"Checking non-SNMP address {non_snmp_address} against SNMP address {snmp_address}")
+                        if non_snmp_address == snmp_address:
+                            # delete the non-SNMP device and move the SNMP device to the same LiveNX node as the non-SNMP device
+                            # This is a non-SNMP device, so we will delete it
+                            local_logger.debug(f"Deleting non-SNMP device {non_snmp_device['id']} with address {non_snmp_address}")
+                            delete_livenx_device(non_snmp_device['serial'])
+                            # Move the SNMP device to the same LiveNX node as the non-SNMP device
+                            if non_snmp_device.get('nodeId') != snmp_device.get('nodeId'):
+                                snmp_device['nodeId'] = non_snmp_device['nodeId']
+                                consolidated_devices.append(snmp_device)                             
+                            break
         
     # Go through the devices and call move_device on each device that has been consolidated
     for snmp_device in consolidated_devices:
