@@ -705,7 +705,7 @@ def main(args):
                     interface_monitor.run_one_cycle()                        
                     last_autoadded_interface_time = time.time()
 
-                if args.consoliatedevices:
+                if args.consolidatedevices:
                     # Consolidate devices if needed
                     livenx_inventory = get_livenx_inventory()
                     local_logger.debug(f"Consolidating devices in LiveNX inventory with {len(livenx_inventory.get('devices', []))} devices.")
