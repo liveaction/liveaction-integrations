@@ -245,14 +245,19 @@ def consolidate_devices(devices):
     """
     consolidated_devices = []
     for device in devices:
+        local_logger.debug(f"Checking device {device['hostName']}")
         # Go through the interfaces of the devices to see if any inteface on any other device has the same address
         for interface in device.get('interfaces', []):
+            local_logger.debug(f"Checking interface {interface.get('name')} with address {interface.get('address')}")
             address = interface.get('address')
             if address:
                 # Go through the rest of the devices to see if any other device interfaces has the same address
                 for other_device in devices:
+                    local_logger.debug(f"Checking other device {other_device['hostName']}")
                     if other_device['id'] != device['id']:
+                        local_logger.debug(f"Checking interfaces of other device {other_device['hostName']}")
                         for other_interface in other_device.get('interfaces', []):
+                            local_logger.debug(f"Checking other interface {other_interface.get('name')} with address {other_interface.get('address')}")
                             other_address = other_interface.get('address')
                             if other_address == address:
                                 # delete the non-SNMP device and move the SNMP device to the same LiveNX node as the non-SNMP device
