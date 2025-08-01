@@ -49,7 +49,7 @@ config_loader = ConfigLoader()
 
 
 # livenx_config.py
-def move_device(device, new_node_id):
+def create_move_device_spec(device, new_node_id):
     """
     Move a device from one node to another.
     This function is a placeholder and should be implemented based on your specific requirements.
@@ -280,10 +280,8 @@ def consolidate_devices(devices):
                             break
         
     # Go through the devices and call move_device on each device that has been consolidated
-    for snmp_device in consolidated_devices:
-        new_node_id = snmp_device.get('nodeId')
-        local_logger.debug(f"Consolidating device {snmp_device['hostName']} to node {new_node_id}")
-        move_device(snmp_device, new_node_id)
+    update_livenx_inventory(consolidated_devices)
+    return consolidated_devices
 
 def create_livenx_interface_from_ip(address, config_loader):
     ifcs = []
@@ -479,7 +477,18 @@ def group_ips_into_subnets(ip_list, max_subnets=1000, init_prefix_len=32):
     # Convert subnets to strings
     return [str(subnet) for subnet in subnets]
 
-def move_devices(subnets, livenx_inventory, node_ips, include_server=False):
+def update_livenx_inventory(devices):
+        # If there are modified devices, update them in LiveNX
+    if len(devices) > 0:
+        # chunk the devices to avoid memory issues
+        chunk_size = 10
+        livenx_inventory = {}
+        for i in range(0, len(devices), chunk_size):
+            chunk = devices[i:i + chunk_size]
+            livenx_inventory['devices'] = chunk
+            add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/config", request_method="PUT")
+
+def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=False):
     modified_devices = []
     nodes = get_livenx_nodes(include_server=include_server)
     try:
@@ -499,21 +508,11 @@ def move_devices(subnets, livenx_inventory, node_ips, include_server=False):
                         new_node_id = get_livenx_node_id_from_ip(nodes, new_node_ip)
                         if current_device_node_id != new_node_id:
                             local_logger.debug(f"Moving device {device['hostName']} from node {current_device_node_id} to node {new_node_id}")
-                            move_device(device, new_node_id)
+                            modified_devices.append(create_move_device_spec(device, new_node_id))
                         else:
                             local_logger.debug(f"Not moving device {device['hostName']}")
                         break
-
-        # If there are modified devices, update them in LiveNX
-        if len(modified_devices) > 0:
-            # chunk the devices to avoid memory issues
-            chunk_size = 10
-            livenx_inventory = {}
-            for i in range(0, len(modified_devices), chunk_size):
-                chunk = modified_devices[i:i + chunk_size]
-                livenx_inventory['devices'] = chunk
-                add_to_livenx_inventory(livenx_inventory, urlpath="/v1/devices/config", request_method="PUT")
-
+        update_livenx_inventory(modified_devices)
     except Exception as err:
         local_logger.error(f"Error moving devices: {err}")
     return modified_devices
@@ -592,7 +591,7 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
                 config_file.write(line)
 
         if movedevices:
-            modified_devices = move_devices(subnets, livenx_inventory, node_ips, include_server=include_server)
+            modified_devices = move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=include_server)
             if len(modified_devices) > 0:
                 local_logger.debug(f"Moved devices: {modified_devices}")
                 should_restart_samplicator = True
