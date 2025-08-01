@@ -1,6 +1,5 @@
 import argparse
 import logging
-import re
 import os
 import json
 import urllib.request
@@ -9,11 +8,13 @@ import sys
 import json
 import gzip
 import time
-from helper.livenx import create_request, get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip, delete_livenx_device
-from common.livenx_inventory import add_to_livenx_inventory
 import ipaddress
 from collections import defaultdict
+from helper.livenx import create_request, get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip, delete_livenx_device
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(script_dir, 'common'))
+from common.livenx_inventory import add_to_livenx_inventory
 from autoaddinterfaces import InterfaceMonitor
 
 
