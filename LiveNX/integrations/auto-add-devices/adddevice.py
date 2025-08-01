@@ -9,9 +9,8 @@ import sys
 import json
 import gzip
 import time
-from helper.livenx import create_request
-from helper.livenx import get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip, delete_livenx_device
-from helper.livenx import add_to_livenx_inventory
+from helper.livenx import create_request, get_livenx_inventory, get_livenx_nodes, get_livenx_node_id_from_ip, delete_livenx_device
+from common.livenx_inventory import add_to_livenx_inventory
 import ipaddress
 from collections import defaultdict
 
