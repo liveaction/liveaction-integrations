@@ -99,7 +99,7 @@ def add_virtual_device_to_livenx_inventory(livenx_inventory):
 
 
 # livenx_config.py
-def create_move_device_spec(device, new_node_id):
+def create_move_device_config(device, new_node_id):
     """
     Move a device from one node to another.
     This function is a placeholder and should be implemented based on your specific requirements.
@@ -260,8 +260,8 @@ def create_move_device_spec(device, new_node_id):
         "probeIPAddress": "123.123.123.123",
         "ipAddress": "123.123.123.123"
       }'''
-    device_spec = {}
-    device_spec['deviceSerial'] = device['serial']
+    new_device_config = {}
+    new_device_config['deviceSerial'] = device['serial']
     device_config_json = {}
     device_config_json['nodeId'] = new_node_id
     device_config_json['systemName'] = device.get('systemName', "")
@@ -284,8 +284,8 @@ def create_move_device_spec(device, new_node_id):
     device_config_json['userDefinedSampleRatio'] = device.get('userDefinedSampleRatio', 1)
     device_config_json['probeIPAddress'] = device.get('address', "")                    
     device_config_json['ipAddress'] = device.get('address', "")
-    device_spec['config'] = device_config_json
-    return device_spec
+    new_device_config['config'] = device_config_json
+    return new_device_config
 
 
 def consolidate_devices(devices):
@@ -293,7 +293,7 @@ def consolidate_devices(devices):
     Consolidate devices by merging devices that have any interface with the same address. 
     The non-SNMP device will be deleted and the SNMP device that has the same address will be moved to the same LiveNX node as the non-SNMP device.
     """
-    consolidated_devices = []
+    updated_device_configs = []
     # get a filtered list of devices that are SNMP devices
     snmp_devices = [device for device in devices if device.get('settings', {}).get('virtualDevice', False) == False]
     for snmp_device in snmp_devices:
@@ -325,13 +325,13 @@ def consolidate_devices(devices):
                             delete_livenx_device(non_snmp_device['serial'])
                             # Move the SNMP device to the same LiveNX node as the non-SNMP device
                             if non_snmp_device.get('nodeId') != snmp_device.get('nodeId'):
-                                snmp_device['nodeId'] = non_snmp_device['nodeId']
-                                consolidated_devices.append(snmp_device)                             
+                                new_node_id = non_snmp_device['nodeId']
+                                updated_device_configs.append(create_move_device_config(snmp_device, new_node_id))                             
                             break
         
     # Go through the devices and call move_device on each device that has been consolidated
-    update_livenx_device_configs(consolidated_devices)
-    return consolidated_devices
+    update_livenx_device_configs(updated_device_configs)
+    return updated_device_configs
 
 def create_livenx_interface_from_ip(address, config_loader):
     ifcs = []
@@ -404,37 +404,34 @@ def read_samplicator_ip_file(filename=None):
         local_logger.error(f"Error while reading log file {err}")
         return ip_set
 
-def update_devices_in_livenx_inventory(livenx_inventory):
+def update_device_configs_in_livenx(device_configs):
 
     '''
-    {
+{
   "devices": [
     {
-      "nodeId": "699dbb53-1f09-4d05-f36d-0770668f510d",
-      "address": "123.123.123.123",
-      "systemName": "John's Device",
-      "systemDescription": "Device next to John's desk in room 5207",
-      "site": "NYC Office",
-      "groupId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
-      "groupName": "NYC Device Group",
-      "stringTags": "MyTag1,MyTag2",
-      "userDefinedSampleRatio": 1,
-      "interfaces": [
-        {
-          "ifIndex": "0",
-          "name": "Interface 0",
-          "address": "123.123.123.123",
-          "subnetMask": "255.255.255.0",
-          "description": "First interface",
-          "serviceProvider": "A Service Provider",
-          "inputCapacity": "1000000",
-          "outputCapacity": "1000000",
-          "wan": false,
-          "xcon": false,
-          "label": "John's Interface Label",
-          "stringTags": "MyTag1,MyTag2"
-        }
-      ]
+      "deviceSerial": "FOC3070X0F33088",
+      "config": {
+        "nodeId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
+        "systemName": "John's Device",
+        "systemDescription": "Device next to John's desk in room 5207",
+        "pollInterval": 60000,
+        "enablePoll": true,
+        "enableQosPoll": false,
+        "enableNetflowPoll": true,
+        "enableIpslaPoll": false,
+        "enableLanPoll": false,
+        "enableRoutingPoll": false,
+        "groupId": "45dc8e15-45ae-47ab-aa45-d6c944590fab",
+        "groupName": "NYC Device Group",
+        "stringTags": "WAN,EastCoast",
+        "site": "NYC Office",
+        "siteIpRanges": "123.123.123.0/25",
+        "isDataCenterSite": false,
+        "userDefinedSampleRatio": 2,
+        "probeIPAddress": "123.123.123.123",
+        "ipAddress": "123.123.123.123"
+      }
     }
   ]
 }
@@ -446,8 +443,8 @@ def update_devices_in_livenx_inventory(livenx_inventory):
     for attempt in range(3):  # Retry up to 3 times
         try:
             # Convert the device list to a JSON string and encode it to bytes
-            data = json.dumps(livenx_inventory).encode('utf-8')
-            local_logger.debug(f"Adding device to LiveNX {livenx_inventory}")
+            data = json.dumps(device_configs).encode('utf-8')
+            local_logger.debug(f"Updating device in LiveNX inventory: {device_configs}")
 
             # Create the request and add the Content-Type header
             request, ctx = create_request(urlpath, data)
@@ -529,16 +526,16 @@ def group_ips_into_subnets(ip_list, max_subnets=1000, init_prefix_len=32):
     # Convert subnets to strings
     return [str(subnet) for subnet in subnets]
 
-def update_livenx_device_configs(devices):
+def update_livenx_device_configs(device_configs):
         # If there are modified devices, update them in LiveNX
-    if len(devices) > 0:
+    if len(device_configs) > 0:
         # chunk the devices to avoid memory issues
         chunk_size = 10
-        livenx_inventory = {}
-        for i in range(0, len(devices), chunk_size):
-            chunk = devices[i:i + chunk_size]
-            livenx_inventory['devices'] = chunk
-            update_devices_in_livenx_inventory(livenx_inventory)
+        device_config_chunk = {}
+        for i in range(0, len(device_configs), chunk_size):
+            chunk = device_configs[i:i + chunk_size]
+            device_config_chunk['devices'] = chunk
+            update_device_configs_in_livenx(device_config_chunk)
 
 def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=False):
     modified_devices = []
@@ -560,7 +557,7 @@ def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_s
                         new_node_id = get_livenx_node_id_from_ip(nodes, new_node_ip)
                         if current_device_node_id != new_node_id:
                             local_logger.debug(f"Moving device {device['hostName']} from node {current_device_node_id} to node {new_node_id}")
-                            modified_devices.append(create_move_device_spec(device, new_node_id))
+                            modified_devices.append(create_move_device_config(device, new_node_id))
                         else:
                             local_logger.debug(f"Not moving device {device['hostName']}")
                         break
