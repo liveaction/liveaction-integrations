@@ -1,0 +1,1505 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 43,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 0,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawSql": "SELECT uniq(SpanAttributes['agent.name']) FROM otel_traces WHERE $__timeFilter(Timestamp)",
+          "refId": "A"
+        }
+      ],
+      "title": "# Agents",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 5,
+        "y": 0
+      },
+      "id": 9,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawSql": "SELECT uniq(SpanAttributes['test.name']) FROM otel_traces WHERE $__timeFilter(Timestamp)",
+          "refId": "A"
+        }
+      ],
+      "title": "# Defined Tests",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 14,
+        "x": 10,
+        "y": 0
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawSql": "SELECT\n  SpanAttributes['test.name'] AS test_name,\n  count() AS NumTestsRun\nFROM otel_traces\nWHERE $__timeFilter(Timestamp)\n  AND notEmpty(SpanAttributes['test.name'])\nGROUP BY test_name\nORDER BY NumTestsRun DESC\n\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "# Tests Run by Test Type",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "operationName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 943
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "traceID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 327
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SpanId"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 233
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TraceId"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 386
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SpanAttributes"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 727
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "startTime"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 188
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 205
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SpanName"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 357
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Events.Timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 1253
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Events.Attributes"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 1183
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TestRun"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 447
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "builderOptions": {
+            "columns": [
+              {
+                "hint": "trace_id",
+                "name": "TraceId"
+              },
+              {
+                "hint": "trace_span_id",
+                "name": "SpanId"
+              },
+              {
+                "hint": "trace_parent_span_id",
+                "name": "ParentSpanId"
+              },
+              {
+                "hint": "trace_service_name",
+                "name": "ServiceName"
+              },
+              {
+                "hint": "trace_operation_name",
+                "name": "SpanName"
+              },
+              {
+                "hint": "time",
+                "name": "Timestamp"
+              },
+              {
+                "hint": "trace_duration_time",
+                "name": "Duration"
+              },
+              {
+                "hint": "trace_tags",
+                "name": "SpanAttributes"
+              },
+              {
+                "hint": "trace_service_tags",
+                "name": "ResourceAttributes"
+              }
+            ],
+            "database": "default",
+            "filters": [
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "time",
+                "key": "",
+                "operator": "WITH IN DASHBOARD TIME RANGE",
+                "type": "datetime"
+              },
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "trace_parent_span_id",
+                "key": "",
+                "operator": "IS EMPTY",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "trace_duration_time",
+                "key": "",
+                "operator": ">",
+                "type": "UInt64",
+                "value": 0
+              },
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "hint": "trace_service_name",
+                "key": "",
+                "operator": "IS ANYTHING",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "key": "SpanAttributes",
+                "label": "SpanAttributes",
+                "mapKey": "test_name",
+                "operator": "=",
+                "type": "Map(LowCardinality(String), String)",
+                "value": "'${TestName}'"
+              }
+            ],
+            "limit": 1000,
+            "meta": {
+              "isTraceIdMode": true,
+              "otelEnabled": true,
+              "otelVersion": "latest",
+              "traceDurationUnit": "nanoseconds",
+              "traceId": ""
+            },
+            "mode": "list",
+            "orderBy": [
+              {
+                "default": true,
+                "dir": "DESC",
+                "hint": "time",
+                "name": ""
+              },
+              {
+                "default": true,
+                "dir": "DESC",
+                "hint": "trace_duration_time",
+                "name": ""
+              }
+            ],
+            "queryType": "traces",
+            "table": "otel_traces"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 3,
+          "meta": {
+            "builderOptions": {
+              "columns": [
+                {
+                  "hint": "trace_id",
+                  "name": "TraceId"
+                },
+                {
+                  "hint": "trace_span_id",
+                  "name": "SpanId"
+                },
+                {
+                  "hint": "trace_parent_span_id",
+                  "name": "ParentSpanId"
+                },
+                {
+                  "hint": "trace_service_name",
+                  "name": "ServiceName"
+                },
+                {
+                  "hint": "trace_operation_name",
+                  "name": "SpanName"
+                },
+                {
+                  "hint": "time",
+                  "name": "Timestamp"
+                },
+                {
+                  "hint": "trace_duration_time",
+                  "name": "Duration"
+                },
+                {
+                  "hint": "trace_tags",
+                  "name": "SpanAttributes"
+                },
+                {
+                  "hint": "trace_service_tags",
+                  "name": "ResourceAttributes"
+                }
+              ],
+              "database": "default",
+              "filters": [
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "time",
+                  "key": "",
+                  "operator": "WITH IN DASHBOARD TIME RANGE",
+                  "type": "datetime"
+                },
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "trace_parent_span_id",
+                  "key": "",
+                  "operator": "IS EMPTY",
+                  "type": "string",
+                  "value": ""
+                },
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "trace_duration_time",
+                  "key": "",
+                  "operator": ">",
+                  "type": "UInt64",
+                  "value": 0
+                },
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "hint": "trace_service_name",
+                  "key": "",
+                  "operator": "IS ANYTHING",
+                  "type": "string",
+                  "value": ""
+                },
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "key": "SpanAttributes",
+                  "label": "SpanAttributes",
+                  "mapKey": "test_name",
+                  "operator": "=",
+                  "type": "Map(LowCardinality(String), String)",
+                  "value": "'${TestName}'"
+                }
+              ],
+              "limit": 1000,
+              "meta": {
+                "isTraceIdMode": true,
+                "otelEnabled": true,
+                "otelVersion": "latest",
+                "traceDurationUnit": "nanoseconds",
+                "traceId": ""
+              },
+              "mode": "list",
+              "orderBy": [
+                {
+                  "default": true,
+                  "dir": "DESC",
+                  "hint": "time",
+                  "name": ""
+                },
+                {
+                  "default": true,
+                  "dir": "DESC",
+                  "hint": "trace_duration_time",
+                  "name": ""
+                }
+              ],
+              "queryType": "traces",
+              "table": "otel_traces"
+            }
+          },
+          "pluginVersion": "4.10.1",
+          "queryType": "traces",
+          "rawSql": "SELECT \n\"Timestamp\" as startTime, \nServiceName as serviceName,\nSpanAttributes['agent.name'] as agentName,\n\"TraceId\" as traceID, \n\"SpanName\" as TestRun,\n* FROM \"default\".\"otel_traces\" WHERE ( Timestamp >= $__fromTime AND Timestamp <= $__toTime ) AND (('All' LIKE '${PathID}') OR (SpanAttributes['path.id'] LIKE '${PathID}')) AND ( TraceId = '${TraceID}' ) AND ( SpanAttributes['test.name'] = '${TestName}' ) AND ( SpanAttributes['agent.name'] = '${AgentName}' ) ORDER BY Timestamp DESC, Duration DESC ",
+          "refId": "A"
+        }
+      ],
+      "title": "Test Trace",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 26,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 1,
+      "options": {
+        "edges": {
+          "mainStatUnit": "none"
+        },
+        "layoutAlgorithm": "layered",
+        "nodes": {
+          "mainStatUnit": "ms"
+        },
+        "zoomMode": "cooperative"
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 3,
+          "hide": false,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.10.1",
+          "queryType": "traces",
+          "rawSql": "WITH hops AS (\n    SELECT\n        TraceId,\n        ServiceName,\n        SpanName,\n        arrayJoin(Events.Attributes) AS hop,\n        hop['hop'] AS hop_number,\n        hop['ip_address'] AS ip_address,\n        hop['location'] AS location,\n        hop['network'] AS network,\n        hop['prefix'] AS prefix,\n        hop['rdns'] AS rdns,\n        toInt32OrZero(hop['response_time_ms']) AS response_time_ms\n\n    FROM \"default\".\"otel_traces\" WHERE ( Timestamp >= $__fromTime AND Timestamp <= $__toTime ) AND (('All' LIKE '${PathID}') OR (SpanAttributes['path.id'] LIKE '${PathID}')) AND ( TraceId = '${TraceID}' )  AND ( SpanAttributes['test.name'] = '${TestName}' ) AND ( SpanAttributes['agent.name'] = '${AgentName}' ) ORDER BY Timestamp DESC\n)\n\nSELECT\n    ip_address AS id,\n    concat(\n        if(network != '', concat(' (', network, ')'), ''),\n        ' ',\n        ip_address\n    ) AS title,\n    10 AS nodeRadius\nFROM hops\nGROUP BY ServiceName, ip_address, network\n\n",
+          "refId": "nodes"
+        },
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 3,
+          "hide": false,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "traces",
+          "rawSql": "\n  WITH trace_hops AS (\n      SELECT\n          TraceId,\n          ServiceName,\n          SpanName,\n          -- Events.Name and Events.Attributes are parallel arrays\n          arrayFilter((name, attr) -> name = 'hop_details',\n                     Events.Name, Events.Attributes) AS hop_events_filtered,\n          arrayFilter(attr ->\n                     arrayElement(Events.Name, indexOf(Events.Attributes, attr)) = 'hop_details',\n                     Events.Attributes) AS hop_attributes\n      FROM otel_traces\n      WHERE ( Timestamp >= $__fromTime AND Timestamp <= $__toTime ) AND (('All' LIKE '${PathID}') OR (SpanAttributes['path.id'] LIKE '${PathID}')) AND ( TraceId = '${TraceID}' )  AND ( SpanAttributes['test.name'] = '${TestName}' ) AND ( SpanAttributes['agent.name'] = '${AgentName}' )\n  ),\n  flattened_hops AS (\n      SELECT\n          TraceId,\n          ServiceName,\n          SpanName,\n          hop_attr AS hop_attr,\n          toInt32OrZero(hop_attr['hop']) AS hop_number,\n          hop_attr['ip_address'] AS ip_address,\n          hop_attr['location'] AS location,\n          hop_attr['network'] AS network,\n          toInt32OrZero(hop_attr['response_time_ms']) AS response_time_ms\n      FROM trace_hops\n      ARRAY JOIN hop_attributes AS hop_attr\n  ),\n  hop_pairs AS (\n      SELECT\n          h1.TraceId,\n          h1.hop_number AS hop_from_num,\n          h2.hop_number AS hop_to_num,\n          h1.ip_address AS source,\n          h2.ip_address AS target,\n          h1.response_time_ms AS source_latency,\n          h2.response_time_ms AS target_latency,\n          h1.location AS source_location,\n          h2.location AS target_location\n      FROM flattened_hops h1\n      INNER JOIN flattened_hops h2\n          ON h1.TraceId = h2.TraceId\n          AND h2.hop_number = h1.hop_number + 1\n  )\n  SELECT\n      source,\n      target,\n      concat(\n          source,\n          ' -> ',\n          target,\n          ' (',\n          toString(target_latency),\n          'ms)'\n      ) AS id,\n      target_latency AS mainstat\n  FROM hop_pairs\n  ORDER BY hop_from_num",
+          "refId": "edges"
+        }
+      ],
+      "title": "Path Visualization",
+      "transparent": true,
+      "type": "nodeGraph"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 100,
+            "axisSoftMin": 0,
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 2,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 5,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 1,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "timeseries",
+          "rawSql": "SELECT \n    toStartOfMinute(Timestamp) AS time, \n    if(sum(length(Events.Attributes)) > 0, 100, 0) AS Value\nFROM \"default\".\"otel_traces\"\nWHERE ( Timestamp >= $__fromTime AND Timestamp <= $__toTime ) AND ( SpanAttributes['test.name'] = '${TestName}' ) AND ( SpanAttributes['agent.name'] = '${AgentName}' ) \nGROUP BY time\nORDER BY time ASC\n",
+          "refId": "Percent Available"
+        }
+      ],
+      "title": "Path Availability",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 100,
+            "axisSoftMin": 0,
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 2,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "id": 4,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 1,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "table",
+          "rawSql": "  SELECT\n    Timestamp,\n    AVG(toInt32OrZero(hop['response_time_ms'])) AS response_time_ms\nFROM otel_traces\nARRAY JOIN Events.Attributes AS hop\nWHERE ( Timestamp >= $__fromTime AND Timestamp <= $__toTime )  AND ( SpanAttributes['test.name'] = '${TestName}' ) AND ( SpanAttributes['agent.name'] = '${AgentName}' ) \nGROUP BY Timestamp,SpanAttributes['test_name']\nORDER BY Timestamp ASC\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Path Latency",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 24,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "database": "default",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "dateColDataType": "date",
+          "dateLoading": false,
+          "dateTimeColDataType": "timeslot",
+          "dateTimeType": "TIMESTAMP",
+          "datetimeLoading": false,
+          "editorType": "sql",
+          "extrapolate": false,
+          "format": 1,
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $__timeFilter(time) GROUP BY t ORDER BY t",
+          "group": [],
+          "interval": "",
+          "intervalFactor": 1,
+          "meta": {},
+          "metricColumn": "none",
+          "pluginVersion": "4.10.1",
+          "queryType": "table",
+          "rawQuery": "SELECT \n    time AS Time,\n    8*(SUM(SumOctets)/5/60) AS value,\n    concat(ApplicationName, ':', toString(d.name)) AS metric\nFROM livenx_flowdb.basic_entity_app_5m_dist\nJOIN livenx_flowdb.dscp AS d ON toUInt8(Dscp) = d.dscp\nWHERE time >= 1708095952 AND time <= 1708096852 AND (ApplicationName, Dscp) GLOBAL IN \n(\n    SELECT\n        ApplicationName, Dscp\n    FROM livenx_flowdb.basic_entity_app_5m_dist\n    JOIN livenx_flowdb.dscp AS d ON toUInt8(Dscp) = d.dscp\n    WHERE time >= 1708095952 AND time <= 1708096852 AND \n    (('All' LIKE 'All') OR (ApplicationName LIKE 'All')) AND \n    (('All' LIKE 'All') OR (d.name LIKE 'All')) AND \n    (('All' LIKE 'All') OR (DeviceSerial LIKE 'All'))\n    GROUP BY ApplicationName, Dscp\n    ORDER BY SUM(SumOctets) DESC\n    LIMIT 10\n)\n\nGROUP BY Time,metric\nORDER BY Time",
+          "rawSql": "SELECT\n    time AS Time,\n    8*(SUM(SumOctets)/${Granularity}/60) AS Traffic,\n    concat(ApplicationName, ':', toString(Dscp)) AS metric\nFROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\nWHERE $__timeFilter(time) AND (ApplicationName, Dscp) GLOBAL IN \n(\n    SELECT\n        ApplicationName, toString(Dscp)\n    FROM livenx_flowdb.basic_entity_app_${Granularity}m_dist\n    WHERE $__timeFilter(time) AND \n    (('All' LIKE '${ApplicationName}') OR (ApplicationName LIKE '${ApplicationName}'))\n    GROUP BY ApplicationName, toString(Dscp)\n    ORDER BY SUM(SumOctets) DESC\n    LIMIT 10\n)\n\nGROUP BY Time,metric\nORDER BY Time",
+          "refId": "Application/DSCP",
+          "round": "0s",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "skip_comments": true,
+          "tableLoading": false,
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "${ApplicationName} Traffic on Path by Application/Dscp (Bits/sec)",
+      "transformations": [
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "dash": [
+                0,
+                10
+              ],
+              "fill": "dot"
+            },
+            "lineWidth": 1,
+            "pointSize": 8,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Body"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Timestamp"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SeverityText"
+            },
+            "properties": []
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 2,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "logs",
+          "rawSql": "SELECT Timestamp, count() FROM otel_logs WHERE $__timeFilter(Timestamp)  GROUP BY Timestamp",
+          "refId": "A"
+        }
+      ],
+      "title": "LiveWire Alerts",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Body"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 1285
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 311
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SeverityText"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 574
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "id": 7,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 2,
+          "meta": {
+            "builderOptions": {
+              "columns": [],
+              "database": "",
+              "limit": 1000,
+              "mode": "list",
+              "queryType": "table",
+              "table": ""
+            }
+          },
+          "pluginVersion": "4.3.2",
+          "queryType": "logs",
+          "rawSql": "SELECT  Timestamp, LogAttributes['event_description'] AS Event,LogAttributes FROM otel_logs WHERE $__timeFilter(Timestamp)  LIMIT 100",
+          "refId": "A"
+        }
+      ],
+      "title": "LiveWire Alerts",
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": "All",
+        "allowCustomValue": false,
+        "current": {
+          "text": "livewire-greenville",
+          "value": "livewire-greenville"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "SELECT SpanAttributes['agent.name'] FROM otel_traces WHERE $__timeFilter(Timestamp) ",
+        "includeAll": true,
+        "name": "AgentName",
+        "options": [],
+        "query": "SELECT SpanAttributes['agent.name'] FROM otel_traces WHERE $__timeFilter(Timestamp) ",
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allValue": "All",
+        "allowCustomValue": false,
+        "current": {
+          "text": "LAN - WEB Test to www.bluecatnetworks.com",
+          "value": "LAN - WEB Test to www.bluecatnetworks.com"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "SELECT SpanAttributes['test.name'] FROM otel_traces WHERE $__timeFilter(Timestamp)  AND ( SpanAttributes['agent.name'] = '${AgentName}' )",
+        "includeAll": false,
+        "name": "TestName",
+        "options": [],
+        "query": "SELECT SpanAttributes['test.name'] FROM otel_traces WHERE $__timeFilter(Timestamp)  AND ( SpanAttributes['agent.name'] = '${AgentName}' )",
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allowCustomValue": true,
+        "current": {
+          "text": "2475f4e83d1e5e183536323934393935",
+          "value": "2475f4e83d1e5e183536323934393935"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "SELECT DISTINCT TraceId FROM otel_traces WHERE ParentSpanId = ''  AND SpanAttributes['test.name'] = '${TestName}'\nAND ( SpanAttributes['agent.name'] = '${AgentName}' )\n AND $__timeFilter(Timestamp) ",
+        "name": "TraceID",
+        "options": [],
+        "query": "SELECT DISTINCT TraceId FROM otel_traces WHERE ParentSpanId = ''  AND SpanAttributes['test.name'] = '${TestName}'\nAND ( SpanAttributes['agent.name'] = '${AgentName}' )\n AND $__timeFilter(Timestamp) ",
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allValue": "All",
+        "allowCustomValue": true,
+        "current": {
+          "text": "1906890142692686321784400761795336777601512644725030199559133993202154378686950642857597968606824483532083",
+          "value": "1906890142692686321784400761795336777601512644725030199559133993202154378686950642857597968606824483532083"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "definition": "SELECT DISTINCT SpanAttributes['path.id'] FROM otel_traces WHERE ParentSpanId = ''  AND SpanAttributes['test.name'] = '${TestName}'\nAND ( SpanAttributes['agent.name'] = '${AgentName}' )\nAND ( TraceId = '${TraceID}' )\n AND $__timeFilter(Timestamp) ",
+        "includeAll": true,
+        "name": "PathID",
+        "options": [],
+        "query": "SELECT DISTINCT SpanAttributes['path.id'] FROM otel_traces WHERE ParentSpanId = ''  AND SpanAttributes['test.name'] = '${TestName}'\nAND ( SpanAttributes['agent.name'] = '${AgentName}' )\nAND ( TraceId = '${TraceID}' )\n AND $__timeFilter(Timestamp) ",
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "hide": 2,
+        "label": "ApplicationName",
+        "name": "ApplicationName",
+        "query": "All",
+        "skipUrlSync": true,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "text": "1",
+          "value": "1"
+        },
+        "description": "",
+        "hide": 2,
+        "label": "Granularity",
+        "name": "Granularity",
+        "query": "1",
+        "skipUrlSync": true,
+        "type": "constant"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Synthetics Path Visualization",
+  "uid": "aetepk51xxy4gc",
+  "version": 5
+}
