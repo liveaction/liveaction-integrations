@@ -1,6 +1,6 @@
 enable
 config t
-! FNF configuration
+!!!! FNF configuration
 interface GigabitEthernet1/0/6
 ip nbar protocol-discovery
  exit
@@ -71,7 +71,10 @@ interface GigabitEthernet1/0/6
 ip flow monitor LIVEACTION-FLOWMONITOR-INGRESS input
 ip flow monitor LIVEACTION-FLOWMONITOR-EGRESS output
 exit
-! AVC application response time configuration
+
+
+
+!!! AVC application response time configuration (Configure only if you want AVC Flow)
 ip access-list extended LIVEACTION-ACL-AVC
 permit tcp any any
 exit
@@ -86,7 +89,7 @@ policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
 class LIVEACTION-CLASS-AVC
 exit
 exit
-interface GigabitEthernet1/0/6
+interface GigabitEthernet1/0/7  !!! Note same interface can not be used for FNF and NBAR.
 ip nbar protocol-discovery
 exit
 flow exporter LIVEACTION-FLOWEXPORTER-IPFIX
@@ -120,7 +123,9 @@ class LIVEACTION-CLASS-AVC
 flow monitor LIVEACTION-FLOWMONITOR-AVC
 exit
 exit
-! Medianet Configuration
+
+
+!!! Medianet Configuration (Configure only if you want Medianet flow)
 policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
 exit
 class-map match-any LIVEACTION-CLASS-MEDIANET
@@ -132,7 +137,7 @@ policy-map type performance-monitor LIVEACTION-POLICY-UNIFIED
 class LIVEACTION-CLASS-MEDIANET
 exit
 exit
-interface GigabitEthernet1/0/6
+interface GigabitEthernet1/0/8 !!! Note same interface can not be used for FNF and NBAR.
 service-policy type performance-monitor input LIVEACTION-POLICY-UNIFIED
 service-policy type performance-monitor output LIVEACTION-POLICY-UNIFIED
 ip nbar protocol-discovery
