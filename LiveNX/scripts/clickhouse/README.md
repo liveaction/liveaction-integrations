@@ -5,7 +5,6 @@ A powerful Python script for performing hierarchical time-based aggregations of 
 ## Features
 
 - **Hierarchical Aggregation**: Supports 4 aggregation levels (1m, 5m, 60m, 360m)
-- **Multiple Table Types**: Handles Basic, AVC (Application Visibility & Control), and Medianet flow tables
 - **Parallel Processing**: Execute multiple batches concurrently for improved performance
 - **Batch Processing**: Process large time ranges in configurable batch sizes
 - **Site IP Mapping**: Map IP addresses to site names using CSV configuration
@@ -67,19 +66,6 @@ Standard network flow metrics:
 - Flow count, packet count, octet count
 - Sampling flag preservation
 
-#### AVC Tables (Application Visibility & Control)
-Enhanced with application performance metrics:
-- Application delay metrics
-- Network delay metrics (client, server, overall)
-- TCP connection issues (retransmissions, connection lost/refused)
-- Page response time statistics
-
-#### Medianet Tables
-Specialized for media quality monitoring:
-- Jitter statistics (sum, count, max, min)
-- Packet loss metrics (count, rate, percentage)
-- Mean Opinion Score (MOS) for voice quality
-
 ## Command Line Options
 
 ### Connection Options
@@ -111,7 +97,6 @@ Specialized for media quality monitoring:
 | `--time-range` | **Required.** Time range to aggregate (see Time Ranges section) |
 | `--level` | Aggregation level: 1m, 5m, 60m, or 360m (default: 1m) |
 | `--all-levels` | Run all aggregation levels in sequence |
-| `--table-type` | Table type: basic, avc, or medianet (default: basic) |
 | `--source-table` | Custom source table (overrides defaults) |
 | `--dest-table` | Custom destination table (overrides defaults) |
 | `--batch-size N` | Process in batches of N intervals (0 = no batching) |
@@ -124,7 +109,6 @@ Specialized for media quality monitoring:
 |--------|-------------|
 | `--dry-run` | Preview queries without executing |
 | `--check-duplicates` | Check for duplicate records in destination |
-| `--delete-first` | Delete existing data before aggregating |
 | `--info` | Show table information and exit |
 
 ## Time Ranges
@@ -218,16 +202,6 @@ python3 clickhouse_site_aggregation.py -H ch.example.com \
 # Basic tables - all levels
 python3 clickhouse_site_aggregation.py -H ch.example.com \
   --time-range yesterday --all-levels --batch-size 60 --parallel 4
-
-# AVC tables - all levels
-python3 clickhouse_site_aggregation.py -H ch.example.com \
-  --time-range yesterday --table-type avc --all-levels \
-  --batch-size 60 --parallel 4
-
-# Medianet tables - all levels
-python3 clickhouse_site_aggregation.py -H ch.example.com \
-  --time-range yesterday --table-type medianet --all-levels \
-  --batch-size 60 --parallel 4
 ```
 
 ### Handling Duplicates
@@ -236,10 +210,6 @@ python3 clickhouse_site_aggregation.py -H ch.example.com \
 # Check for duplicates first
 python3 clickhouse_site_aggregation.py -H ch.example.com \
   --time-range yesterday --level 5m --check-duplicates
-
-# If duplicates found, delete and re-aggregate
-python3 clickhouse_site_aggregation.py -H ch.example.com \
-  --time-range yesterday --level 5m --delete-first
 ```
 
 ### Custom Tables

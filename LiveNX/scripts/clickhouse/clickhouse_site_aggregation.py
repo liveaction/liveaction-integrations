@@ -679,29 +679,6 @@ class ClickHouseAggregator:
             print(f"\033[91mFailed to check duplicates: {e}\033[0m")
             return -1
     
-    def delete_range(self, table: str, start_time: str, end_time: str, 
-                    dry_run: bool = False) -> bool:
-        """Delete data in a specific time range from a table"""
-        query = f"""
-        ALTER TABLE {table}
-        DELETE WHERE time >= '{start_time}' AND time < '{end_time}'
-        """
-        
-        if dry_run:
-            print("\033[94mDry run - DELETE query:\033[0m")
-            print(query)
-            return True
-        
-        try:
-            print(f"Deleting data from {table} between {start_time} and {end_time}...")
-            self.execute_query(query)
-            print("\033[92mDelete initiated (may take time to complete in background)\033[0m")
-            return True
-        except Exception as e:
-            print(f"\033[91mDelete failed: {e}\033[0m")
-            return False
-
-
 def parse_time_range(range_str: str) -> Tuple[str, str]:
     """
     Parse time range string into start and end times
@@ -784,9 +761,6 @@ Examples:
   # Check for duplicates in destination table
   %(prog)s -H clickhouse.example.com --time-range yesterday --level 5m --check-duplicates
   
-  # Delete and re-aggregate (useful for fixing duplicates)
-  %(prog)s -H clickhouse.example.com --time-range yesterday --level 5m --delete-first
-  
   # Use HTTPS with authentication
   %(prog)s -H secure.clickhouse.com --https -u myuser -P mypass --time-range last-hour
   
@@ -854,8 +828,6 @@ Examples:
                       help='Show queries without executing them')
     parser.add_argument('--check-duplicates', action='store_true',
                       help='Check for duplicate records in destination table')
-    parser.add_argument('--delete-first', action='store_true',
-                      help='Delete existing data in time range before aggregating')
     parser.add_argument('--info', action='store_true',
                       help='Show table information and exit')
     
@@ -1034,18 +1006,8 @@ Examples:
             else:
                 print("\033[91mFailed to check for duplicates\033[0m")
             
-            if not args.delete_first and not args.dry_run and len(levels_to_run) == 1:
+            if not args.dry_run and len(levels_to_run) == 1:
                 continue
-        
-        # Delete existing data if requested
-        if args.delete_first and not args.dry_run:
-            print(f"\n\033[93mDeleting existing data from {dest_table}...\033[0m")
-            if not aggregator.delete_range(dest_table, start_time, end_time, args.dry_run):
-                print("\033[91mFailed to delete existing data\033[0m")
-                overall_success = False
-                continue
-            print("Waiting 5 seconds for delete to process...")
-            time.sleep(5)
         
         # Run aggregation
         print(f"\n\033[94mStarting {level_desc}...\033[0m")
