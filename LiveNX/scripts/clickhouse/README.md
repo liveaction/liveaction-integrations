@@ -9,7 +9,7 @@ A powerful Python script for performing hierarchical time-based aggregations of 
 - **Batch Processing**: Process large time ranges in configurable batch sizes
 - **Site IP Mapping**: Map IP addresses to site names using CSV configuration
 - **SSL/TLS Support**: Secure HTTPS connections with certificate verification
-- **Duplicate Detection**: Check for and remove duplicate records
+- **Duplicate Detection**: Check for duplicate records
 - **Dry Run Mode**: Preview queries before execution
 - **Custom Tables**: Support for user-defined source and destination tables
 
@@ -129,7 +129,7 @@ Specify exact start and end times:
 
 ## Site IP Mapping
 
-When aggregating from raw tables, you can map IP addresses to site names using a CSV file.
+When aggregating from raw tables, you can map IP addresses to site names using a CSV file. If the site to IP range mapping is already defined in LiveNX you can use the CSV export file for this.
 
 ### CSV Format
 
