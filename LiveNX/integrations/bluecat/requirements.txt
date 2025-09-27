@@ -1,0 +1,8 @@
+# Core HTTP + JSON handling for BlueCat BAM API
+requests>=2.32.3
+
+# ClickHouse client with TLS/mTLS support
+clickhouse-connect>=0.7.18
+
+# Date/time utilities (stdlib covers most, but adding for safety)
+python-dateutil>=2.9.0.post0
