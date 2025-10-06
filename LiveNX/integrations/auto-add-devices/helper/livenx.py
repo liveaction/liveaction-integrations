@@ -95,7 +95,141 @@ def create_request(url, data = None):
     request = urllib.request.Request(api_url, headers=headers, data = data)
     return request, ctx
 
-def get_livenx_inventory():
+def get_livenx_inventory(non_snmp_only: bool = True):
+    '''
+    {
+    "meta": {
+        "href": "string",
+        "queryParameters": {
+        "additionalProp1": [
+            "string"
+        ],
+        "additionalProp2": [
+            "string"
+        ],
+        "additionalProp3": [
+            "string"
+        ]
+        },
+        "http": {
+        "method": "string",
+        "statusCode": 0,
+        "statusReason": "string"
+        }
+    },
+    "href": "https://10.10.10.10:8093/v1/devices/9IRVE649AQF",
+    "id": "9IRVE649AQF",
+    "serial": "9IRVE649AQF",
+    "address": "1.1.1.1",
+    "clientIp": "10.10.10.10",
+    "systemName": "device.test.com",
+    "displaySystemName": "device.test.com [10.10.10.10 | Node1 | 9IRVE649AQF]",
+    "hostName": "device",
+    "displayHostName": "device [10.10.10.10 | Node1 | 9IRVE649AQF]",
+    "systemLocation": "West Coast Office",
+    "systemDescription": "Gigabit Routing Switch",
+    "nodeId": "843bf835-e330-45fc-a363-c407237ef4d7",
+    "osVersion": {
+        "majorNumber": 12,
+        "minorNumber": 1,
+        "indivNumber": null,
+        "indivNumberSuffix": null,
+        "newFeatureIdentifier": null,
+        "newFeatureVersion": null,
+        "versionString": null,
+        "osType": "IOS_XE"
+    },
+    "osVersionString": "12.1",
+    "vendorProduct": {
+        "model": "ciscoCSR1000v",
+        "displayName": "ciscoCSR1000v",
+        "description": "ciscoCSR1000v",
+        "vendor": {
+        "vendorName": "Cisco",
+        "vendorOid": {
+            "displayName": ".1.3.6.1.4.1.9"
+        },
+        "vendorSerialOid": {
+            "displayName": ".1.3.6.1.4.1.9.3.6.3"
+        }
+        },
+        "objectOID": {
+        "displayName": ".1.3.6.1.4.1.9.1.1537"
+        },
+        "objectOIDString": ".1.3.6.1.4.1.9.1.1537",
+        "asrModel": false
+    },
+    "site": "Western Division",
+    "isDataCenterSite": false,
+    "tags": [
+        "Corp",
+        "West"
+    ],
+    "taggedOmni": false,
+    "interfaces": {
+        "name": "Null0",
+        "abbreviatedName": "Nu0",
+        "ifIndex": 5,
+        "description": "",
+        "speed": 10000000000,
+        "type": "other",
+        "wan": false,
+        "xcon": false,
+        "interfaceState": "UP"
+    },
+    "monitorOnly": false,
+    "settings": {
+        "pollInterval": 60000,
+        "enablePoll": true,
+        "enableQosPoll": true,
+        "enableNetflowPoll": true,
+        "enableIpslaPoll": true,
+        "enableLanPoll": true,
+        "enableRoutingPoll": true,
+        "virtualDevice": false
+    },
+    "capabilities": {
+        "nbarCapable": true,
+        "netflowCollectorCapable": true,
+        "mediatraceCapable": true,
+        "extendedTraceRouteCapable": true,
+        "nbar2Capable": true,
+        "flexibleNetflowCapable": true,
+        "perfmonCapable": true,
+        "avcCapable": false,
+        "unifiedPerfmonCapable": true,
+        "hqfSupportDetected": true,
+        "ipslaCapable": true
+    },
+    "pollingSupported": {
+        "netflowPollingSupported": true,
+        "ipslaPollingSupported": true,
+        "lanPollingSupported": true,
+        "routingPollingSupported": true,
+        "qosPollingSupported": true
+    },
+    "group": {
+        "idString": "7e3cf778-770d-41fe-932d-f3cf12902e61"
+    },
+    "linkInfo": {
+        "type": "OMNI_PEEK",
+        "label": "Packet Inspection",
+        "displayValue": "Peek",
+        "rawValue": {
+        "name": "OmniPeek Web",
+        "host": "10.4.201.132",
+        "path": "/omnipeek/forensics",
+        "startTime": "2023-03-08T02:08:10.000Z",
+        "endTime": "2023-03-08T02:13:10.000Z",
+        "showDialog": true
+        }
+    },
+    "analyticsNode": "Analytics Node",
+    "state": "NOT_AVAILABLE",
+    "userDefinedSampleRatio": 100,
+    "deviceLoadedState": "NOT_AVAILABLE"
+    }
+    '''
 
     api_url = "/v1/devices?includeHistorical=false"
 
@@ -112,6 +246,11 @@ def get_livenx_inventory():
         # Parse the JSON response
         json_data = json.loads(response_data)
     
+    if non_snmp_only and 'devices' in json_data:
+        devices = json_data['devices']
+        # Filter out devices with settings.virtualDevice equal to false - This will keep only virtual (non-SNMP) devices
+        non_snmp_devices = [device for device in devices if device.get('settings', {}).get('virtualDevice', False) == True]
+        json_data['devices'] = non_snmp_devices
     return json_data
 
 
