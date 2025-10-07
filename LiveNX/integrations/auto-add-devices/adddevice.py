@@ -368,17 +368,36 @@ def choose_target_node(nodes):
     CURRENT_NODE_INDEX += 1
     return target_node
 
-def map_ip_to_livenx_inventory(ip_list, include_server=False):
+def create_livenx_site_from_ip(ip_address):
+        ''' Create a site for each device based on the location of the node
+        {
+          "siteName": location.get('name',''),
+          "siteDescription": location.get('name',''),
+          "type": location.get('type',''),
+          "siteIpRanges":[bluecat_block.get('range','')]
+        }
+        '''
+        site = {}
+        site['siteName'] = f"Site for {ip_address}"
+        site['siteDescription'] = f"Auto-created site for devices added from IP {ip_address}"
+        site['type'] = "Auto-Added"
+        site['siteIpRanges'] = [f"{ip_address}/32"]
+        return site
+
+def create_inventory_from_ips(ip_list, include_server=False):
     livenx_inventory = {}
     livenx_devices = []
+    livenx_sites = []
     nodes = get_livenx_nodes(include_server=include_server)
     
     for ip in ip_list:
         target_node = choose_target_node(nodes)
         nodeid = target_node['id']
         livenx_devices.append(create_livenx_device_from_ip(nodeid, ip, config_loader))
-    
+        livenx_sites.append(create_livenx_site_from_ip(ip))
+
     livenx_inventory['devices'] = livenx_devices
+    livenx_inventory['sites'] = livenx_sites
     return livenx_inventory
 
     
@@ -696,7 +715,7 @@ def monitor_samplicator_ip_file(filename, include_server=False):
         local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_set)}")
         local_logger.debug(f"Number of IPs from LiveNX: {len(original_livenx_inventory.get('devices', []))}")
         
-        new_device_inventory = None
+        new_inventory = None
         # Remove existing IPs from the list
         for livenx_device in original_livenx_inventory.get('devices',[]):
             try:
@@ -712,10 +731,10 @@ def monitor_samplicator_ip_file(filename, include_server=False):
             ip_list = list(ip_set)              
             for i in range(0, len(ip_list), 10):  # Process in chunks of 10
                 chunk = ip_list[i:i + 10]
-                new_device_inventory = map_ip_to_livenx_inventory(chunk, include_server=include_server)
-                # Add IP to LiveNX
-                if isinstance(new_device_inventory, dict) and len(new_device_inventory.get('devices', [])) > 0:
-                    add_virtual_device_to_livenx_inventory(new_device_inventory)
+                new_inventory = create_inventory_from_ips(chunk, include_server=include_server)
+                # Add device to LiveNX
+                if isinstance(new_inventory, dict) and len(new_inventory.get('devices', [])) > 0:
+                    add_virtual_device_to_livenx_inventory(new_inventory)
                 else:
                     local_logger.debug("No device to add")
     return len(ip_set)
