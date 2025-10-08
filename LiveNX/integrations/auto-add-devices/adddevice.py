@@ -802,7 +802,7 @@ def main(args):
                     if args.writesamplicatorconfigmaxsubnets is not None and args.movedevices:
                         local_logger.info(f"File {args.monitoripfile} has not been modified for {args.numsecstowaitbeforerebalance} seconds. Running rebalance operation.")
                         # Move devices if needed
-                        should_restart_samplicator = write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices, args.includeserver)
+                        should_restart_samplicator = write_samplicator_config_to_files(new_ips_to_be_added, args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices, args.includeserver)
 
                         if should_restart_samplicator:
                             # Restart the Samplicator service
@@ -814,7 +814,7 @@ def main(args):
                 if args.addinterfaces and (time.time() - last_autoadded_interface_time) > args.numsecstowaitbeforeaddinginterfaces:
                     local_logger.info(f"Last autoadded interface waittime expired ({args.numsecstowaitbeforeaddinginterfaces} seconds). Running auto add interfaces operation.")
                     interface_monitor = InterfaceMonitor()
-                    interface_monitor.run_one_cycle()                        
+                    interface_monitor.run_one_cycle()
                     last_autoadded_interface_time = time.time()
 
                 if args.consolidatedevices:
@@ -840,7 +840,7 @@ def main(args):
 
     if args.writesamplicatorconfig:
         # Write the samplicator config
-        write_samplicator_config_to_files(args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices, args.includeserver)
+        write_samplicator_config_to_files(new_ips_to_be_added, args.samplicatorconfigfilepath, args.writesamplicatorconfigmaxsubnets, args.movedevices, args.includeserver)
         exit(0)
 
     if liveNxApiHost is None or liveNxApiPort is None or liveNxApiToken is None:
