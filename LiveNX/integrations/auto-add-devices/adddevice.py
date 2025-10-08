@@ -615,6 +615,7 @@ def stop_samplicator():
         # run killall samplicate command
         local_logger.info("Killing all Samplicator processes...")
         os.system("killall samplicate")
+        time.sleep(2)
     except Exception as err:
         local_logger.error(f"Error while restarting Samplicator: {err}")
 
@@ -685,6 +686,7 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
                 livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + subnet_device_count[subnet]
 
         if movedevices:
+            local_logger.info("Moving devices based on new subnets...")
             node_ips = [node.get('ipAddress') for node in livenx_nodes if node.get('ipAddress')]
             # Move devices based on the new subnets
             modified_devices = move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=include_server)
@@ -778,7 +780,7 @@ def main(args):
 
     if args.monitoripfile is not None:
         restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
-        last_added_time = 0.0
+        last_added_time = time.time()
         last_autoadded_interface_time = time.time()
         current_time = 0.0
         while True:
