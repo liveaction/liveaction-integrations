@@ -774,7 +774,7 @@ def monitor_samplicator_ip_file(existing_ips_set, filename, include_server=False
         local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_set)}")
         local_logger.debug(f"Number of IPs existing: {len(existing_ips_set)}")
         # Remove existing IPs from the ip_set
-        ip_set = ip_set - existing_ips_set
+        ip_set = ip_set.difference(existing_ips_set)
         local_logger.debug(f"Set of IPs after removing existing IPs: {ip_set}")
         if len(ip_set) < 1:
             local_logger.debug("No IP to add")
