@@ -630,30 +630,52 @@ def stop_samplicator():
     """
     Restart the Samplicator service.
     """
-    try:
-        # run killall samplicate command
-        local_logger.info("Killing all Samplicator processes...")
-        os.system("killall samplicate")
-        time.sleep(2)
-    except Exception as err:
-        local_logger.error(f"Error while restarting Samplicator: {err}")
+    samplicator_running = True
+    while samplicator_running:
+        try:
+            # run killall samplicate command
+            local_logger.info("Killing all Samplicator processes...")
+            os.system("killall -9 samplicate")
+            time.sleep(5)
+            # make sure all samplicator processes are killed
+            output = os.popen("pgrep samplicate").read()
+            if output:
+                local_logger.info("Samplicator process is still running. Killing it again...")
+            else:
+                samplicator_running = False
+                local_logger.info("Samplicator process is not running.")
+        except Exception as err:
+            local_logger.error(f"Error while restarting Samplicator: {err}")
 
 def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfile, samplicatorhost="127.0.0.1", samplicatorport=2055):
     """
     Start the Samplicator service.
     """
-    try:
-        local_logger.info("Starting samplicator service...")
-        # run the restart command
-        if os.path.exists(samplicatorconfigfilepath) == False:
-            # create an empty file
-            with open(samplicatorconfigfilepath, 'w') as f:
-                f.write("1.2.3.4/255.255.255.255: 127.0.0.1/9999")
-                f.close()
-        
-        os.system(f"{samplicatorfilepath} -n -o -S -c {samplicatorconfigfilepath} -i {montoripfile} -p {samplicatorport} -s {samplicatorhost} -f -r 8192")
-    except Exception as err:
-        local_logger.error(f"Error while restarting Samplicator: {err}")
+    samplicator_started = False
+    while not samplicator_started:
+        # check if the samplicator process is running
+        try:
+            output = os.popen("pgrep samplicate").read()
+            if output:
+                samplicator_started = True
+                local_logger.info("Samplicator process is running.")
+            else:
+                local_logger.info("Samplicator process is not running. Starting it...")
+                try:
+                    local_logger.info("Starting samplicator service...")
+                    # run the restart command
+                    if os.path.exists(samplicatorconfigfilepath) == False:
+                        # create an empty file
+                        with open(samplicatorconfigfilepath, 'w') as f:
+                            f.write("1.2.3.4/255.255.255.255: 127.0.0.1/9999")
+                            f.close()
+                    os.system(f"{samplicatorfilepath} -n -o -S -c {samplicatorconfigfilepath} -i {montoripfile} -p {samplicatorport} -s {samplicatorhost} -f -r 8192")
+                    time.sleep(5)
+                except Exception as err:
+                    local_logger.error(f"Error while starting Samplicator: {err}")
+        except Exception as err:
+            local_logger.error(f"Error checking samplicator process: {err}")
+
 
 def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_file_path, max_subnets, movedevices, include_server):
     should_restart_samplicator = False
