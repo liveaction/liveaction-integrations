@@ -688,6 +688,7 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
                 # got through the new ips to be added and see if any of them are in this subnet and if they are add the device to the node
+                added_ips = set()
                 for new_ip in new_ips_to_be_added:
                     if ipaddress.ip_address(new_ip) in ipaddress.ip_network(subnet):
                         local_logger.debug(f"Adding new device with IP {new_ip} to node {livenx_node['id']}")
@@ -695,10 +696,11 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
                         nodeid = target_node['id']
                         new_device = create_livenx_device_from_ip(nodeid, new_ip, config_loader)
                         add_virtual_device_to_livenx_inventory({'devices': [new_device]})
-                        new_ips_to_be_added.remove(new_ip)
+                        added_ips.add(new_ip)
                         should_restart_samplicator = True
                         # update the device count for the node
                         livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + 1
+                new_ips_to_be_added = new_ips_to_be_added - added_ips
 
         if movedevices:
             livenx_inventory = get_livenx_inventory()
