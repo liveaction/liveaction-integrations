@@ -130,7 +130,7 @@ class InterfaceMonitor:
 
             for existing_interface in existing_interfaces:
                 final_interfaces_indicies.append(existing_interface.get('ifIndex'))
-            local_logger.debug(f"EXISTING={final_interfaces_indicies}")                    
+            #local_logger.debug(f"EXISTING={final_interfaces_indicies}")                    
             current_device_interfaces = current_interfaces.get(device_serial, set())
             for current_interface in current_device_interfaces:
                 if current_interface[0] not in final_interfaces_indicies:
@@ -152,7 +152,7 @@ class InterfaceMonitor:
                         existing_interface_ifindex = existing_interface.get('ifIndex')
                         local_logger.debug(f"Deleted {existing_interface.get('name')} index {existing_interface_ifindex} from device {device_serial} with ip {ip4}")
                         final_interfaces_indicies.remove(existing_interface_ifindex)
-                local_logger.debug(f"FINAL={final_interfaces_indicies}")
+                #local_logger.debug(f"FINAL={final_interfaces_indicies}")
                 set_interfaces(device_serial, final_interfaces_indicies, ip4)
 
     def run_one_cycle(self):
