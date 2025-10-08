@@ -745,7 +745,7 @@ def add_test_devices(start_num, num_devices, include_server=False):
     except Exception as err:
         local_logger.error(f"Error adding test devices: {err}")
 
-def monitor_samplicator_ip_file(filename, include_server=False):
+def monitor_samplicator_ip_file(existing_ips_set, filename, include_server=False):
     """
     Monitor a log file for IP addresses and add them to LiveNX.
     """
@@ -756,20 +756,11 @@ def monitor_samplicator_ip_file(filename, include_server=False):
     if len(ip_set) < 1:
         local_logger.debug("No IP to add")
     else:
-        # get existing livenx inventory
-        original_livenx_inventory = get_livenx_inventory()
         local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_set)}")
-        local_logger.debug(f"Number of IPs from LiveNX: {len(original_livenx_inventory.get('devices', []))}")
-        
+        local_logger.debug(f"Number of IPs existing: {len(existing_ips)}")
         new_inventory = None
-        # Remove existing IPs from the list
-        for livenx_device in original_livenx_inventory.get('devices',[]):
-            try:
-              local_logger.debug(f"Removing IP {livenx_device['address']} from list")
-              ip_set.remove(livenx_device['address'])
-            except Exception as err:
-                local_logger.error(f"Error removing IP {livenx_device['address']} from list: {err}")
-                pass
+        # Remove existing IPs from the ip_set
+        ip_set = ip_set - existing_ips_set
         local_logger.debug(f"Set of IPs after removing existing devices: {ip_set}")
         if len(ip_set) < 1:
             local_logger.debug("No IP to add")
@@ -798,10 +789,11 @@ def main(args):
 
                     # Check if the file has been modified since the last check
                     current_time = time.time()
-                    new_ips = monitor_samplicator_ip_file(args.monitoripfile, args.includeserver)
-                    new_ips_to_be_added.update(new_ips)
-                    local_logger.debug(f"New IPs to be added: {new_ips_to_be_added}")
+                    new_ips = monitor_samplicator_ip_file(new_ips_to_be_added, args.monitoripfile, args.includeserver)
+
                     if len(new_ips) > 0:
+                        new_ips_to_be_added.update(new_ips)
+                        local_logger.debug(f"New IPs to be added: {new_ips_to_be_added}")
                         last_added_time = current_time
 
                 local_logger.debug(f"No new devices added since {int(time.time() - last_added_time)} seconds ({int(last_added_time)}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
