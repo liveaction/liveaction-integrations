@@ -747,7 +747,7 @@ def add_test_devices(start_num, num_devices, include_server=False):
 
 def monitor_samplicator_ip_file(existing_ips_set, filename, include_server=False):
     """
-    Monitor a log file for IP addresses and add them to LiveNX.
+    Monitor a log file for IP addresses and return a set of new IP addresses that are not in the existing_ips_set.
     """
     local_logger.debug(f"Monitoring {filename} for IP addresses.")
     ip_set = read_samplicator_ip_file(filename)
@@ -757,11 +757,10 @@ def monitor_samplicator_ip_file(existing_ips_set, filename, include_server=False
         local_logger.debug("No IP to add")
     else:
         local_logger.debug(f"Number of IPs from Samplicator IP file: {len(ip_set)}")
-        local_logger.debug(f"Number of IPs existing: {len(existing_ips)}")
-        new_inventory = None
+        local_logger.debug(f"Number of IPs existing: {len(existing_ips_set)}")
         # Remove existing IPs from the ip_set
         ip_set = ip_set - existing_ips_set
-        local_logger.debug(f"Set of IPs after removing existing devices: {ip_set}")
+        local_logger.debug(f"Set of IPs after removing existing IPs: {ip_set}")
         if len(ip_set) < 1:
             local_logger.debug("No IP to add")
 
