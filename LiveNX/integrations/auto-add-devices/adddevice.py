@@ -591,6 +591,7 @@ def choose_least_loaded_node(livenx_nodes):
     
     for node in livenx_nodes:
         device_count = node.get('deviceCount', 0)
+        local_logger.debug(f"Node {node['id']} has {device_count} devices")
         if device_count < least_device_count:
             least_device_count = device_count
             least_loaded_node = node
@@ -636,20 +637,24 @@ def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfi
     except Exception as err:
         local_logger.error(f"Error while restarting Samplicator: {err}")
 
-def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets, movedevices, include_server):
+def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_file_path, max_subnets, movedevices, include_server):
     should_restart_samplicator = False
+    all_ips = new_ips_to_be_added.copy()
+
+    
     try:
         livenx_inventory = get_livenx_inventory()
         livenx_nodes = get_livenx_nodes(include_server=include_server)
-        ip_addresses = []
 
-        # Collect all IP addresses from the inventory
+        # Collect all IP addresses from the existing inventory
         for device in livenx_inventory.get('devices', []):
             ip_address = device.get('address')
             if ip_address:
-                ip_addresses.append(ip_address)
+                all_ips.add(ip_address)
 
         # Group IPs into subnets
+        ip_addresses = list(all_ips)
+        local_logger.debug(f"Total unique IPs to be processed: {len(ip_addresses)}")
         subnets = group_ips_into_subnets(ip_addresses, max_subnets=max_subnets)
 
         # get the number of device IPs per subnet
@@ -682,10 +687,21 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
                 line = f"{ip}/{dotted_notation}: {node_ip}/{samplicator_port}\n"
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
-                # update the device count for the node
-                livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + subnet_device_count[subnet]
+                # got through the new ips to be added and see if any of them are in this subnet and if they are add the device to the node
+                for new_ip in new_ips_to_be_added:
+                    if ipaddress.ip_address(new_ip) in ipaddress.ip_network(subnet):
+                        local_logger.debug(f"Adding new device with IP {new_ip} to node {livenx_node['id']}")
+                        target_node = livenx_node
+                        nodeid = target_node['id']
+                        new_device = create_livenx_device_from_ip(nodeid, new_ip, config_loader)
+                        add_virtual_device_to_livenx_inventory({'devices': [new_device]})
+                        new_ips_to_be_added.remove(new_ip)
+                        should_restart_samplicator = True
+                        # update the device count for the node
+                        livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + 1
 
         if movedevices:
+            livenx_inventory = get_livenx_inventory()
             local_logger.info("Moving devices based on new subnets...")
             node_ips = [node.get('ipAddress') for node in livenx_nodes if node.get('ipAddress')]
             # Move devices based on the new subnets
@@ -757,17 +773,8 @@ def monitor_samplicator_ip_file(filename, include_server=False):
         local_logger.debug(f"Set of IPs after removing existing devices: {ip_set}")
         if len(ip_set) < 1:
             local_logger.debug("No IP to add")
-        else:  
-            ip_list = list(ip_set)              
-            for i in range(0, len(ip_list), 10):  # Process in chunks of 10
-                chunk = ip_list[i:i + 10]
-                new_inventory = create_inventory_from_ips(chunk, include_server=include_server)
-                # Add device to LiveNX
-                if isinstance(new_inventory, dict) and len(new_inventory.get('devices', [])) > 0:
-                    add_virtual_device_to_livenx_inventory(new_inventory)
-                else:
-                    local_logger.debug("No device to add")
-    return len(ip_set)
+
+    return ip_set
 
 
 def main(args):
@@ -783,6 +790,7 @@ def main(args):
         last_added_time = time.time()
         last_autoadded_interface_time = time.time()
         current_time = 0.0
+        new_ips_to_be_added = set()
         while True:
             try:
                 # check if the file exists
@@ -790,8 +798,10 @@ def main(args):
 
                     # Check if the file has been modified since the last check
                     current_time = time.time()
-                    num_devices_added = monitor_samplicator_ip_file(args.monitoripfile, args.includeserver)
-                    if num_devices_added > 0:
+                    new_ips = monitor_samplicator_ip_file(args.monitoripfile, args.includeserver)
+                    new_ips_to_be_added.update(new_ips)
+                    local_logger.debug(f"New IPs to be added: {new_ips_to_be_added}")
+                    if len(new_ips) > 0:
                         last_added_time = current_time
 
                 local_logger.debug(f"No new devices added since {int(time.time() - last_added_time)} seconds ({int(last_added_time)}). Will rebalance after no device added for {args.numsecstowaitbeforerebalance} seconds.")
@@ -807,6 +817,7 @@ def main(args):
                             # Restart the Samplicator service
                             restart_samplicator(args.samplicatorpath, args.samplicatorconfigfilepath, args.monitoripfile, args.samplicatorhost, args.samplicatorport)
                     last_added_time = 0.0
+                    new_ips_to_be_added = set()
 
                 # Run the autoadd interfaces every 5 minutes
                 if args.addinterfaces and (time.time() - last_autoadded_interface_time) > args.numsecstowaitbeforeaddinginterfaces:
