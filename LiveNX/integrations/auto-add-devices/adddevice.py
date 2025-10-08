@@ -585,6 +585,18 @@ def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_s
         local_logger.error(f"Error moving devices: {err}")
     return modified_devices
 
+def choose_least_loaded_node(livenx_nodes):
+    least_loaded_node = None
+    least_device_count = float('inf')
+    
+    for node in livenx_nodes:
+        device_count = node.get('deviceCount', 0)
+        if device_count < least_device_count:
+            least_device_count = device_count
+            least_loaded_node = node
+            
+    return least_loaded_node
+
 def restart_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfile, samplicatorhost, samplicatorport):
     """
     Restart the Samplicator service.
@@ -639,16 +651,28 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
         # Group IPs into subnets
         subnets = group_ips_into_subnets(ip_addresses, max_subnets=max_subnets)
 
-        # Ensure we have node IPs to distribute subnets
-        node_ips = [node.get('ipAddress') for node in livenx_nodes if node.get('ipAddress')]
-        if not node_ips:
-            local_logger.error("No node IPs available for distribution.")
-            return
+        # get the number of device IPs per subnet
+        subnet_device_count = defaultdict(int)
+        for ip in ip_addresses:
+            for subnet in subnets:
+                if ipaddress.ip_address(ip) in ipaddress.ip_network(subnet):
+                    local_logger.debug(f"IP {ip} is in subnet {subnet}")
+                    subnet_device_count[subnet] += 1
+                    break
+
+        # get a mapping of nodeid to the number of devices on the node
+        for device in livenx_inventory.get('devices', []):
+            node_id = device.get('nodeId')
+            for node in livenx_nodes:
+                if node.get('id') == node_id:
+                    node['deviceCount'] = node.get('deviceCount', 0) + 1
+
 
         # Distribute subnets evenly across node IPs
         with open(samplicator_config_file_path, 'w') as config_file:
             for i, subnet in enumerate(subnets):
-                node_ip = node_ips[i % len(node_ips)]  # Cycle through node IPs
+                livenx_node = choose_least_loaded_node(livenx_nodes)
+                node_ip = livenx_node.get('ipAddress')
                 ip = str(ipaddress.ip_network(subnet)).split('/')[0]
                 dotted_notation = str(ipaddress.ip_network(subnet).netmask)
                 samplicator_port = SAMPLICATOR_NODE_PORT
@@ -657,8 +681,12 @@ def write_samplicator_config_to_files(samplicator_config_file_path, max_subnets,
                 line = f"{ip}/{dotted_notation}: {node_ip}/{samplicator_port}\n"
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
+                # update the device count for the node
+                livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + subnet_device_count[subnet]
 
         if movedevices:
+            node_ips = [node.get('ipAddress') for node in livenx_nodes if node.get('ipAddress')]
+            # Move devices based on the new subnets
             modified_devices = move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=include_server)
             if len(modified_devices) > 0:
                 local_logger.debug(f"Moved devices: {modified_devices}")
