@@ -81,21 +81,39 @@ def add_virtual_device_to_livenx_inventory(livenx_inventory):
   
     '''
 
+    try:
+        # Convert the device list to a JSON string and encode it to bytes
+        data = json.dumps(livenx_inventory).encode('utf-8')
 
-    # Convert the device list to a JSON string and encode it to bytes
-    data = json.dumps(livenx_inventory).encode('utf-8')
-
-    # Create the request and add the Content-Type header
-    request, ctx = create_request("/v1/devices/virtual", data)
-    local_logger.info(data)
-    request.add_header("Content-Type", "application/json")
-    request.add_header("accept", "application/json")
-    # Specify the request method as POST
-    request.method = "POST"
-    
-    with urllib.request.urlopen(request, context=ctx) as response:
-        response_data = response.read().decode('utf-8')
-        local_logger.info(response_data)
+        # Create the request and add the Content-Type header
+        request, ctx = create_request("/v1/devices/virtual", data)
+        local_logger.info(data)
+        request.add_header("Content-Type", "application/json")
+        request.add_header("accept", "application/json")
+        # Specify the request method as POST
+        request.method = "POST"
+        
+        with urllib.request.urlopen(request, context=ctx) as response:
+            response_data = response.read().decode('utf-8')
+            local_logger.info(response_data)
+    except Exception as err:
+        local_logger.error(f"Error on /v1/devices/virtual API Call: {err}")
+        # If there is an error, try adding the devices one at a time to see which device is causing the error
+        if 'devices' in livenx_inventory:
+            for device in livenx_inventory['devices']:
+                try:
+                    single_device_inventory = {'devices': [device]}
+                    data = json.dumps(single_device_inventory).encode('utf-8')
+                    request, ctx = create_request("/v1/devices/virtual", data)
+                    local_logger.info(data)
+                    request.add_header("Content-Type", "application/json")
+                    request.add_header("accept", "application/json")
+                    request.method = "POST"
+                    with urllib.request.urlopen(request, context=ctx) as response:
+                        response_data = response.read().decode('utf-8')
+                        local_logger.info(response_data)
+                except Exception as single_err:
+                    local_logger.error(f"Error adding device {device.get('systemName','unknown')} with address {device.get('address','unknown')}: {single_err}")
 
 
 # livenx_config.py
@@ -673,7 +691,6 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
                 if node.get('id') == node_id:
                     node['deviceCount'] = node.get('deviceCount', 0) + 1
 
-
         # Distribute subnets evenly across node IPs
         new_devices_to_be_added = []
         with open(samplicator_config_file_path, 'w') as config_file:
@@ -796,14 +813,22 @@ def main(args):
         last_autoadded_interface_time = time.time()
         current_time = 0.0
         new_ips_to_be_added = set()
+        existing_ips_set = set()
         while True:
             try:
                 # check if the file exists
                 if os.path.exists(args.monitoripfile):
+                    # get a list of IPs that already exist in LiveNX
+                    livenx_inventory = get_livenx_inventory()
+                    for device in livenx_inventory.get('devices', []):
+                        ip_address = device.get('address')
+                        if ip_address:
+                            existing_ips_set.add(ip_address)
 
                     # Check if the file has been modified since the last check
                     current_time = time.time()
-                    new_ips = monitor_samplicator_ip_file(new_ips_to_be_added, args.monitoripfile, args.includeserver)
+                    known_ips_set = existing_ips_set.union(new_ips_to_be_added)
+                    new_ips = monitor_samplicator_ip_file(known_ips_set, args.monitoripfile, args.includeserver)
 
                     if len(new_ips) > 0:
                         new_ips_to_be_added.update(new_ips)
