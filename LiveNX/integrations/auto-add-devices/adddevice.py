@@ -675,6 +675,7 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
 
 
         # Distribute subnets evenly across node IPs
+        new_devices_to_be_added = []
         with open(samplicator_config_file_path, 'w') as config_file:
             for i, subnet in enumerate(subnets):
                 livenx_node = choose_least_loaded_node(livenx_nodes)
@@ -695,12 +696,24 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
                         target_node = livenx_node
                         nodeid = target_node['id']
                         new_device = create_livenx_device_from_ip(nodeid, new_ip, config_loader)
-                        add_virtual_device_to_livenx_inventory({'devices': [new_device]})
+                        new_devices_to_be_added.append(new_device)
                         added_ips.add(new_ip)
                         should_restart_samplicator = True
                         # update the device count for the node
                         livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + 1
                 new_ips_to_be_added = new_ips_to_be_added - added_ips
+
+        if len(new_devices_to_be_added) > 0:
+            # chunk the devices to avoid memory issues
+            chunk_size = 10
+            device_chunk = {}
+            for i in range(0, len(new_devices_to_be_added), chunk_size):
+                chunk = new_devices_to_be_added[i:i + chunk_size]
+                device_chunk['devices'] = chunk
+                local_logger.info(f"Adding {len(chunk)} new devices to LiveNX inventory...")
+                add_virtual_device_to_livenx_inventory(device_chunk)
+                time.sleep(1)  # slight delay to avoid overwhelming the API
+            should_restart_samplicator = True
 
         if movedevices:
             livenx_inventory = get_livenx_inventory()
