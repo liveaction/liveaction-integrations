@@ -1,4 +1,4 @@
-# Inserting recommended and running router configs into LiveNX so LiveAssist can analyze them
+# Recommended and running router configs for LiveAssist
 
 ## Example of adding a running router config
 
