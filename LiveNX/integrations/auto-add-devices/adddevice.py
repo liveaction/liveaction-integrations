@@ -679,7 +679,10 @@ def start_samplicator(samplicatorfilepath, samplicatorconfigfilepath, montoripfi
 
 def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_file_path, max_subnets, movedevices, include_server):
     should_restart_samplicator = False
-    all_ips = new_ips_to_be_added.copy()
+    new_ips_set = set(new_ips_to_be_added)
+    remaining_new_ips = set(new_ips_set)
+    all_ips = set(new_ips_set)
+    existing_ips = set()
 
     
     try:
@@ -691,19 +694,33 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
             ip_address = device.get('address')
             if ip_address:
                 all_ips.add(ip_address)
+                existing_ips.add(ip_address)
 
         # Group IPs into subnets
         ip_addresses = list(all_ips)
         local_logger.debug(f"Total unique IPs to be processed: {len(ip_addresses)}")
         subnets = group_ips_into_subnets(ip_addresses, max_subnets=max_subnets)
+        subnet_network_map = {subnet: ipaddress.ip_network(subnet) for subnet in subnets}
 
         # get the number of device IPs per subnet
-        subnet_device_count = defaultdict(int)
-        for ip in ip_addresses:
+        subnet_existing_device_count = defaultdict(int)
+        for ip in existing_ips:
+            ip_obj = ipaddress.ip_address(ip)
             for subnet in subnets:
-                if ipaddress.ip_address(ip) in ipaddress.ip_network(subnet):
-                    local_logger.debug(f"IP {ip} is in subnet {subnet}")
-                    subnet_device_count[subnet] += 1
+                subnet_network = subnet_network_map[subnet]
+                if ip_obj in subnet_network:
+                    local_logger.debug(f"Existing IP {ip} is in subnet {subnet}")
+                    subnet_existing_device_count[subnet] += 1
+                    break
+
+        subnet_new_device_count = defaultdict(int)
+        for ip in new_ips_set:
+            ip_obj = ipaddress.ip_address(ip)
+            for subnet in subnets:
+                subnet_network = subnet_network_map[subnet]
+                if ip_obj in subnet_network:
+                    local_logger.debug(f"New IP {ip} is in subnet {subnet}")
+                    subnet_new_device_count[subnet] += 1
                     break
 
         # get a mapping of nodeid to the number of devices on the node
@@ -719,18 +736,23 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
             for i, subnet in enumerate(subnets):
                 livenx_node = choose_least_loaded_node(livenx_nodes)
                 node_ip = livenx_node.get('ipAddress')
-                ip = str(ipaddress.ip_network(subnet)).split('/')[0]
-                dotted_notation = str(ipaddress.ip_network(subnet).netmask)
+                subnet_network = subnet_network_map[subnet]
+                ip = str(subnet_network.network_address)
+                dotted_notation = str(subnet_network.netmask)
                 samplicator_port = SAMPLICATOR_NODE_PORT
                 if node_ip == '127.0.0.1':
                     samplicator_port = SAMPLICATOR_SERVER_PORT
                 line = f"{ip}/{dotted_notation}: {node_ip}/{samplicator_port}\n"
                 local_logger.debug(f"Writing line to config file: {line.strip()}")
                 config_file.write(line)
+                assigned_device_count = subnet_existing_device_count.get(subnet, 0) + subnet_new_device_count.get(subnet, 0)
+                if assigned_device_count == 0:
+                    assigned_device_count = 1
+                livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + assigned_device_count
                 # got through the new ips to be added and see if any of them are in this subnet and if they are add the device to the node
                 added_ips = set()
-                for new_ip in new_ips_to_be_added:
-                    if ipaddress.ip_address(new_ip) in ipaddress.ip_network(subnet):
+                for new_ip in remaining_new_ips:
+                    if ipaddress.ip_address(new_ip) in subnet_network:
                         local_logger.debug(f"Adding new device with IP {new_ip} to node {livenx_node['id']}")
                         target_node = livenx_node
                         nodeid = target_node['id']
@@ -738,9 +760,7 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
                         new_devices_to_be_added.append(new_device)
                         added_ips.add(new_ip)
                         should_restart_samplicator = True
-                        # update the device count for the node
-                        livenx_node['deviceCount'] = livenx_node.get('deviceCount', 0) + 1
-                new_ips_to_be_added = new_ips_to_be_added - added_ips
+                remaining_new_ips = remaining_new_ips - added_ips
 
         if len(new_devices_to_be_added) > 0:
             # chunk the devices to avoid memory issues
