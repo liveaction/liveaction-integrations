@@ -587,11 +587,15 @@ def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_s
 
                 # Check if the device IP is in the smallest matching subnet
                 for subnet in sorted_subnets:
+                    local_logger.debug(f"Checking if device IP {device_ip} is in subnet {subnet}")
                     if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
+                        local_logger.debug(f"Device IP {device_ip} is in subnet {subnet}")
                         # If it is, update the node IP for that device
                         new_node_ip = node_ips[sorted_subnets.index(subnet) % len(node_ips)]
                         current_device_node_id = device.get('nodeId')
+                        local_logger.debug(f"Current device node ID: {current_device_node_id}")
                         new_node_id = get_livenx_node_id_from_ip(nodes, new_node_ip)
+                        local_logger.debug(f"New node ID for device IP {device_ip} is {new_node_id}")
                         if current_device_node_id != new_node_id:
                             local_logger.debug(f"Moving device {device['hostName']} from node {current_device_node_id} to node {new_node_id}")
                             modified_devices.append(create_move_device_config(device, new_node_id))
