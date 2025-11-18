@@ -574,7 +574,7 @@ def update_livenx_device_configs(device_configs):
             device_config_chunk['devices'] = chunk
             update_device_configs_in_livenx(device_config_chunk)
 
-def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=False):
+def move_devices_based_on_subnets(subnets, subnet_to_node_map, livenx_inventory, node_ips, include_server=False):
     modified_devices = []
     nodes = get_livenx_nodes(include_server=include_server)
     try:
@@ -591,10 +591,12 @@ def move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_s
                     if ipaddress.ip_address(device_ip) in ipaddress.ip_network(subnet):
                         local_logger.debug(f"Device IP {device_ip} is in subnet {subnet}")
                         # If it is, update the node IP for that device
-                        new_node_ip = node_ips[sorted_subnets.index(subnet) % len(node_ips)]
+                        new_node = subnet_to_node_map.get(subnet)
+                        local_logger.debug(f"New node for subnet {subnet} is {new_node}")
+                        new_node_ip = new_node.get('ipAddress')
                         current_device_node_id = device.get('nodeId')
                         local_logger.debug(f"Current device node ID: {current_device_node_id}")
-                        new_node_id = get_livenx_node_id_from_ip(nodes, new_node_ip)
+                        new_node_id = new_node.get('id')
                         local_logger.debug(f"New node ID for device IP {device_ip} is {new_node_id}")
                         if current_device_node_id != new_node_id:
                             local_logger.debug(f"Moving device {device['hostName']} from node {current_device_node_id} to node {new_node_id}")
@@ -736,9 +738,13 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
 
         # Distribute subnets evenly across node IPs
         new_devices_to_be_added = []
+        # create a map of subnet to node
+        subnet_to_node_map = {}
         with open(samplicator_config_file_path, 'w') as config_file:
             for i, subnet in enumerate(subnets):
                 livenx_node = choose_least_loaded_node(livenx_nodes)
+                # add mapping of subnet to node
+                subnet_to_node_map[subnet] = livenx_node
                 node_ip = livenx_node.get('ipAddress')
                 subnet_network = subnet_network_map[subnet]
                 ip = str(subnet_network.network_address)
@@ -783,7 +789,7 @@ def write_samplicator_config_to_files(new_ips_to_be_added, samplicator_config_fi
             local_logger.info("Moving devices based on new subnets...")
             node_ips = [node.get('ipAddress') for node in livenx_nodes if node.get('ipAddress')]
             # Move devices based on the new subnets
-            modified_devices = move_devices_based_on_subnets(subnets, livenx_inventory, node_ips, include_server=include_server)
+            modified_devices = move_devices_based_on_subnets(subnets, subnet_to_node_map, livenx_inventory, node_ips, include_server=include_server)
             if len(modified_devices) > 0:
                 local_logger.debug(f"Moved devices: {modified_devices}")
                 should_restart_samplicator = True
