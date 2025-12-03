@@ -20,18 +20,46 @@ This tool fetch the device NAT data.
 
 ### Basic Command
 ```bash
-# Run monitor script 
-python infoblox_script.py --livenx_host=<livenx.host> --livenx_token=<livenx-api-token> --report_id=<livenx-report-id> --device_serial=<livenx-device-serial> --infoblox_host=<inflox-host> --infoblox_username=<inflox-username> --infoblox_password=<inflox-password>
+# Run monitor script (polls every minute and writes to ClickHouse)
+python infoblox_script.py \
+  --livenx_host=<livenx.host> \
+  --livenx_token=<livenx-api-token> \
+  --report_id=<livenx-report-id> \
+  --device_serial=<livenx-device-serial> \
+  --infoblox_host=<inflox-host> \
+  --infoblox_username=<inflox-username> \
+  --infoblox_password=<inflox-password> \
+  --clickhouse_host=<clickhouse-host> \
+  --clickhouse_username=<clickhouse-user> \
+  --clickhouse_password=<clickhouse-pass>
 ```
+
+The script:
+- polls LiveNX NAT data and Infoblox DHCP leases once per minute
+- writes matches into ClickHouse (default database `inventory_db`, table `infoblox_nat_dhcp`) when ClickHouse connection info is provided
+- otherwise prints the per-poll records to stdout
+- creates the database/table if they do not already exist when ClickHouse is enabled
+
+Set ClickHouse connection values via flags or environment variables: `CLICKHOUSE_HOST`, `CLICKHOUSE_PORT` (default `9440`), `CLICKHOUSE_USERNAME`, `CLICKHOUSE_PASSWORD`, `CLICKHOUSE_DATABASE`, `CLICKHOUSE_TABLE`, `CLICKHOUSE_CACERTS`, `CLICKHOUSE_CERTFILE`, `CLICKHOUSE_KEYFILE`.
 
 ### Command Line Arguments
 
 | Argument | Description | Required |
 |----------|-------------|----------|
-| `--livenx_host` | Livenx hostname/Ipadress | Yes |
-| `--livenx_token` | Livenx api token | Yes |
-| `--report_id` | Livenc Report ID to  | Yes |
-| `--device_serial` | Livenc Device Serial | Yes |
+| `--livenx_host` | Livenx hostname/IP address | Yes |
+| `--livenx_token` | Livenx API token | Yes |
+| `--report_id` | Livenx Report ID | Yes |
+| `--device_serial` | Livenx Device Serial | Yes |
 | `--infoblox_host` | Infoblox host | Yes |
 | `--infoblox_username` | Infoblox username | Yes |
 | `--infoblox_password` | Infoblox password | Yes |
+| `--clickhouse_host` | ClickHouse host (or env `CLICKHOUSE_HOST`) | Yes |
+| `--clickhouse_port` | ClickHouse port (default 9440 or env) | Yes |
+| `--clickhouse_username` | ClickHouse username (or env) | Yes |
+| `--clickhouse_password` | ClickHouse password (or env) | Yes |
+| `--clickhouse_database` | ClickHouse database (default `inventory_db`) | No |
+| `--clickhouse_table` | ClickHouse table (default `infoblox_nat_dhcp`) | No |
+| `--clickhouse_cacerts` | CA bundle for ClickHouse TLS | No |
+| `--clickhouse_certfile` | Client cert for ClickHouse TLS | No |
+| `--clickhouse_keyfile` | Client key for ClickHouse TLS | No |
+| `--poll_interval_seconds` | Poll interval in seconds (default 60) | No |

@@ -6,12 +6,51 @@ import json
 import argparse
 import logging
 import sys
+import os
+from datetime import datetime
+import ssl
+import re
+from clickhouse_driver import Client
 
 local_logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # Suppress HTTPS warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+def connect_with_tls(host, port, user, password, database, ca_certs='/path/to/ca.pem', certfile='/etc/clickhouse-server/cacerts/ca.crt', keyfile='/etc/clickhouse-server/cacerts/ca.key'):
+    if not(host and port and user and password and database):
+        raise Exception("Missing Clickhouse Env setup")
+    tls_params = {
+        "secure": True,
+        "verify": False,
+        "ssl_version": ssl.PROTOCOL_SSLv23,
+        "ca_certs": ca_certs,
+        "certfile": certfile,
+        "keyfile": keyfile,
+    }
+
+    try:
+        client = Client(
+            host=host,
+            port=int(port),
+            user=user,
+            password=password,
+            database=database,
+            secure=tls_params["secure"],
+            verify=tls_params["verify"],
+            ssl_version=tls_params.get("ssl_version"),
+            # ca_certs=tls_params.get("ca_certs"),
+            certfile=tls_params.get("certfile"),
+            keyfile=tls_params.get("keyfile"),
+        )
+        return client
+
+    except Exception as e:
+        local_logger.error(f"Error connecting to ClickHouse: {e}")
+        return None
+
 
 def pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial):
     # Construct the LiveNX API URL
@@ -39,7 +78,11 @@ def pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, r
                 livenx_nat_data = []
             else:
                 # Split the response text into lines and check the length of the data
-                livenx_nat_data = livenx_response.text.splitlines()
+                raw_lines = livenx_response.text.splitlines()
+                # Some LiveNX responses prepend "Top Analysis" before the CSV header; drop it if present (can repeat)
+                while raw_lines and raw_lines[0].strip().lower() == "top analysis":
+                    raw_lines = raw_lines[1:]
+                livenx_nat_data = raw_lines
                 print(f"Parsed LiveNX data into {len(livenx_nat_data)} lines.")
                 if len(livenx_nat_data) < 2:  # There should be at least a header line and one data line
                     print("LiveNX CSV has no data rows.")
@@ -82,6 +125,25 @@ def get_infoblox(infoblox_host, infoblox_username, infoblox_password):
     
     return infoblox_leases
 
+def normalize_key(key):
+    """Lowercase and replace non-alphanumerics with underscores for flexible header matching."""
+    if not key:
+        return ""
+    return re.sub(r'[^a-z0-9]+', '_', str(key).strip().lower())
+
+def pick(entry, candidates):
+    """
+    Return the first populated value for any of the provided candidate keys.
+    Candidate keys should be normalized (see normalize_key).
+    """
+    normalized = {normalize_key(k): v for k, v in entry.items() if normalize_key(k)}
+    for candidate in candidates:
+        val = normalized.get(candidate)
+        if val is not None and val != "":
+            return val
+    return None
+
+
 def process_consolidation(livenx_nat_data, infoblox_leases):
     # Step 3: Match NAT IPs with DHCP leases and create a combined report
     consolidated_report = []
@@ -90,9 +152,19 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
     if livenx_nat_data:
         csv_reader = csv.DictReader(livenx_nat_data)
         for i, nat_entry in enumerate(csv_reader):
-            src_ip = nat_entry.get('Src IP Addr')
-            nat_ip = nat_entry.get('Mapped Src IP')
-            dst_ip = nat_entry.get('Dst IP Addr')
+            # Normalize column names to match LiveNX header variants
+            src_ip = pick(nat_entry, ['src_ip_addr', 'src_ip'])
+            dst_ip = pick(nat_entry, ['dst_ip_addr', 'dst_ip'])
+            nat_ip = pick(
+                nat_entry,
+                [
+                    'mapped_src_ip_addr',
+                    'mapped_src_ip',
+                    'mapped_ip_addr',
+                    'mappest_ip_addr',  # observed variant/typo
+                    'mapped_dst_ip_addr',
+                ],
+            )
 
             # Debug NAT entry content
             print(f"Entry {i}: Src IP - {src_ip}, Mapped Src IP - {nat_ip}, Dst IP - {dst_ip}")
@@ -118,13 +190,64 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
     else:
         print(f"Found {len(consolidated_report)} matching entries.")
 
-    # Step 5: Save the report as a .json file
-    output_file = 'consolidated_report.json'
-    print(f"Saving report to {output_file}...")
-    with open(output_file, 'w') as json_file:
-        json.dump(consolidated_report, json_file, indent=4)
+    return consolidated_report
 
-    print(f'Report saved as {output_file}')
+
+def sanitize_identifier(identifier):
+    """Basic protection to keep identifiers ClickHouse-safe."""
+    return identifier.replace("`", "").replace(";", "")
+
+
+def ensure_clickhouse_table(client, database, table_name):
+    safe_db = sanitize_identifier(database)
+    safe_table = sanitize_identifier(table_name)
+    client.execute(f"CREATE DATABASE IF NOT EXISTS `{safe_db}`")
+    create_table_sql = f"""
+        CREATE TABLE IF NOT EXISTS `{safe_db}`.`{safe_table}` (
+            polled_at DateTime DEFAULT now(),
+            window_start DateTime,
+            window_end DateTime,
+            src_ip String,
+            mapped_src_ip String,
+            dst_ip String,
+            src_mac String,
+            device_serial String,
+            report_id String
+        ) ENGINE = MergeTree()
+        ORDER BY (polled_at, src_ip)
+    """
+    client.execute(create_table_sql)
+
+
+def write_records_to_clickhouse(client, database, table_name, records):
+    if not records:
+        print("No records to insert into ClickHouse for this interval.")
+        return
+
+    safe_db = sanitize_identifier(database)
+    safe_table = sanitize_identifier(table_name)
+    insert_sql = f"""
+        INSERT INTO `{safe_db}`.`{safe_table}`
+            (polled_at, window_start, window_end, src_ip, mapped_src_ip, dst_ip, src_mac, device_serial, report_id)
+        VALUES
+    """
+    payload = []
+    for record in records:
+        payload.append(
+            (
+                record.get("polled_at"),
+                record.get("window_start"),
+                record.get("window_end"),
+                record.get("src_ip") or "",
+                record.get("mapped_src_ip") or "",
+                record.get("dst_ip") or "",
+                record.get("src_mac") or "",
+                record.get("device_serial") or "",
+                record.get("report_id") or "",
+            )
+        )
+    client.execute(insert_sql, payload)
+    print(f"Wrote {len(payload)} record(s) to ClickHouse table `{safe_db}`.`{safe_table}`.")
 
 
 def main(args):
@@ -139,17 +262,95 @@ def main(args):
     infoblox_host = args.infoblox_host
     infoblox_username = args.infoblox_username
     infoblox_password = args.infoblox_password
+    clickhouse_host = args.clickhouse_host or os.getenv("CLICKHOUSE_HOST")
+    clickhouse_username = args.clickhouse_username or os.getenv("CLICKHOUSE_USERNAME")
+    clickhouse_password = args.clickhouse_password or os.getenv("CLICKHOUSE_PASSWORD")
+    clickhouse_port = args.clickhouse_port or os.getenv("CLICKHOUSE_PORT", 9440)
+    clickhouse_database = args.clickhouse_database or os.getenv("CLICKHOUSE_DATABASE", "inventory_db")
+    clickhouse_table = args.clickhouse_table or os.getenv("CLICKHOUSE_TABLE", "infoblox_nat_dhcp")
+    clickhouse_cacerts = args.clickhouse_cacerts or os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
+    clickhouse_certfile = args.clickhouse_certfile or os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
+    clickhouse_keyfile = args.clickhouse_keyfile or os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
 
-    # Get the current time in milliseconds (Unix timestamp)
-    end_time = int(time.time() * 1000)  # Current time in milliseconds
-    start_time = end_time - (15 * 60 * 1000)  # Subtract 15 minutes
+    required_api_fields = {
+        "livenx_host": livenx_host,
+        "livenx_token": livenx_token,
+        "device_serial": device_serial,
+        "report_id": report_id,
+    }
+    missing_api = [key for key, value in required_api_fields.items() if not value]
+    if missing_api:
+        raise ValueError(f"Missing required LiveNX API configuration: {', '.join(missing_api)}")
 
-    livenx_nat_data = pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
-    infoblox_leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
-    process_consolidation(livenx_nat_data, infoblox_leases)
-    
+    clickhouse_enabled = all([clickhouse_host, clickhouse_username, clickhouse_password])
+    client = None
+    if clickhouse_enabled:
+        client = connect_with_tls(
+            host=clickhouse_host,
+            port=int(clickhouse_port),
+            user=clickhouse_username,
+            password=clickhouse_password,
+            database=clickhouse_database,
+            ca_certs=clickhouse_cacerts,
+            certfile=clickhouse_certfile,
+            keyfile=clickhouse_keyfile,
+        )
 
+        if client is None:
+            raise ConnectionError("Failed to establish ClickHouse connection.")
 
+        ensure_clickhouse_table(client, clickhouse_database, clickhouse_table)
+    else:
+        print("ClickHouse configuration not provided; results will be printed to stdout only.")
+
+    poll_interval_seconds = max(1, int(args.poll_interval_seconds))
+
+    try:
+        while True:
+            loop_started = time.time()
+            try:
+                end_time = int(loop_started * 1000)
+                start_time = end_time - (60 * 1000)  # last minute
+
+                livenx_nat_data = pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
+                infoblox_leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
+                consolidated = process_consolidation(livenx_nat_data, infoblox_leases)
+
+                window_start_dt = datetime.utcfromtimestamp(start_time / 1000)
+                window_end_dt = datetime.utcfromtimestamp(end_time / 1000)
+                polled_at = datetime.utcnow()
+                records = []
+                for entry in consolidated:
+                    records.append(
+                        {
+                            "polled_at": polled_at,
+                            "window_start": window_start_dt,
+                            "window_end": window_end_dt,
+                            "src_ip": entry.get("SRC IP (private)"),
+                            "mapped_src_ip": entry.get("Mapped (NAT) IP"),
+                            "dst_ip": entry.get("DST IP (public)"),
+                            "src_mac": entry.get("SRC MAC"),
+                            "device_serial": device_serial,
+                            "report_id": report_id,
+                        }
+                    )
+
+                if client:
+                    write_records_to_clickhouse(client, clickhouse_database, clickhouse_table, records)
+                else:
+                    print(json.dumps(records, default=str, indent=2))
+            except Exception as exc:
+                local_logger.exception("Error during polling loop: %s", exc)
+
+            elapsed = time.time() - loop_started
+            sleep_for = max(0, poll_interval_seconds - elapsed)
+            print(f"Sleeping for {sleep_for:.1f} seconds before next poll.")
+            time.sleep(sleep_for)
+    except KeyboardInterrupt:
+        print("Polling stopped by user.")
+    finally:
+        if client:
+            client.disconnect()
 
 if __name__ == "__main__":
     # Set up argument parser
@@ -161,6 +362,16 @@ if __name__ == "__main__":
     parser.add_argument("--infoblox_host", required=True, help="Infoblox host address")
     parser.add_argument("--infoblox_username", required=True, help="Infoblox username")
     parser.add_argument("--infoblox_password", required=True, help="Infoblox password")
+    parser.add_argument("--clickhouse_host", help="ClickHouse host (or set CLICKHOUSE_HOST)")
+    parser.add_argument("--clickhouse_port", type=int, help="ClickHouse port (or set CLICKHOUSE_PORT)")
+    parser.add_argument("--clickhouse_username", help="ClickHouse username (or set CLICKHOUSE_USERNAME)")
+    parser.add_argument("--clickhouse_password", help="ClickHouse password (or set CLICKHOUSE_PASSWORD)")
+    parser.add_argument("--clickhouse_database", help="ClickHouse database name (or set CLICKHOUSE_DATABASE; default inventory_db)")
+    parser.add_argument("--clickhouse_table", help="ClickHouse table name (or set CLICKHOUSE_TABLE; default infoblox_nat_dhcp)")
+    parser.add_argument("--clickhouse_cacerts", help="Path to ClickHouse CA certs (or set CLICKHOUSE_CACERTS)")
+    parser.add_argument("--clickhouse_certfile", help="Path to ClickHouse client cert (or set CLICKHOUSE_CERTFILE)")
+    parser.add_argument("--clickhouse_keyfile", help="Path to ClickHouse client key (or set CLICKHOUSE_KEYFILE)")
+    parser.add_argument("--poll_interval_seconds", default=60, type=int, help="Polling interval in seconds. Default: 60")
 
     args = parser.parse_args()
     main(args)
