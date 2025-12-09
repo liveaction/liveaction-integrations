@@ -1,7 +1,11 @@
+import json
 import sys
 from pathlib import Path
 
 import pytest
+import runpy
+
+import requests
 
 
 SCRIPT_DIR = Path(__file__).parent
@@ -52,3 +56,49 @@ def test_pull_nat_data_from_LiveNX_skips_top_analysis_line(monkeypatch):
     original_lines = SCRIPT_DIR.joinpath("livenx.csv").read_text().splitlines()
     # Response has two leading "Top Analysis" lines; one is from the fixture and one we preprended in the test.
     assert len(data) == len(original_lines) - 1
+
+
+
+def test_script_with_mock_infoblox_api(monkeypatch):
+    """
+    Integration test to run main script with Infoblox API patch
+ 
+    Note: It will run infinite due to main script polling
+    """
+    mock_response = [
+        {"address": "146.112.255.155", "hardware": "aa:bb:cc:dd:ee:ff"},
+        {"address": "10.164.0.147", "hardware": "14:72:33:44:55:66"},
+        {"address": "10.164.0.113", "hardware": "11:32:33:44:55:66"},
+        {"address": "10.164.0.88", "hardware": "88:22:33:44:55:66"},
+        {"address": "10.164.0.101", "hardware": "10:12:33:44:55:66"}
+    ]
+   
+    # Save original requests.get
+    original_get = requests.get
+
+    def fake_get(url,  *args, **kwargs):
+        if "/wapi/" in url and "/lease?" in url:            
+            response = requests.models.Response()
+            response.status_code = 200
+            # Set the _content as bytes
+            response._content = json.dumps(mock_response).encode('utf-8')
+            return response            
+        return original_get(url,  *args, **kwargs)        
+
+    monkeypatch.setattr(script.requests, "get", fake_get)    
+    
+    # Load the config file
+    with open(SCRIPT_DIR.joinpath("test_config.json")) as config_file:
+        cfg = json.load(config_file)
+
+    # Build argv list from key/value pairs
+    argv = ["infoblox_script"]
+    for key, value in cfg.items():
+        argv.append(f"--{key}")
+        argv.append(str(value))
+
+    # Patch sys.argv
+    monkeypatch.setattr(sys, "argv", argv)
+
+    runpy.run_module("infoblox_script", run_name="__main__")
+
