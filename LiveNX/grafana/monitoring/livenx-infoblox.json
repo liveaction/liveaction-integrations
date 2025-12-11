@@ -146,7 +146,7 @@
           },
           "pluginVersion": "4.10.2",
           "queryType": "table",
-          "rawSql": "SELECT * FROM \"inventory_db\".\"infoblox_nat_dhcp\" WHERE $__timeFilter(polled_at) LIMIT 1000",
+          "rawSql": "SELECT * FROM \"default\".\"infoblox_nat_dhcp\" WHERE $__timeFilter(polled_at) LIMIT 1000",
           "refId": "A"
         }
       ],
@@ -168,5 +168,5 @@
   "timezone": "browser",
   "title": "Infoblox LiveNX",
   "uid": "94524b90-e793-4e06-bfd6-1fd89f2fe8f3",
-  "version": 5
+  "version": 6
 }
