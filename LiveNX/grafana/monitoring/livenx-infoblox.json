@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "grafana-clickhouse-datasource",
-        "uid": "ff6kcrj922ry8a"
+        "uid": "PDEE91DDB90597936"
       },
       "fieldConfig": {
         "defaults": {
@@ -57,8 +57,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 14,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -109,7 +109,7 @@
           },
           "datasource": {
             "type": "grafana-clickhouse-datasource",
-            "uid": "ff6kcrj922ry8a"
+            "uid": "PDEE91DDB90597936"
           },
           "editorType": "sql",
           "format": 1,
@@ -146,7 +146,7 @@
           },
           "pluginVersion": "4.10.2",
           "queryType": "table",
-          "rawSql": "SELECT * FROM \"test_infoblox_001\".\"table_report\" WHERE $__timeFilter(polled_at) LIMIT 1000",
+          "rawSql": "SELECT * FROM \"inventory_db\".\"infoblox_nat_dhcp\" WHERE $__timeFilter(polled_at) LIMIT 1000",
           "refId": "A"
         }
       ],
@@ -168,5 +168,5 @@
   "timezone": "browser",
   "title": "Infoblox LiveNX",
   "uid": "94524b90-e793-4e06-bfd6-1fd89f2fe8f3",
-  "version": 3
+  "version": 5
 }
