@@ -66,11 +66,11 @@ def test_script_with_mock_infoblox_api(monkeypatch):
     Note: It will run infinite due to main script polling
     """
     mock_response = [
-        {"address": "146.112.255.155", "hardware": "aa:bb:cc:dd:ee:ff"},
-        {"address": "10.164.0.147", "hardware": "14:72:33:44:55:66"},
-        {"address": "10.164.0.113", "hardware": "11:32:33:44:55:66"},
-        {"address": "10.164.0.88", "hardware": "88:22:33:44:55:66"},
-        {"address": "10.164.0.101", "hardware": "10:12:33:44:55:66"}
+        {"address": "146.112.255.155", "hardware": "aa:bb:cc:dd:ee:ff", "client_hostname":"host146.name"},
+        {"address": "10.164.0.147", "hardware": "14:72:33:44:55:66", "client_hostname":"host147.name"},
+        {"address": "10.164.0.113", "hardware": "11:32:33:44:55:66", "client_hostname":"host113.name"},
+        {"address": "10.164.0.88", "hardware": "88:22:33:44:55:66", "client_hostname":"host88.name"},
+        {"address": "10.164.0.101", "hardware": "10:12:33:44:55:66", "client_hostname":"host101.name"}
     ]
    
     # Save original requests.get
