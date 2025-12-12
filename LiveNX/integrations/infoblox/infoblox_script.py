@@ -102,7 +102,7 @@ def get_infoblox(infoblox_host, infoblox_username, infoblox_password):
     # Infoblox API details
     wapi_version = '2.2'
     wapi_url = f'https://{infoblox_host}/wapi/v{wapi_version}'
-    leases_url = f'{wapi_url}/lease?_return_fields=address,hardware&_max_results=1000'
+    leases_url = f'{wapi_url}/lease?_return_fields=address,hardware,client_hostname&_max_results=1000'
 
     infoblox_leases = []
     try:
@@ -170,7 +170,7 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
             print(f"Entry {i}: Src IP - {src_ip}, Mapped Src IP - {nat_ip}, Dst IP - {dst_ip}")
 
             # Look for matching MAC address from DHCP leases
-            mac_address = next((lease['hardware'] for lease in infoblox_leases if lease.get('address') == src_ip), None)
+            mac_address, hostname = next(((lease['hardware'], lease['client_hostname']) for lease in infoblox_leases if lease.get('address') == src_ip), (None, None))
 
             # Debug MAC address match
             print(f"Matched MAC Address for Src IP {src_ip}: {mac_address}")
@@ -180,7 +180,8 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
                 'SRC IP (private)': src_ip,
                 'Mapped (NAT) IP': nat_ip,
                 'DST IP (public)': dst_ip,
-                'SRC MAC': mac_address
+                'SRC MAC': mac_address,
+                'Hostname': hostname
             }
             consolidated_report.append(report_entry)
 
@@ -212,11 +213,16 @@ def ensure_clickhouse_table(client, database, table_name):
             dst_ip String,
             src_mac String,
             device_serial String,
-            report_id String
+            report_id String,
+            hostname String
         ) ENGINE = MergeTree()
         ORDER BY (polled_at, src_ip)
     """
     client.execute(create_table_sql)
+
+    # Ensure hostname column
+    hostname_column_sql = f"ALTER TABLE `{safe_db}`.`{safe_table}` ADD COLUMN IF NOT EXISTS hostname String"
+    client.execute(hostname_column_sql)
 
 
 def write_records_to_clickhouse(client, database, table_name, records):
@@ -228,7 +234,7 @@ def write_records_to_clickhouse(client, database, table_name, records):
     safe_table = sanitize_identifier(table_name)
     insert_sql = f"""
         INSERT INTO `{safe_db}`.`{safe_table}`
-            (polled_at, window_start, window_end, src_ip, mapped_src_ip, dst_ip, src_mac, device_serial, report_id)
+            (polled_at, window_start, window_end, src_ip, mapped_src_ip, dst_ip, src_mac, hostname, device_serial, report_id)
         VALUES
     """
     payload = []
@@ -242,6 +248,7 @@ def write_records_to_clickhouse(client, database, table_name, records):
                 record.get("mapped_src_ip") or "",
                 record.get("dst_ip") or "",
                 record.get("src_mac") or "",
+                record.get("hostname") or "",
                 record.get("device_serial") or "",
                 record.get("report_id") or "",
             )
@@ -330,6 +337,7 @@ def main(args):
                             "mapped_src_ip": entry.get("Mapped (NAT) IP"),
                             "dst_ip": entry.get("DST IP (public)"),
                             "src_mac": entry.get("SRC MAC"),
+                            "hostname": entry.get("Hostname"),
                             "device_serial": device_serial,
                             "report_id": report_id,
                         }
