@@ -149,7 +149,10 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
     consolidated_report = []
     print("Processing NAT and DHCP data for matching...")
 
-    if livenx_nat_data:
+    # Make a dictionary by address for quick retrieval
+    lease_dict = {lease.get('address'): (lease['hardware'], lease['client_hostname']) for lease in infoblox_leases}
+
+    if livenx_nat_data and lease_dict:
         csv_reader = csv.DictReader(livenx_nat_data)
         for i, nat_entry in enumerate(csv_reader):
             # Normalize column names to match LiveNX header variants
@@ -170,7 +173,10 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
             print(f"Entry {i}: Src IP - {src_ip}, Mapped Src IP - {nat_ip}, Dst IP - {dst_ip}")
 
             # Look for matching MAC address from DHCP leases
-            mac_address, hostname = next(((lease['hardware'], lease['client_hostname']) for lease in infoblox_leases if lease.get('address') == src_ip), (None, None))
+            mac_address, hostname = lease_dict.get(src_ip, (None, None))
+
+            if not mac_address:
+                continue
 
             # Debug MAC address match
             print(f"Matched MAC Address for Src IP {src_ip}: {mac_address}")
