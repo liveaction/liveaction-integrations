@@ -79,7 +79,7 @@ def test_script_with_mock_infoblox_api(monkeypatch):
     original_get = requests.get
 
     def fake_get(url,  *args, **kwargs):
-        if "/wapi/" in url and "/lease?" in url:            
+        if "/wapi/" in url and "/lease" in url:            
             response = requests.models.Response()
             response.status_code = 200
                 
