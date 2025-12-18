@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 import runpy
-
+import random
 import requests
 
 
@@ -65,13 +65,15 @@ def test_script_with_mock_infoblox_api(monkeypatch):
  
     Note: It will run infinite due to main script polling
     """
-    mock_response = [
-        {"address": "146.112.255.155", "hardware": "aa:bb:cc:dd:ee:ff", "client_hostname":"host146.name"},
-        {"address": "10.164.0.147", "hardware": "14:72:33:44:55:66", "client_hostname":"host147.name"},
-        {"address": "10.164.0.113", "hardware": "11:32:33:44:55:66", "client_hostname":"host113.name"},
-        {"address": "10.164.0.88", "hardware": "88:22:33:44:55:66", "client_hostname":"host88.name"},
-        {"address": "10.164.0.101", "hardware": "10:12:33:44:55:66", "client_hostname":"host101.name"}
-    ]
+    mock_response = {
+        "result": [
+            {"address": "146.112.255.155" },
+            {"address": "10.164.0.147", "hardware": "14:72:33:44:55:66" },
+            {"address": "10.164.0.113", "hardware": "11:32:33:44:55:66", "client_hostname":"host113.name"},
+            {"address": "10.164.0.88", "hardware": "88:22:33:44:55:66", "client_hostname":"host88.name"},
+            {"address": "10.164.0.101", "hardware": "10:12:33:44:55:66", "client_hostname":"host101.name"}
+        ]
+    }
    
     # Save original requests.get
     original_get = requests.get
@@ -80,6 +82,13 @@ def test_script_with_mock_infoblox_api(monkeypatch):
         if "/wapi/" in url and "/lease?" in url:            
             response = requests.models.Response()
             response.status_code = 200
+                
+            # Randomly add next page id for pagination
+            if random.randint(1,10) % 2 == 0:
+                mock_response["next_page_id"] = "abcdef"
+            else:
+                mock_response.pop("next_page_id", None)
+
             # Set the _content as bytes
             response._content = json.dumps(mock_response).encode('utf-8')
             return response            

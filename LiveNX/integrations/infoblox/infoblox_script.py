@@ -103,26 +103,47 @@ def get_infoblox(infoblox_host, infoblox_username, infoblox_password):
     wapi_version = '2.2'
     wapi_url = f'https://{infoblox_host}/wapi/v{wapi_version}'
     leases_url = f'{wapi_url}/lease?_return_fields=address,hardware,client_hostname&_max_results=1000'
-
-    infoblox_leases = []
-    try:
-        print("Requesting DHCP lease data from Infoblox...")
-        response = requests.get(leases_url, auth=(infoblox_username, infoblox_password), verify=False, timeout=30)
-
-        # Check the response status and print detailed logs
-        print(f"Infoblox Response Status: {response.status_code}")
-        if response.status_code == 200:
-            infoblox_leases = response.json()
-            print(f"Infoblox returned {len(infoblox_leases)} leases.")
-            print("Sample Infoblox Lease Data (First 3):")
-            print(infoblox_leases[:3])  # Print first 3 leases for debugging
-        else:
-            print(f"Error fetching Infoblox data: Status {response.status_code}, Content: {response.text}")
-            infoblox_leases = []
-    except requests.exceptions.RequestException as e:
-        print(f"Error pulling from Infoblox: {e}")
-        infoblox_leases = []
     
+    page_id = None
+    max_results = 1000
+
+    infoblox_leases = []    
+    try:
+        while True:
+            params = {
+                "_paging": 1,
+                "_return_as_object": 1,
+                "_max_results": max_results,
+                "_return_fields": "address,hardware,client_hostname"
+            }
+
+            if page_id:
+                params["_page_id"] = page_id
+
+            print("Requesting DHCP lease data from Infoblox...")
+            response = requests.get(leases_url, params=params, auth=(infoblox_username, infoblox_password), verify=False, timeout=30)
+
+            # Check the response status and print detailed logs
+            print(f"Infoblox Response Status: {response.status_code}")
+            if response.status_code == 200:
+                data =  response.json()
+                leases = data.get("result", [])
+                infoblox_leases.extend(leases)
+                print(f"Infoblox returned {len(leases)} lease(s) in current attempt.")
+                page_id = data.get("next_page_id")
+                if not page_id:
+                    break
+                
+            else:
+                print(f"Error fetching Infoblox data: Status {response.status_code}, Content: {response.text}")
+                break            
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Error pulling from Infoblox: {e}")        
+    
+    if infoblox_leases:
+        print(f"Total leases: {len(infoblox_leases)}\nSample Infoblox Lease Data (First 3):")
+        print(infoblox_leases[:3])  # Print first 3 leases for debugging
     return infoblox_leases
 
 def normalize_key(key):
@@ -150,7 +171,9 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
     print("Processing NAT and DHCP data for matching...")
 
     # Make a dictionary by address for quick retrieval
-    lease_dict = {lease.get('address'): (lease['hardware'], lease['client_hostname']) for lease in infoblox_leases}
+    lease_dict = {address: (hardware, lease.get('client_hostname')) 
+                  for lease in infoblox_leases 
+                  if (address := lease.get('address')) and (hardware := lease.get('hardware'))}
 
     if livenx_nat_data and lease_dict:
         csv_reader = csv.DictReader(livenx_nat_data)
