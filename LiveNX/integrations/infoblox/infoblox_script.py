@@ -101,8 +101,7 @@ def get_infoblox(infoblox_host, infoblox_username, infoblox_password):
 
     # Infoblox API details
     wapi_version = '2.2'
-    wapi_url = f'https://{infoblox_host}/wapi/v{wapi_version}'
-    leases_url = f'{wapi_url}/lease?_return_fields=address,hardware,client_hostname&_max_results=1000'
+    leases_url = f'https://{infoblox_host}/wapi/v{wapi_version}/lease'
     
     page_id = None
     max_results = 1000
