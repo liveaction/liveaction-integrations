@@ -13,7 +13,12 @@ import re
 from clickhouse_driver import Client
 
 local_logger = logging.getLogger(__name__)
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, 
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+INIT_DURATION_IN_SECONDS = 60  # use to fetch data first time based on the duration
+MAX_ITEMS_TO_PRINT = 3
 
 # Suppress HTTPS warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -55,26 +60,26 @@ def connect_with_tls(host, port, user, password, database, ca_certs='/path/to/ca
 def pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial):
     # Construct the LiveNX API URL
     livenx_nat_report_url = f'https://{livenx_host}:8093/v1/reports/flow/{report_id}/runAggregation.csv?startTime={start_time}&endTime={end_time}&deviceSerial={device_serial}'
-    print(f"Constructed URL: {livenx_nat_report_url}")
+    local_logger.debug(f"Constructed URL: {livenx_nat_report_url}")
 
     livenx_nat_data = []
 
     # Step 1: Pull NAT data from LiveNX as CSV
     headers = {'Accept': '*/*', 'Authorization': f'Bearer {livenx_token}'}
     try:
-        print("Requesting NAT data from LiveNX...")
+        local_logger.info("Requesting NAT data from LiveNX...")
         livenx_response = requests.get(livenx_nat_report_url, headers=headers, verify=False, timeout=30)
 
         # Check the response status and print detailed logs
-        print(f"LiveNX Response Status: {livenx_response.status_code}")
+        local_logger.info(f"LiveNX Response Status: {livenx_response.status_code}")
         if livenx_response.status_code == 200:
-            print("LiveNX data fetched successfully.")
-            print("LiveNX Response Content (First 500 chars):")
-            print(livenx_response.text[:500])  # Print a portion to check content format
+            local_logger.info("LiveNX data fetched successfully.")
+            local_logger.debug("LiveNX Response Content (First 500 chars):")
+            local_logger.debug(livenx_response.text[:500])  # Print a portion to check content format
 
             # Check if the response contains data (empty CSV check)
             if not livenx_response.text.strip():
-                print("LiveNX response contains no data.")
+                local_logger.info("LiveNX response contains no data.")
                 livenx_nat_data = []
             else:
                 # Split the response text into lines and check the length of the data
@@ -83,15 +88,15 @@ def pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, r
                 while raw_lines and raw_lines[0].strip().lower() == "top analysis":
                     raw_lines = raw_lines[1:]
                 livenx_nat_data = raw_lines
-                print(f"Parsed LiveNX data into {len(livenx_nat_data)} lines.")
+                local_logger.debug(f"Parsed LiveNX data into {len(livenx_nat_data)} lines.")
                 if len(livenx_nat_data) < 2:  # There should be at least a header line and one data line
-                    print("LiveNX CSV has no data rows.")
+                    local_logger.debug("LiveNX CSV has no data rows.")
                     livenx_nat_data = []
         else:
-            print(f"Error fetching LiveNX data: Status {livenx_response.status_code}, Content: {livenx_response.text}")
+            local_logger.error(f"Error fetching LiveNX data: Status {livenx_response.status_code}, Content: {livenx_response.text}")
             livenx_nat_data = []
     except requests.exceptions.RequestException as e:
-        print(f"Error pulling from LiveNX: {e}")
+        local_logger.error(f"Error pulling from LiveNX: {e}")
         livenx_nat_data = []
 
     return livenx_nat_data
@@ -119,30 +124,30 @@ def get_infoblox(infoblox_host, infoblox_username, infoblox_password):
             if page_id:
                 params["_page_id"] = page_id
 
-            print("Requesting DHCP lease data from Infoblox...")
+            local_logger.debug("Requesting DHCP lease data from Infoblox...")
             response = requests.get(leases_url, params=params, auth=(infoblox_username, infoblox_password), verify=False, timeout=30)
 
             # Check the response status and print detailed logs
-            print(f"Infoblox Response Status: {response.status_code}")
+            local_logger.debug(f"Infoblox Response Status: {response.status_code}")
             if response.status_code == 200:
                 data =  response.json()
                 leases = data.get("result", [])
                 infoblox_leases.extend(leases)
-                print(f"Infoblox returned {len(leases)} lease(s) in current attempt.")
+                local_logger.info(f"Infoblox returned {len(leases)} lease(s) in current attempt.")
                 page_id = data.get("next_page_id")
                 if not page_id:
                     break
                 
             else:
-                print(f"Error fetching Infoblox data: Status {response.status_code}, Content: {response.text}")
+                local_logger.error(f"Error fetching Infoblox data: Status {response.status_code}, Content: {response.text}")
                 break            
             
     except requests.exceptions.RequestException as e:
-        print(f"Error pulling from Infoblox: {e}")        
+        local_logger.error(f"Error pulling from Infoblox: {e}")        
     
     if infoblox_leases:
-        print(f"Total leases: {len(infoblox_leases)}\nSample Infoblox Lease Data (First 3):")
-        print(infoblox_leases[:3])  # Print first 3 leases for debugging
+        local_logger.info(f"Total leases: {len(infoblox_leases)}")
+        local_logger.debug(f"\nSample Infoblox Lease Data (First {MAX_ITEMS_TO_PRINT}):\n {infoblox_leases[:MAX_ITEMS_TO_PRINT]}")  # Print first 3 leases for debugging
     return infoblox_leases
 
 def normalize_key(key):
@@ -167,7 +172,7 @@ def pick(entry, candidates):
 def process_consolidation(livenx_nat_data, infoblox_leases):
     # Step 3: Match NAT IPs with DHCP leases and create a combined report
     consolidated_report = []
-    print("Processing NAT and DHCP data for matching...")
+    local_logger.debug("Processing NAT and DHCP data for matching...")
 
     # Make a dictionary by address for quick retrieval
     lease_dict = {address: (hardware, lease.get('client_hostname')) 
@@ -190,18 +195,16 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
                     'mapped_dst_ip_addr',
                 ],
             )
-
-            # Debug NAT entry content
-            print(f"Entry {i}: Src IP - {src_ip}, Mapped Src IP - {nat_ip}, Dst IP - {dst_ip}")
-
+            
             # Look for matching MAC address from DHCP leases
             mac_address, hostname = lease_dict.get(src_ip, (None, None))
 
+            if i< MAX_ITEMS_TO_PRINT:
+                # Debug NAT entry content (For First 3)
+                local_logger.debug(f"Entry {i}: Src IP - {src_ip}, Mapped Src IP - {nat_ip}, Dst IP - {dst_ip} MAC - {mac_address}")
+
             if not mac_address:
                 continue
-
-            # Debug MAC address match
-            print(f"Matched MAC Address for Src IP {src_ip}: {mac_address}")
 
             # Pack everything into a report
             report_entry = {
@@ -215,9 +218,9 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
 
     # Step 4: Check if any data was processed
     if not consolidated_report:
-        print("No matching entries found between NAT and DHCP data.")
+        local_logger.info("No matching entries found between NAT and DHCP data.")
     else:
-        print(f"Found {len(consolidated_report)} matching entries.")
+        local_logger.info(f"Found {len(consolidated_report)} matching entries.")
 
     return consolidated_report
 
@@ -255,7 +258,7 @@ def ensure_clickhouse_table(client, database, table_name):
 
 def write_records_to_clickhouse(client, database, table_name, records):
     if not records:
-        print("No records to insert into ClickHouse for this interval.")
+        local_logger.info("No records to insert into ClickHouse for this interval.")
         return
 
     safe_db = sanitize_identifier(database)
@@ -282,12 +285,12 @@ def write_records_to_clickhouse(client, database, table_name, records):
             )
         )
     client.execute(insert_sql, payload)
-    print(f"Wrote {len(payload)} record(s) to ClickHouse table `{safe_db}`.`{safe_table}`.")
+    local_logger.info(f"Wrote {len(payload)} record(s) to ClickHouse table `{safe_db}`.`{safe_table}`.")
 
 
 def main(args):
     ## trace input arguments
-    local_logger.info(args)
+    local_logger.debug(args)
 
     # Assign variables from arguments
     livenx_host = args.livenx_host
@@ -336,16 +339,18 @@ def main(args):
 
         ensure_clickhouse_table(client, clickhouse_database, clickhouse_table)
     else:
-        print("ClickHouse configuration not provided; results will be printed to stdout only.")
+        local_logger.info("ClickHouse configuration not provided; results will be printed to stdout only.")
 
     poll_interval_seconds = max(1, int(args.poll_interval_seconds))
 
     try:
-        while True:
-            loop_started = time.time()
+
+        loop_started = int(time.time() *1000)  # current timestamp
+        start_time = loop_started - (INIT_DURATION_IN_SECONDS * 1000) 
+        end_time = loop_started
+
+        while True:            
             try:
-                end_time = int(loop_started * 1000)
-                start_time = end_time - (60 * 1000)  # last minute
 
                 livenx_nat_data = pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
                 infoblox_leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
@@ -354,6 +359,9 @@ def main(args):
                 window_start_dt = datetime.utcfromtimestamp(start_time / 1000)
                 window_end_dt = datetime.utcfromtimestamp(end_time / 1000)
                 polled_at = datetime.utcnow()
+
+                local_logger.info("\n" + ("-"*100) + f"\nStart: {window_start_dt.isoformat()} End: {window_end_dt.isoformat()}\n" + "-"*100)
+
                 records = []
                 for entry in consolidated:
                     records.append(
@@ -374,16 +382,27 @@ def main(args):
                 if client:
                     write_records_to_clickhouse(client, clickhouse_database, clickhouse_table, records)
                 else:
-                    print(json.dumps(records, default=str, indent=2))
+                    local_logger.debug(json.dumps(records[:MAX_ITEMS_TO_PRINT], default=str, indent=2)) # print first 3 records
             except Exception as exc:
                 local_logger.exception("Error during polling loop: %s", exc)
 
-            elapsed = time.time() - loop_started
+            elapsed = time.time() - end_time / 1000
             sleep_for = max(0, poll_interval_seconds - elapsed)
-            print(f"Sleeping for {sleep_for:.1f} seconds before next poll.")
-            time.sleep(sleep_for)
+
+            local_logger.info("\n" + ("="*100) + f"\nTotal duration: {elapsed:.1f} seconds\n" + 
+                  f"LiveNX records: {len(livenx_nat_data)}, Infoblox leases: {len(infoblox_leases)}\n" +
+                  f"Consolidated records: {len(consolidated)}\n" + "="*100)
+
+            if sleep_for > 0:
+                local_logger.info(f"Sleeping for {sleep_for:.1f} seconds before next poll.")
+                time.sleep(sleep_for)
+
+            start_time = end_time + 1
+            end_time = int(time.time() *1000)  # current timestamp
+
+
     except KeyboardInterrupt:
-        print("Polling stopped by user.")
+        local_logger.error("Polling stopped by user.")
     finally:
         if client:
             client.disconnect()
