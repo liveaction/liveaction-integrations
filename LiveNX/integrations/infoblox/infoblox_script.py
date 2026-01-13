@@ -59,7 +59,7 @@ def connect_with_tls(host, port, user, password, database, ca_certs='/path/to/ca
 
 def pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial):
     # Construct the LiveNX API URL
-    livenx_nat_report_url = f'https://{livenx_host}:8093/v1/reports/flow/{report_id}/runAggregation.csv?startTime={start_time}&endTime={end_time}&deviceSerial={device_serial}'
+    livenx_nat_report_url = f'https://{livenx_host}:8093/v1/reports/flow/{report_id}/runAggregation.csv?startTime={start_time}&endTime={end_time}&topAnalysisDisplayType=raw&deviceSerial={device_serial}'
     local_logger.debug(f"Constructed URL: {livenx_nat_report_url}")
 
     livenx_nat_data = []
