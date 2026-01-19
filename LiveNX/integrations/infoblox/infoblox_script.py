@@ -169,10 +169,17 @@ def pick(entry, candidates):
     return None
 
 
-def process_consolidation(livenx_nat_data, infoblox_leases):
+def process_consolidation(livenx_nat_data, infoblox_leases, trace_info):
     # Step 3: Match NAT IPs with DHCP leases and create a combined report
     consolidated_report = []
     local_logger.debug("Processing NAT and DHCP data for matching...")
+
+    trace_src_ip = None
+    trace_dst_ip = None
+    if trace_info:
+        trace_src_ip = trace_info.get('trace_src_ip')
+        trace_dst_ip = trace_info.get('trace_dst_ip')
+         
 
     # Make a dictionary by address for quick retrieval
     lease_dict = {address: (hardware, lease.get('client_hostname')) 
@@ -202,6 +209,21 @@ def process_consolidation(livenx_nat_data, infoblox_leases):
             if i< MAX_ITEMS_TO_PRINT:
                 # Debug NAT entry content (For First 3)
                 local_logger.debug(f"Entry {i}: Src IP - {src_ip}, Mapped Src IP - {nat_ip}, Dst IP - {dst_ip} MAC - {mac_address}")
+
+            if trace_info:
+                match = False
+                if trace_src_ip and trace_dst_ip:
+                    if trace_src_ip == src_ip and trace_dst_ip == dst_ip:
+                        match = True                        
+                elif trace_src_ip:
+                    if trace_src_ip == src_ip:
+                        match = True  
+                elif trace_dst_ip:
+                    if trace_dst_ip == dst_ip:
+                        match = True                  
+                if match:
+                    local_logger.info(f"***** TRACE Entry: Src IP - {src_ip}, Mapped Src IP - {nat_ip}, Dst IP - {dst_ip} MAC - {mac_address}")
+                
 
             if not mac_address:
                 continue
@@ -309,6 +331,8 @@ def main(args):
     clickhouse_cacerts = args.clickhouse_cacerts or os.getenv("CLICKHOUSE_CACERTS", "/path/to/ca.pem")
     clickhouse_certfile = args.clickhouse_certfile or os.getenv("CLICKHOUSE_CERTFILE", "/etc/clickhouse-server/cacerts/ca.crt")
     clickhouse_keyfile = args.clickhouse_keyfile or os.getenv("CLICKHOUSE_KEYFILE", "/etc/clickhouse-server/cacerts/ca.key")
+    trace_src_ip = args.trace_src_ip
+    trace_dst_ip = args.trace_dst_ip
 
     required_api_fields = {
         "livenx_host": livenx_host,
@@ -319,6 +343,8 @@ def main(args):
     missing_api = [key for key, value in required_api_fields.items() if not value]
     if missing_api:
         raise ValueError(f"Missing required LiveNX API configuration: {', '.join(missing_api)}")
+
+    trace_info = {'trace_src_ip': trace_src_ip, 'trace_dst_ip': trace_dst_ip } if trace_src_ip or trace_dst_ip else None
 
     clickhouse_enabled = all([clickhouse_host, clickhouse_username, clickhouse_password])
     client = None
@@ -354,7 +380,7 @@ def main(args):
 
                 livenx_nat_data = pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
                 infoblox_leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
-                consolidated = process_consolidation(livenx_nat_data, infoblox_leases)
+                consolidated = process_consolidation(livenx_nat_data, infoblox_leases, trace_info)
 
                 window_start_dt = datetime.utcfromtimestamp(start_time / 1000)
                 window_end_dt = datetime.utcfromtimestamp(end_time / 1000)
@@ -427,6 +453,8 @@ if __name__ == "__main__":
     parser.add_argument("--clickhouse_certfile", help="Path to ClickHouse client cert (or set CLICKHOUSE_CERTFILE)")
     parser.add_argument("--clickhouse_keyfile", help="Path to ClickHouse client key (or set CLICKHOUSE_KEYFILE)")
     parser.add_argument("--poll_interval_seconds", default=60, type=int, help="Polling interval in seconds. Default: 60")
-
+    parser.add_argument("--trace_src_ip", help="Src IP to trace")
+    parser.add_argument("--trace_dst_ip", help="Dst IP to trace")
+    
     args = parser.parse_args()
     main(args)
