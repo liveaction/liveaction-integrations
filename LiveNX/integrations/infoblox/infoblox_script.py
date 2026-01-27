@@ -19,6 +19,10 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 
 INIT_DURATION_IN_SECONDS = 60  # use to fetch data first time based on the duration
 MAX_ITEMS_TO_PRINT = 3
+MIN_TOTAL_POLL_DURATION_IN_SECONDS = 60
+
+MAX_LIVENX_RETRY_ATTEMPTS = 5
+LIVENX_REPORT_RESULTS_LIMIT = 100000
 
 # Suppress HTTPS warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -100,6 +104,121 @@ def pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, r
         livenx_nat_data = []
 
     return livenx_nat_data
+
+
+def setup_LiveNX_flow_limit(livenx_host, livenx_token, report_results_limit):
+    # To setup LiveNX Report Results Limit     
+    livenx_limit_url = f'https://{livenx_host}:8093/v1/reports/flow/limit'
+    headers = {'Accept': '*/*', 'Authorization': f'Bearer {livenx_token}'}
+    body =  {
+                "maxReturnSize" : report_results_limit
+            }
+    try:
+        livenx_response = requests.put(livenx_limit_url, headers=headers, json=body, verify=False, timeout=30)
+        if livenx_response.status_code == 200:
+            queue_response = livenx_response.json()
+            limit = queue_response.get('maxReturnSize')
+            local_logger.info(f"LiveNX report results limit = {limit} is setup successfully.")
+            return True, queue_response
+        else:
+            local_logger.error(f"Unable to setup LiveNX report limit: {livenx_response.text}")
+            return False, livenx_response.text
+    except Exception as e:
+        local_logger.error(f"Error on report limit from LiveNX: {e}")
+        return False, str(e)
+
+
+def setup_LiveNX_queue(livenx_host, livenx_token, start_time, end_time, report_id, device_serial):
+    # To setup Top analysis report queue
+    livenx_nat_report_url = f'https://{livenx_host}:8093/v1/reports/queue'
+    local_logger.debug(f"Constructed URL: {livenx_nat_report_url}")
+
+    headers = {'Accept': '*/*', 'Authorization': f'Bearer {livenx_token}'}
+    body =  {
+     "name": "Top Analysis for Infoblox",
+     "reports":[
+         {
+                "reportId": {
+                    "category": "flow",
+                    "id": report_id
+                },
+                "parameters": {
+                    "interface": "All Interfaces",
+                    "displayFilter": "No Display Filtering",
+                    "direction": "both",
+                    "flowType": "basic",
+                    "topAnalysisDisplayType": "raw",
+                    "executionType": "aggregation",
+                    "flexSearch": "",
+                    "shouldWaitForDnsResolution": False,
+                    "useFlowReportLimit": True,
+                    "deviceSerial": device_serial,
+                    "startTime": start_time,
+                    "endTime": end_time
+                },
+                "reportName": "Report-1",
+                "reportDescription": None
+            }
+        ]
+    }
+    try:
+        livenx_response = requests.post(livenx_nat_report_url, headers=headers, json=body, verify=False, timeout=30)
+        if livenx_response.status_code == 200:
+            local_logger.debug("LiveNX Response Content (First 500 chars):")
+            local_logger.debug(livenx_response.text[:500])  # Print a portion to check content format
+            queue_response = livenx_response.json()
+            return True, queue_response
+        else:
+            local_logger.error(f"Unable to setup LiveNX queue: {livenx_response.text}")
+            return False, livenx_response.text
+    except Exception as e:
+        local_logger.error(f"Error pulling from LiveNX: {e}")
+        return False, str(e)
+    
+
+def pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, start_time, end_time, report_id, device_serial):      
+        
+        livenx_nat_data = []
+    
+        local_logger.info("Requesting NAT data from LiveNX...")
+        queue_status, queue_response = setup_LiveNX_queue(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
+        
+        if queue_status:           
+            job_id = queue_response.get('jobId')
+            job_info = queue_response.get('jobInfo')
+            local_logger.info(f"LiveNX queue job id: {job_id}")
+            if job_info:
+                headers = {'Accept': '*/*', 'Authorization': f'Bearer {livenx_token}'}   
+
+                result_url = job_info.get('result') + "/csv"
+
+                for i in range(MAX_LIVENX_RETRY_ATTEMPTS):
+                    result_response = requests.get(result_url, headers=headers, verify=False, timeout=30)
+                    if result_response.status_code == 400:
+                        local_logger.info(f"Retry attempt-{i}: Waiting for LiveNX data")
+                        time.sleep(5)  # Sleep for 5 seconds
+                        continue
+                    else:
+                        break
+                if result_response.status_code == 200:
+            
+                    # Check if the response contains data (empty CSV check)
+                    if not result_response.text.strip():
+                        local_logger.info("LiveNX response contains no data.")
+                        livenx_nat_data = []
+                    else:
+                        # Split the response text into lines and check the length of the data
+                        raw_lines = result_response.text.splitlines()
+                        # Some LiveNX responses prepend "Top Analysis" before the CSV header; drop it if present (can repeat)
+                        while raw_lines and raw_lines[0].strip().lower() == "top analysis":
+                            raw_lines = raw_lines[1:]
+                        livenx_nat_data = raw_lines
+                        local_logger.info(f"LiveNX Job {job_id} repsonse: {len(livenx_nat_data)} lines.")
+                        if len(livenx_nat_data) < 2:  # There should be at least a header line and one data line
+                            local_logger.debug("LiveNX CSV has no data rows.")
+                            livenx_nat_data = []
+        return livenx_nat_data
+
 
 # Step 2: Grab Infoblox DHCP leases
 def get_infoblox(infoblox_host, infoblox_username, infoblox_password):
@@ -369,6 +488,9 @@ def main(args):
 
     poll_interval_seconds = max(1, int(args.poll_interval_seconds))
 
+    # Setup LiveNX Report Results Limit
+    setup_LiveNX_flow_limit(livenx_host, livenx_token, LIVENX_REPORT_RESULTS_LIMIT)
+
     try:
 
         loop_started = int(time.time() *1000)  # current timestamp
@@ -378,7 +500,7 @@ def main(args):
         while True:            
             try:
 
-                livenx_nat_data = pull_nat_data_from_LiveNX(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
+                livenx_nat_data = pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
                 infoblox_leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
                 consolidated = process_consolidation(livenx_nat_data, infoblox_leases, trace_info)
 
@@ -452,7 +574,7 @@ if __name__ == "__main__":
     parser.add_argument("--clickhouse_cacerts", help="Path to ClickHouse CA certs (or set CLICKHOUSE_CACERTS)")
     parser.add_argument("--clickhouse_certfile", help="Path to ClickHouse client cert (or set CLICKHOUSE_CERTFILE)")
     parser.add_argument("--clickhouse_keyfile", help="Path to ClickHouse client key (or set CLICKHOUSE_KEYFILE)")
-    parser.add_argument("--poll_interval_seconds", default=60, type=int, help="Polling interval in seconds. Default: 60")
+    parser.add_argument("--poll_interval_seconds", default=60, type=int, help="Polling interval in seconds.")
     parser.add_argument("--trace_src_ip", help="Src IP to trace")
     parser.add_argument("--trace_dst_ip", help="Dst IP to trace")
     
