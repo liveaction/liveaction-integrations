@@ -167,7 +167,7 @@
                 }
               ],
               "groupBy": [],
-              "limit": 1000,
+              "limit": 10000,
               "meta": {},
               "mode": "list",
               "orderBy": [],
@@ -177,7 +177,7 @@
           },
           "pluginVersion": "4.10.2",
           "queryType": "table",
-          "rawSql": "SELECT polled_at, src_ip, mapped_src_ip, dst_ip, src_mac, hostname, device_serial, report_id FROM \"default\".\"infoblox_nat_dhcp\" WHERE \n( \n  (('${SRC_IP}' == '' OR '${SRC_IP}' == src_ip) AND src_ip != '') \nAND (('${DST_IP}' == '' OR '${DST_IP}' == dst_ip) AND dst_ip != '')  \nAND (('${MAPPED_SRC_IP}' == '' OR '${MAPPED_SRC_IP}' == mapped_src_ip) AND mapped_src_ip != '')\nAND (('${HOSTNAME}' == '' OR '${HOSTNAME}' == hostname) AND hostname != '')   \nAND (('${DEVICE_SERIAL}' == '' OR '${DEVICE_SERIAL}' == device_serial) AND device_serial != '')   \nAND (('${SRC_MAC}' == '' OR '${SRC_MAC}' == src_mac) AND src_mac != '') \nAND $__timeFilter(polled_at)) \nORDER BY polled_at DESC LIMIT 1000",
+          "rawSql": "SELECT polled_at, src_ip, mapped_src_ip, dst_ip, src_mac, hostname, device_serial, report_id FROM \"default\".\"infoblox_nat_dhcp\" WHERE \n( \n  (('${SRC_IP}' == '' OR src_ip LIKE '${SRC_IP}%') AND src_ip != '') \nAND (('${DST_IP}' == '' OR  dst_ip LIKE '${DST_IP}%' ) AND dst_ip != '')  \nAND (('${MAPPED_SRC_IP}' == '' OR mapped_src_ip LIKE '${MAPPED_SRC_IP}%') AND mapped_src_ip != '')\nAND (('${HOSTNAME}' == '' OR hostname LIKE '${HOSTNAME}%' ) AND hostname != '')   \nAND (('${DEVICE_SERIAL}' == '' OR device_serial LIKE '${DEVICE_SERIAL}%') AND device_serial != '')   \nAND (('${SRC_MAC}' == '' OR src_mac LIKE '${SRC_MAC}%') AND src_mac != '') \nAND $__timeFilter(polled_at)) \nORDER BY polled_at DESC LIMIT 10000",
           "refId": "A"
         }
       ],
