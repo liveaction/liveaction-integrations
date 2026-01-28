@@ -57,6 +57,36 @@ def test_pull_nat_data_from_LiveNX_skips_top_analysis_line(monkeypatch):
     # Response has two leading "Top Analysis" lines; one is from the fixture and one we preprended in the test.
     assert len(data) == len(original_lines) - 1
 
+def test_generate_time_ranges():
+
+    # Check Normal Sequence
+    ranges = script.generate_time_ranges(10, 90, 25)    
+    assert ranges[0][0] == 10 and ranges[0][1] == 34
+    assert ranges[1][0] == 35 and ranges[1][1] == 59
+    assert ranges[2][0] == 60 and ranges[2][1] == 84
+    assert ranges[-1][0] == 85 and ranges[-1][1] == 90
+
+    # Check with no interval
+    ranges = script.generate_time_ranges(10, 90, 0)
+    assert len(ranges) == 1
+    assert ranges[0][0] == 10 and ranges[0][1] == 90
+
+    # Check with higher interval
+    ranges = script.generate_time_ranges(10, 90, 100)
+    assert len(ranges) == 1
+    assert ranges[0][0] == 10 and ranges[0][1] == 90
+
+    # Check with real timestamp
+    loop_started = 1769594014101 
+    start_time = 1769594014101 - (10 * 1000) 
+    end_time = loop_started
+
+    ranges = script.generate_time_ranges(start_time, end_time, 600)    
+    print(ranges)
+    assert ranges[0][0] == start_time
+    assert ranges[-1][1] == end_time
+
+
 
 
 def test_script_with_mock_infoblox_api(monkeypatch):

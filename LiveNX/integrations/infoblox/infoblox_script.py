@@ -19,7 +19,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 
 INIT_DURATION_IN_SECONDS = 60  # use to fetch data first time based on the duration
 MAX_ITEMS_TO_PRINT = 3
-MIN_TOTAL_POLL_DURATION_IN_SECONDS = 60
+LIVENX_POLL_INTERVAL_IN_SECONDS = 0  # 0 for no specific poll
 
 MAX_LIVENX_RETRY_ATTEMPTS = 5
 LIVENX_REPORT_RESULTS_LIMIT = 100000
@@ -180,13 +180,13 @@ def pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, start_time, end_t
         
         livenx_nat_data = []
     
-        local_logger.info("Requesting NAT data from LiveNX...")
+        local_logger.info(f"{start_time}-{end_time}: Requesting NAT data from LiveNX...")
         queue_status, queue_response = setup_LiveNX_queue(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
         
         if queue_status:           
             job_id = queue_response.get('jobId')
             job_info = queue_response.get('jobInfo')
-            local_logger.info(f"LiveNX queue job id: {job_id}")
+            local_logger.info(f"{start_time}-{end_time}: LiveNX queue job id: {job_id}")
             if job_info:
                 headers = {'Accept': '*/*', 'Authorization': f'Bearer {livenx_token}'}   
 
@@ -195,7 +195,7 @@ def pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, start_time, end_t
                 for i in range(MAX_LIVENX_RETRY_ATTEMPTS):
                     result_response = requests.get(result_url, headers=headers, verify=False, timeout=30)
                     if result_response.status_code == 400:
-                        local_logger.info(f"Retry attempt-{i}: Waiting for LiveNX data")
+                        local_logger.info(f"{start_time}-{end_time}: Retry attempt-{i+1}: Waiting for LiveNX data")
                         time.sleep(5)  # Sleep for 5 seconds
                         continue
                     else:
@@ -204,7 +204,7 @@ def pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, start_time, end_t
             
                     # Check if the response contains data (empty CSV check)
                     if not result_response.text.strip():
-                        local_logger.info("LiveNX response contains no data.")
+                        local_logger.info(f"{start_time}-{end_time}: LiveNX response contains no data.")
                         livenx_nat_data = []
                     else:
                         # Split the response text into lines and check the length of the data
@@ -213,7 +213,7 @@ def pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, start_time, end_t
                         while raw_lines and raw_lines[0].strip().lower() == "top analysis":
                             raw_lines = raw_lines[1:]
                         livenx_nat_data = raw_lines
-                        local_logger.info(f"LiveNX Job {job_id} repsonse: {len(livenx_nat_data)} lines.")
+                        local_logger.info(f"{start_time}-{end_time}: LiveNX Job {job_id} repsonse: {len(livenx_nat_data)} lines.")
                         if len(livenx_nat_data) < 2:  # There should be at least a header line and one data line
                             local_logger.debug("LiveNX CSV has no data rows.")
                             livenx_nat_data = []
@@ -429,6 +429,26 @@ def write_records_to_clickhouse(client, database, table_name, records):
     local_logger.info(f"Wrote {len(payload)} record(s) to ClickHouse table `{safe_db}`.`{safe_table}`.")
 
 
+def generate_time_ranges(start, end, interval):
+    """To generate intermediate time ranges with the given interval"""
+    
+    if interval == 0:
+        return [(start, end)]
+
+    ranges = []
+    current = start
+
+    while current + interval - 1 < end:
+        next_value = current + interval -1
+        ranges.append((current, next_value))
+        current = next_value + 1
+
+    # handle the final range if end is not reached exactly
+    if current <= end:
+        ranges.append((current, end))
+
+    return ranges
+
 def main(args):
     ## trace input arguments
     local_logger.debug(args)
@@ -499,38 +519,44 @@ def main(args):
 
         while True:            
             try:
-
-                livenx_nat_data = pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, start_time, end_time, report_id, device_serial)
                 infoblox_leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
-                consolidated = process_consolidation(livenx_nat_data, infoblox_leases, trace_info)
 
                 window_start_dt = datetime.utcfromtimestamp(start_time / 1000)
                 window_end_dt = datetime.utcfromtimestamp(end_time / 1000)
-                polled_at = datetime.utcnow()
-
                 local_logger.info("\n" + ("-"*100) + f"\nStart: {window_start_dt.isoformat()} End: {window_end_dt.isoformat()}\n" + "-"*100)
 
-                records = []
-                for entry in consolidated:
-                    records.append(
-                        {
-                            "polled_at": polled_at,
-                            "window_start": window_start_dt,
-                            "window_end": window_end_dt,
-                            "src_ip": entry.get("SRC IP (private)"),
-                            "mapped_src_ip": entry.get("Mapped (NAT) IP"),
-                            "dst_ip": entry.get("DST IP (public)"),
-                            "src_mac": entry.get("SRC MAC"),
-                            "hostname": entry.get("Hostname"),
-                            "device_serial": device_serial,
-                            "report_id": report_id,
-                        }
-                    )
+                total_livenx_records = 0
+                total_consolidated_records = 0
+                interval = LIVENX_POLL_INTERVAL_IN_SECONDS * 1000
+                time_ranges = generate_time_ranges(start_time, end_time, interval)
+                for time_range in time_ranges:
+                    livenx_nat_data = pull_nat_data_from_LiveNX_async(livenx_host, livenx_token, time_range[0], time_range[1], report_id, device_serial)
+                    consolidated = process_consolidation(livenx_nat_data, infoblox_leases, trace_info)                    
+                    polled_at = datetime.utcnow()                    
+                    
+                    total_livenx_records += len(livenx_nat_data)
+                    total_consolidated_records += len(consolidated)
+                    records = []
+                    for entry in consolidated:
+                        records.append(
+                            {
+                                "polled_at": polled_at,
+                                "window_start": window_start_dt,
+                                "window_end": window_end_dt,
+                                "src_ip": entry.get("SRC IP (private)"),
+                                "mapped_src_ip": entry.get("Mapped (NAT) IP"),
+                                "dst_ip": entry.get("DST IP (public)"),
+                                "src_mac": entry.get("SRC MAC"),
+                                "hostname": entry.get("Hostname"),
+                                "device_serial": device_serial,
+                                "report_id": report_id,
+                            }
+                        )
 
-                if client:
-                    write_records_to_clickhouse(client, clickhouse_database, clickhouse_table, records)
-                else:
-                    local_logger.debug(json.dumps(records[:MAX_ITEMS_TO_PRINT], default=str, indent=2)) # print first 3 records
+                    if client:
+                        write_records_to_clickhouse(client, clickhouse_database, clickhouse_table, records)
+                    else:
+                        local_logger.debug(json.dumps(records[:MAX_ITEMS_TO_PRINT], default=str, indent=2)) # print first 3 records
             except Exception as exc:
                 local_logger.exception("Error during polling loop: %s", exc)
 
@@ -538,8 +564,8 @@ def main(args):
             sleep_for = max(0, poll_interval_seconds - elapsed)
 
             local_logger.info("\n" + ("="*100) + f"\nTotal duration: {elapsed:.1f} seconds\n" + 
-                  f"LiveNX records: {len(livenx_nat_data)}, Infoblox leases: {len(infoblox_leases)}\n" +
-                  f"Consolidated records: {len(consolidated)}\n" + "="*100)
+                  f"LiveNX records: {total_livenx_records}, Infoblox leases: {len(infoblox_leases)}\n" +
+                  f"Consolidated records: {total_consolidated_records}\n" + "="*100)
 
             if sleep_for > 0:
                 local_logger.info(f"Sleeping for {sleep_for:.1f} seconds before next poll.")
