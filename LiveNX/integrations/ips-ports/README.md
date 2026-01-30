@@ -48,6 +48,75 @@ Example:
 192.0.2.0/24 ExamplePartner 12.5
 ```
 
+Sample file (`B2B_NETWORK_FILE_PATH`):
+
+```
+192.0.2.0/24 ExamplePartner 12.5
+198.51.100.0/24 AnotherPartner 8
+203.0.113.0/25 LegacyPartner #N/A
+```
+
+## Output JSON format
+
+`OUTPUT_JSON_FILE` contains the `summaryData` array from the LiveNX report
+results. Each element is a record with a `data` list; the script reads specific
+indexes (source/destination IPs and ports, plus average bit rate).
+
+Sample (abbreviated) `OUTPUT_JSON_FILE`:
+
+```
+[
+  {
+    "data": [
+      { "value": "user-a" },
+      { "value": "user-b" },
+      { "value": "10.0.0.10" },
+      { "value": "site-a" },
+      { "value": 443 },
+      { "value": "203.0.113.25" },
+      { "value": "site-b" },
+      { "value": 8443 },
+      { "value": "TCP" },
+      { "value": "0" },
+      { "value": "app-name" },
+      { "value": 120 },
+      { "value": 98000 },
+      { "value": 700 },
+      { "value": 12.345 }
+    ]
+  }
+]
+```
+
+Note: The exact fields and ordering in `data` are determined by the LiveNX
+report configuration. This script uses `data[2]`, `data[4]`, `data[5]`,
+`data[7]`, and `data[14]`.
+
+Field meanings (based on the report layout used by this script):
+
+```
+Index  Field              Notes
+-----  -----------------  -----------------------------
+0      source_username    String
+1      destination_user   String
+2      source_ip          IP string (letters stripped)
+3      source_site        String
+4      source_port        Integer or numeric string
+5      destination_ip     IP string (letters stripped)
+6      destination_site   String
+7      destination_port   Integer or numeric string
+8      protocol           String (e.g., TCP)
+9      dscp               String/number
+10     app_name           String
+11     total_flows        Integer
+12     total_bytes        Integer
+13     total_packets      Integer
+14     average_bit_rate   Float, rounded to 3 decimals
+15     packet_rate        Float
+16     peak_bit_rate      Float
+17     peak_packet_rate   Float
+```
+
 ## Usage
 
 From the repository root:
