@@ -40,10 +40,16 @@ B2B_NETWORK_FILE_PATH = os.getenv("B2B_NETWORK_FILE_PATH", "/opt/app/Files/B2B_N
 LOG_FILE_PATH = os.getenv('LOG_FILE_PATH','/opt/app/Files/LiveNX_B2Bl200.log')
 OUTPUT_JSON_FILE = os.getenv('OUTPUT_JSON_FILE','/opt/app/Files/LiveNX_Results_l200.json')
 FLEX_CRITERIA = os.getenv('FLEX_CRITERIA', flex_search)
+REPORT_DATA_SOURCE = os.getenv('REPORT_DATA_SOURCE', 'flowstore')
 
 
 syslog_server = os.getenv('SYSLOG_SERVER')  # SYSLOG/LOGGING # Remote Syslog Server
 syslog_port = os.getenv('SYSLOG_PORT')  # SYSLOG/LOGGING # Remote Syslog Server
+
+# Validate report data source
+report_data_source = REPORT_DATA_SOURCE.strip().lower()
+if report_data_source not in ("flowstore", "flowstore_v2"):
+    raise ValueError("REPORT_DATA_SOURCE must be 'flowstore' or 'flowstore_v2'")
 
 smtp_server = ""  # SMTP/LOGGING # SMTP Server
 from_email = ""  # SMTP/LOGGING # SMTP source email address
@@ -125,6 +131,7 @@ ReportJson = {
             "flowType":"basic",
             "interface":"All Interfaces",
             "flexSearch":flex.rstrip(' |'),
+            "reportDataSource":report_data_source,
             "sortBy":"BIT_RATE",
             "binDuration":"5min",
             "useFlowReportLimit":true

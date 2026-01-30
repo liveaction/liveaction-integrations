@@ -31,6 +31,7 @@ missing, you will be prompted interactively.
 - `LOG_FILE_PATH` (default: `/opt/app/Files/LiveNX_B2Bl200.log`)
 - `OUTPUT_JSON_FILE` (default: `/opt/app/Files/LiveNX_Results_l200.json`)
 - `FLEX_CRITERIA` (default: built-in flex search string)
+- `REPORT_DATA_SOURCE` (default: `flowstore`): `flowstore` or `flowstore_v2`
 - `SYSLOG_SERVER` (optional): remote syslog host
 - `SYSLOG_PORT` (optional): remote syslog port
 
