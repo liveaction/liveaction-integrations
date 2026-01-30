@@ -150,7 +150,9 @@ def map_netld_inventory_to_livenx_inventory(netld_inventory):
     livenx_devices = []
     nodes = get_livenx_nodes()
     node = None
+    print(nodes)
     for node in nodes:
+      print(node)
       if node['ipAddress'] == liveNxTargetIP:
         nodeid = node['id']
         break
