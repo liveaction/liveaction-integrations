@@ -35,7 +35,12 @@ python infoblox_script.py \
 ```
 
 The script:
-- polls LiveNX NAT data and Infoblox DHCP leases once per minute
+- polls Infoblox DHCP leases and LiveNX NAT data serially. 
+- gets Infoblox DHCP lease information by calling APIs. By default, it returns 1000 records. If there are more records, it calls the API with pagination until all records are fetched.
+- uses LiveNX asynchronous API to get the data:
+https://bluecatnetworks.atlassian.net/wiki/spaces/LA/pages/11658075195/21.1.0+Configure+Limit+of+Flow+Reports
+When the app starts, it sets flow logs limit to 100K by default. You can update it via `LIVENX_REPORT_RESULTS_LIMIT` parameter in the script. Also, there is one more parameter: `LIVENX_POLL_INTERVAL_IN_SECONDS`. If it is zero, the LiveNX report queue is called with poll start and end time. In case of large data, it is tuned with less interval. The API is called for the configured interval multiple times sequentially until the poll duration is covered.
+- consolidates LiveNX data with Infoblox data.
 - writes matches into ClickHouse (default database `inventory_db`, table `infoblox_nat_dhcp`) when ClickHouse connection info is provided
 - otherwise prints the per-poll records to stdout
 - creates the database/table if they do not already exist when ClickHouse is enabled
@@ -63,3 +68,5 @@ Set ClickHouse connection values via flags or environment variables: `CLICKHOUSE
 | `--clickhouse_certfile` | Client cert for ClickHouse TLS | No |
 | `--clickhouse_keyfile` | Client key for ClickHouse TLS | No |
 | `--poll_interval_seconds` | Poll interval in seconds (default 60) | No |
+| `--trace_src_ip` | source ip to trace(troubleshooting purpose only) | No |
+| `--trace_dst_ip` | destination ip to trace(troubleshooting purpose only) | No |
