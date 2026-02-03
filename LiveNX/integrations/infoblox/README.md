@@ -37,9 +37,7 @@ python infoblox_script.py \
 The script:
 - polls Infoblox DHCP leases and LiveNX NAT data serially. 
 - gets Infoblox DHCP lease information by calling APIs. By default, it returns 1000 records. If there are more records, it calls the API with pagination until all records are fetched.
-- uses LiveNX asynchronous API to get the data:
-https://bluecatnetworks.atlassian.net/wiki/spaces/LA/pages/11658075195/21.1.0+Configure+Limit+of+Flow+Reports
-When the app starts, it sets flow logs limit to 100K by default. You can update it via `LIVENX_REPORT_RESULTS_LIMIT` parameter in the script. Also, there is one more parameter: `LIVENX_POLL_INTERVAL_IN_SECONDS`. If it is zero, the LiveNX report queue is called with poll start and end time. In case of large data, it is tuned with less interval. The API is called for the configured interval multiple times sequentially until the poll duration is covered.
+- uses LiveNX asynchronous API to get the data. When the app starts, it sets flow logs limit to 100K by default. You can update it via `LIVENX_REPORT_RESULTS_LIMIT` parameter in the script. Also, there is one more parameter: `LIVENX_POLL_INTERVAL_IN_SECONDS`. If it is zero, the LiveNX report queue is called with poll start and end time. In case of large data, it is tuned with less interval. The API is called for the configured interval multiple times sequentially until the poll duration is covered.
 - consolidates LiveNX data with Infoblox data.
 - writes matches into ClickHouse (default database `inventory_db`, table `infoblox_nat_dhcp`) when ClickHouse connection info is provided
 - otherwise prints the per-poll records to stdout
