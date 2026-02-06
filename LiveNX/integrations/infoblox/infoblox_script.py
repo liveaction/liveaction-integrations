@@ -133,6 +133,10 @@ def setup_LiveNX_queue(livenx_host, livenx_token, start_time, end_time, report_i
     livenx_nat_report_url = f'https://{livenx_host}:8093/v1/reports/queue'
     local_logger.debug(f"Constructed URL: {livenx_nat_report_url}")
 
+    # LiveNX doesn't accept same start and end time
+    if start_time == end_time:
+        start_time = end_time - 1
+
     headers = {'Accept': '*/*', 'Authorization': f'Bearer {livenx_token}'}
     body =  {
      "name": "Top Analysis for Infoblox",
