@@ -33,6 +33,7 @@ global B2B  # Variable for B2B List
 
 Result = "" # Used later during the API Requests to LiveNX to store the "Resport Queing Details"
 B2B = {}  # Used for B2B Mapping
+B2B_IPs = {} # Used for IP Network mapping
 flex_search = "flow.protocol!=ESP & flow.protocol!=UDP & tag=b2b & ( flow.dstIp=72.0.0.0/5 | flow.dstIp=192.0.0.0/5 | flow.dstIp=62.0.0.0/7 | flow.dstIp=64.0.0.0/7 ) "
 
 B2B_NETWORK_FILE_PATH = os.getenv("B2B_NETWORK_FILE_PATH", "/opt/app/Files/B2B_Networks_l200.txt")
@@ -328,17 +329,47 @@ def process_data(record):
     #peak_packet_rate = record['data'][17]['value']
     enabled = True
     if enabled:
-        for _, [name, threshold, network] in B2B.items():
-            # if ipaddress.IPv4Address(destination_ip) in ipaddress.IPv4Network(network) and source_port not in [443,8443,1521,1433,1363,1364]:
-            if ipaddress.IPv4Address(destination_ip) in network:
-                if "#N/A" in threshold: #Looks for thresholds that didn't match up during my excel/vlookup
-                    logging.info("The Destination IP address {} matches {} but the threshold is invalid".format(destination_ip, name))
-                elif (bit_rate > float(threshold)): #Compares bit rate to the integer contained in threshold
-                    logging.info("Source IP {}, Source Port {}, Destination IP {}, Destination Port {}, Average Bit Rate {}, has exceeded the {} threshold of {}".format(source_ip, source_port, destination_ip, destination_port, bit_rate, name, threshold))
-                else:
-                    logging.info("The IP address {} matches {} using ports {} to {} but the bitrate {} was not in violation of the threshold {}".format(destination_ip, name, source_port, destination_port, bit_rate, threshold))
+        b2b_network = B2B_IPs.get(destination_ip)
+        if b2b_network:
+
+            if b2b_network == '-':  # IP is not available in the network list
+                return
+
+            [name, threshold, network] = B2B.get(b2b_network)
+
+            # Log the results
+            log_result(source_ip, source_port, destination_ip, destination_port, bit_rate, name, threshold)
+        else:
+            is_found = False
+            for _, [name, threshold, network] in B2B.items():
+                # if ipaddress.IPv4Address(destination_ip) in ipaddress.IPv4Network(network) and source_port not in [443,8443,1521,1433,1363,1364]:
+                if ipaddress.IPv4Address(destination_ip) in network:
+                    
+                    # set IP network mapping
+                    B2B_IPs[destination_ip] = str(network)
+
+                    # Log the results
+                    log_result(source_ip, source_port, destination_ip, destination_port, bit_rate, name, threshold)
+
+                    is_found = True
+                    break
+            
+            if not is_found:
+                # No IP found in the network
+                B2B_IPs[destination_ip] = '-'
     else:
         print("Logging is disabled")
+
+def log_result(source_ip, source_port, destination_ip, destination_port, bit_rate, name, threshold):
+
+    if "#N/A" in threshold: #Looks for thresholds that didn't match up during my excel/vlookup
+        logging.info("The Destination IP address {} matches {} but the threshold is invalid".format(destination_ip, name))
+    elif (bit_rate > float(threshold)): #Compares bit rate to the integer contained in threshold
+        logging.info("Source IP {}, Source Port {}, Destination IP {}, Destination Port {}, Average Bit Rate {}, has exceeded the {} threshold of {}".format(source_ip, source_port, destination_ip, destination_port, bit_rate, name, threshold))
+    else:
+        logging.info("The IP address {} matches {} using ports {} to {} but the bitrate {} was not in violation of the threshold {}".format(destination_ip, name, source_port, destination_port, bit_rate, threshold))
+
+
 
 def threading(records):
     for record in records:
