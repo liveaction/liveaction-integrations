@@ -3,7 +3,7 @@ charset-normalizer==3.3.2
 idna==3.7
 python-dotenv==1.0.1
 requests==2.32.3
-urllib3==2.2.2
+urllib3==2.6.3
 pytest==8.3.2
 clickhouse-driver==0.2.9
 netmiko==4.5.0
