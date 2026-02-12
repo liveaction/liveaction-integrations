@@ -1,0 +1,66 @@
+!
+! NUMBER       - replace with VLAN / interface number to monitor
+! LiveAction Server - replace with your LiveNX server IP
+! loopback0    - replace with your preferred source interface (must have IP)
+!
+feature netflow
+!
+flow timeout 10
+!
+flow exporter LIVEACTION-FLOWEXPORTER
+  description exportversion9
+  destination <LiveAction Server>
+  transport udp 2055
+  source loopback0
+  version 9
+    template data timeout 60
+    option exporter-stats timeout 600
+    option interface-table timeout 600
+!
+flow record LIVEACTION-FLOWRECORD
+  match ipv4 source address
+  match ipv4 destination address
+  match ip protocol
+  match transport source-port
+  match transport destination-port
+  match input interface
+  match flow direction
+  collect transport tcp flags
+  collect counter bytes
+  collect counter packets
+  collect timestamp sys-uptime first
+  collect timestamp sys-uptime last
+  collect ip version
+!
+flow monitor LIVEACTION-FLOWMONITOR
+  description for L3/SVI and routed physical interfaces
+  record LIVEACTION-FLOWRECORD
+  exporter LIVEACTION-FLOWEXPORTER
+!
+flow monitor LIVEACTION-FLOWMONITOR-BRIDGED-MODE
+  description for VLAN configuration mode on switched-only vlans
+  record LIVEACTION-FLOWRECORD
+  exporter LIVEACTION-FLOWEXPORTER
+!
+! === L3 ROUTED INTERFACES (physical) ===
+! Repeat for each L3 routed interface you want to monitor
+! These must be "no switchport" interfaces with an IP address
+!
+interface Ethernet <NUMBER>
+  ip flow monitor LIVEACTION-FLOWMONITOR input
+!
+! === SVI INTERFACES (routed traffic only on FX2) ===
+! Repeat for each SVI you want to monitor
+!
+interface Vlan <NUMBER>
+  ip flow monitor LIVEACTION-FLOWMONITOR input
+!
+! === VLAN BRIDGED MODE (switched traffic only on FX2) ===
+! Repeat for each VLAN where you need L2 switched traffic visibility
+! Pair this with the SVI config above for full coverage
+!
+vlan configuration <NUMBER>
+  ip flow monitor LIVEACTION-FLOWMONITOR-BRIDGED-MODE input
+!
+end
+!
