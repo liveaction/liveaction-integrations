@@ -41,10 +41,14 @@ def load_env_file(dotenv_path, override=False):
 load_env_file(SCRIPT_DIR.joinpath('.env'), True)
 import ips_ports_new
 
-LIVENX_DATA = None
+LIVENX_JSON_DATA = None
+LIVENX_CSV_DATA = None
 
-with open(SCRIPT_DIR.joinpath("mock_LiveNX_data.json")) as config_file:
-    LIVENX_DATA = json.load(config_file)
+with open(SCRIPT_DIR.joinpath("tests", "mock_LiveNX_data.json")) as config_file:
+    LIVENX_JSON_DATA = json.load(config_file)
+
+with open(SCRIPT_DIR.joinpath("tests", "mock_LiveNX_data.csv")) as csv_file:
+    LIVENX_CSV_DATA = csv_file.readlines()
 
 def test_old_script():
     '''To test old script file'''
@@ -55,7 +59,7 @@ def test_old_script():
     ip_ports = importlib.import_module("ips-ports") 
 
     start_time = time.time()
-    ip_ports.threading(LIVENX_DATA)
+    ip_ports.threading(LIVENX_JSON_DATA)
     print(f"**** OLD processing time =  {round(time.time() - start_time, 2)} seconds")
 
 
@@ -70,7 +74,7 @@ def test_new_script():
     ips_ports_new.setup_logger()
     
     start_time = time.time()
-    ips_ports_new.threading(LIVENX_DATA)
+    ips_ports_new.processing(LIVENX_CSV_DATA)
     print(f"**** NEW processing time =  {round(time.time() - start_time, 2)} seconds")
 
 
@@ -96,7 +100,7 @@ def test_new_process():
     #------------------------
     # Setup logger
     #------------------------
-    ips_ports_new.LOG_FILE_PATH = ips_ports_new.LOG_FILE_PATH.replace('LiveNX_B2Bl200', 'test')
+    ips_ports_new.LOG_FILE_PATH = ips_ports_new.LOG_FILE_PATH.replace('LiveNX_B2Bl200', 'tests/test')
     if os.path.exists(ips_ports_new.LOG_FILE_PATH):
         os.remove(ips_ports_new.LOG_FILE_PATH) 
 
@@ -105,139 +109,35 @@ def test_new_process():
     #------------------------
     # Setup LiveNX data
     #------------------------
-    def generate_livenx_record(src_ip, dst_ip, bit_rate):
-        record = {
-        "key": [
-            {
-                "infoElementId": "100000008c229fa4",
-                "value": src_ip
-            },
-            {
-                "infoElementId": "100000008c229fa5",
-                "value": dst_ip
-            },
-            {
-                "infoElementId": "1000000000000004",
-                "value": "TCP"
-            },
-            {
-                "infoElementId": "1000000000000007",
-                "value": 443
-            },
-            {
-                "infoElementId": "100000000000000b",
-                "value": 58203
-            },
-            {
-                "infoElementId": "10000000000000c3",
-                "value": "0 (BE)"
-            },
-            {
-                "infoElementId": "1000000000000060",
-                "value": "https"
-            },
-            {
-                "infoElementId": "100000008c2297d0",
-                "value": "Unknown"
-            }
-        ],
-        "data": [
-            {
-                "infoElementId": "100000008c2298a4",
-                "value": "null"
-            },
-            {
-                "infoElementId": "100000008c2298a5",
-                "value": "null"
-            },
-            {
-                "infoElementId": "100000008c229fa4",
-                "value": src_ip
-            },
-            {
-                "infoElementId": "100000008c2297cf",
-                "value": "Internet"
-            },
-            {
-                "infoElementId": "1000000000000007",
-                "value": 443
-            },
-            {
-                "infoElementId": "100000008c229fa5",
-                "value": dst_ip
-            },
-            {
-                "infoElementId": "100000008c2297d0",
-                "value": "Unknown"
-            },
-            {
-                "infoElementId": "100000000000000b",
-                "value": 58203
-            },
-            {
-                "infoElementId": "1000000000000004",
-                "value": "TCP"
-            },
-            {
-                "infoElementId": "10000000000000c3",
-                "value": "0 (BE)"
-            },
-            {
-                "infoElementId": "1000000000000060",
-                "value": "https"
-            },
-            {
-                "infoElementId": "100000000000002a",
-                "value": 40
-            },
-            {
-                "infoElementId": "1000000000000017",
-                "value": 96534560
-            },
-            {
-                "infoElementId": "1000000000000018",
-                "value": 77960
-            },
-            {
-                "infoElementId": "100000008c22977d",
-                "value": bit_rate
-            },
-            {
-                "infoElementId": "100000008c22977e",
-                "value": 21.655555555555555
-            },
-            {
-                "infoElementId": "100000008c229846",
-                "value": 257424.0
-            },
-            {
-                "infoElementId": "100000008c229847",
-                "value": 25.0
-            }
-            ]
-        } 
-        return record
+    def generate_livenx_csv_records(data):
 
-    TEST_LIVENX_DATA = [
-        generate_livenx_record('56.207.109.25', '10.164.0.101', 101),
-        generate_livenx_record('56.207.109.25', '10.164.0.24', 50),
-        generate_livenx_record('56.207.109.25', '56.207.109.91', 21),
-        generate_livenx_record('56.207.109.91', '10.164.0.101', 31),
-        generate_livenx_record('56.207.109.25', '56.207.109.91', 25)
-    ]
+        rows = ['Src IP Addr,Src Site,Src Port,Dst IP Addr,Dst Site,Dst Port,Protocol,DSCP,Application,Total Flows (flows),Total Bytes (bytes),Total Packets (packets),Average Bit Rate (Kbps),Average Packet Rate (pps),Peak Bit Rate (bps),Peak Packet Rate (pps)']
+        for (src_ip, dst_ip, bit_rate) in data:
+             rows.append(f'{src_ip},Internet,443,{dst_ip},Unknown,"57,840",TCP,0 (BE),https,37,"8,974,646","13,912",{bit_rate},3.86,"25,872.85",5.01')
+        return rows
+
+    TEST_LIVENX_DATA = generate_livenx_csv_records([
+        ('56.207.109.25', '10.164.0.101', 101),
+        ('56.207.109.25', '10.164.0.24', 50),
+        ('56.207.109.25', '56.207.109.91', 21),
+        ('56.207.109.91', '10.164.0.101', 31),
+        ('56.207.109.25', '56.207.109.91', 25)
+    ])
     
     #------------------------
     # Process data
     #------------------------
-    ips_ports_new.threading(TEST_LIVENX_DATA)
+    ips_ports_new.processing(TEST_LIVENX_DATA)
 
 
     #------------------------
     # Check Logs
     #------------------------
     with open(ips_ports_new.LOG_FILE_PATH) as logs:
-        for log in logs:
-            print(log)
+        lines = logs.readlines()
+        assert len(lines) == 3
+        assert " has exceeded the thirdHost threshold " in lines[0]
+        assert "was not in violation of the threshold" in lines[1]
 
         
 

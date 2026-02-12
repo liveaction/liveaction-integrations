@@ -1,6 +1,7 @@
 #############################################################
 ############ Import the required modules/packages ###########
 #############################################################
+import csv
 import json # For handling/parsing JSON data
 import string
 import time  # So we can set delays in retrieving report results while waiting for report to complete
@@ -38,7 +39,7 @@ flex_search = "flow.protocol!=ESP & flow.protocol!=UDP & tag=b2b & ( flow.dstIp=
 
 B2B_NETWORK_FILE_PATH = os.getenv("B2B_NETWORK_FILE_PATH", "/opt/app/Files/B2B_Networks_l200.txt")
 LOG_FILE_PATH = os.getenv('LOG_FILE_PATH','/opt/app/Files/LiveNX_B2Bl200.log')
-OUTPUT_JSON_FILE = os.getenv('OUTPUT_JSON_FILE','/opt/app/Files/LiveNX_Results_l200.json')
+OUTPUT_FILE = os.getenv('OUTPUT_JSON_FILE','/opt/app/Files/LiveNX_Results_l200.json')
 FLEX_CRITERIA = os.getenv('FLEX_CRITERIA', flex_search)
 REPORT_DATA_SOURCE = os.getenv('REPORT_DATA_SOURCE', 'flowstore')
 
@@ -240,7 +241,7 @@ def livenx_report_api_request():
 
     # Retrieve the Report's Results URL from the Response
     # global Result
-    Result = response.json()['jobInfo']['result']
+    Result = response.json()['jobInfo']['result'] + "/csv"
     print(Result)
 
 
@@ -250,24 +251,23 @@ def livenx_report_api_request():
     ###################################################################################################
 
     # Check report completion status and loop until the report is ready
-    complete = ""
-    while not complete:
+    
+    while True:
         try:
             # Result = "https://sedemo2.liveaction.com:8093/v1/reports/results/f314134e-3c85-4dc1-bb7a-1b70889cbbcf"
 
             # Submit API request to LiveNX to retrieve status and eventually completed report
             response = requests.get(url=Result, headers=headers, verify=False)
-            if response.json()['userMessage']:
+            if response.status_code == 400:
                 print("Report's still processing...")
                 time.sleep(1)
-        except KeyError as error:  # Once the report is ready proceed
-            complete = True
-        except:
-            print("Default Exception")
-            pass
+            else:
+                break
+        except Exception as err:
+            print("LiveNX API Error: " + str(err))
+            break
 
     return response
-
 
 def save_api_response(response):
     ###########################################################
@@ -284,49 +284,44 @@ def save_api_response(response):
     '''
     #
     # New and Improved
-    summarydata = response.json()['results'][0]['results'][0]['summary']['summaryData']  # Grab only the data we need
+    summarydata = response.text  # Grab only the data we need
     enabled = True
     if enabled:
         write_time = time.time()
         print('Writing "Optimized" API results to Files/LiveNX_Results.json')
-        output_file = open(OUTPUT_JSON_FILE, 'w')
-        json.dump(summarydata, output_file, indent=4)
-        output_file.close()
-        print(f'Data successfully written to file api.json.  Total "write" time took {round(time.time() - write_time, 2)}')
+        with open(OUTPUT_FILE, 'w') as output_file:
+            output_file.write(summarydata)
+        print(f'Data successfully written to file.  Total "write" time took {round(time.time() - write_time, 2)}')
     else:
         print("Writing JSON to disk is disabled")
 
-def process_data(record):
-
-    # Now that the report's JSON has been downloaded into the "response" varriable as a mix of JSON(dictionaries) and Lists
-    # ...we need to find just the data we need.  In this case we're processing the summaryData.
-    # ....Because there is a mix of dictionaries and lists, we're alternating between calling dictionary "key names" and numerical list ids.
-    # ....Read this is "From the JSON loaded in the Response variable, grab the list associated with the "results" key...
-    # .......Then from the selected list of dictionarys, retrieve the list stored is it's "result" key.  Then from the...
-    # ........retrieved list of dictionarys, retrieve and iterate through the "summary" key and it's subkey "summaryData"
+def process_data(index, record):
 
     # Set variables and process each record so that we can create/send logs when thresholds/matches are found
 
-    #source_username = record['data'][0]['value']
-    #destination_username = record['data'][1]['value']
-    source_ip = record['data'][2]['value'].strip(
-        string.ascii_letters + string.whitespace + string.punctuation)  # Makes sure that only digits are retrieved
-    #source_site = record['data'][3]['value']
-    source_port = record['data'][4]['value']
-    destination_ip = record['data'][5]['value'].strip(
-        string.ascii_letters + string.whitespace + string.punctuation)  # Makes sure that only digits are retrieved
-    #destination_site = record['data'][6]['value']
-    destination_port = record['data'][7]['value']
-    #protocol = record['data'][8]['value']
-    #dscp = record['data'][9]['value']
-    #app_name = record['data'][10]['value']
-    #total_flows = record['data'][11]['value']
-    #total_bytes = record['data'][12]['value']
-    #total_packets = record['data'][13]['value']
-    bit_rate = round(record['data'][14]['value'], 3) # Round bitrate to two decimals
-    #packet_rate = record['data'][15]['value']
-    #peak_bit_rate = record['data'][16]['value']
-    #peak_packet_rate = record['data'][17]['value']
+    # Key names in the dictonary of CSV
+    # Src IP Addr,Src Site,Src Port,Dst IP Addr,Dst Site,Dst Port,Protocol,DSCP,Application,Total Flows (flows),Total Bytes (bytes),Total Packets (packets),Average Bit Rate (Kbps),Average Packet Rate (pps),Peak Bit Rate (bps),Peak Packet Rate (pps)
+    try:
+        source_ip = record.get('Src IP Addr')
+        if source_ip:
+            source_ip = source_ip.strip(string.ascii_letters + string.whitespace + string.punctuation)  # Makes sure that only digits are retrieved
+        else:
+            print(f'Record {index}: Source IP Not found')
+        source_port = record.get('Src Port')
+
+        destination_ip = record.get('Dst IP Addr')
+        if destination_ip:
+            destination_ip = destination_ip.strip(string.ascii_letters + string.whitespace + string.punctuation)  # Makes sure that only digits are retrieved
+        else:
+            print(f'Record {index}: Destination IP Not found')
+            return  # Skip the processing if destination IP is not available
+        destination_port = record.get('Dst Port')
+        bit_rate = round(float(record.get('Average Bit Rate (Kbps)')), 3) # Round bitrate to two decimals
+    except Exception as err:
+        print(f'Record {index} parsing error: {err}')
+        return
+
+
     enabled = True
     if enabled:
         b2b_network = B2B_IPs.get(destination_ip)
@@ -371,9 +366,11 @@ def log_result(source_ip, source_port, destination_ip, destination_port, bit_rat
 
 
 
-def threading(records):
-    for record in records:
-        process_data(record) 
+def processing(records):
+    csv_reader = csv.DictReader(records)
+    for index, record in enumerate(csv_reader):
+        process_data(index+1, record) 
+       
 
 
 def main():
@@ -388,10 +385,20 @@ def main():
 
     save_api_response(response) # Save LiveNX API results
 
-    start_time = time.time()
-    print(f"Starting to process {len(response.json()['results'][0]['results'][0]['summary']['summaryData']):,} records against {len(B2B):,} networks and thresholds for a total of {len(response.json()['results'][0]['results'][0]['summary']['summaryData']) * len(B2B):,} comparisons")
-    threading(response.json()['results'][0]['results'][0]['summary']['summaryData'])
-    print(f"Total processing time =  {round(time.time() - start_time, 2)} seconds")
+
+    if not response.text.strip():
+        print('LiveNX response contains no data.')
+    else:
+               
+        livenx_data = response.text.splitlines()
+
+        if not livenx_data or len(livenx_data) < 2:  # There should be at least a header line and one data line
+            print("LiveNX CSV has no data rows.")
+        else:
+            start_time = time.time()
+            print(f"Starting to process {len(livenx_data):,} records against {len(B2B):,} networks and thresholds for a total of {len(livenx_data) * len(B2B):,} comparisons")
+            processing(livenx_data)
+            print(f"Total processing time =  {round(time.time() - start_time, 2)} seconds")
 
     print(f'Total time for completion = {round(time.time() - script_start, 2)} seconds')
 
