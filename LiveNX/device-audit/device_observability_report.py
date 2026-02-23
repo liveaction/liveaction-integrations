@@ -240,19 +240,19 @@ base_devices AS (
 ),
 avc_flow AS (
     SELECT DeviceSerial AS serial, 1 AS has_avc_flow
-    FROM livenx_flowdb.avc_raw_dist
+    FROM livenx_flowdb.avc_entity_app_5m_dist
     WHERE time >= now() - INTERVAL {lookback_hours} HOUR
     GROUP BY serial
 ),
 basic_flow AS (
     SELECT DeviceSerial AS serial, 1 AS has_basic_flow
-    FROM livenx_flowdb.basic_raw_dist
+    FROM livenx_flowdb.basic_entity_5m_dist
     WHERE time >= now() - INTERVAL {lookback_hours} HOUR
     GROUP BY serial
 ),
 medianet_flow AS (
     SELECT DeviceSerial AS serial, 1 AS has_medianet_flow
-    FROM livenx_flowdb.medianet_raw_dist
+    FROM livenx_flowdb.medianet_entity_app_5m_dist
     WHERE time >= now() - INTERVAL {lookback_hours} HOUR
     GROUP BY serial
 ),
