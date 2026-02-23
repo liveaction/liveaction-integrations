@@ -37,7 +37,7 @@ pip install -r ../requirements.txt
 Or install directly:
 
 ```bash
-pip install clickhouse-driver
+pip install clickhouse-driver lz4 clickhouse-cityhash
 ```
 
 ## Configuration
