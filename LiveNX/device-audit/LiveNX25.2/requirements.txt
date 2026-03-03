@@ -1,0 +1,4 @@
+clickhouse-driver==0.2.5
+clickhouse-cityhash==1.0.2.5
+lz4==3.1.10
+requests==2.27.1
