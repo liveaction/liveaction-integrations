@@ -231,6 +231,8 @@ base_devices AS (
         argMax(if(DeviceAddress != '', DeviceAddress, ClientAddress), Version) AS device_ip,
         argMax(VendorName, Version) AS manufacturer,
         argMax(VendorModel, Version) AS model,
+        argMax(HostName, Version) AS host_name,
+        argMax(SystemName, Version) AS system_name,
         lower(argMax(HostName, Version)) AS hostname_lc,
         lower(argMax(SystemName, Version)) AS system_name_lc
     FROM livenx_modeldb.device_dist
@@ -351,6 +353,7 @@ config_ip_seen AS (
 )
 SELECT
     d.serial AS serial_number,
+    coalesce(nullIf(d.host_name, ''), nullIf(d.system_name, ''), d.serial) AS device_name,
     d.device_ip AS device_ip,
     d.manufacturer AS manufacturer,
     d.model AS model,
@@ -425,6 +428,7 @@ def row_to_output(row: dict[str, Any]) -> dict[str, str]:
 
     return {
         "serial_number": str(row.get("serial_number", "") or ""),
+        "device_name": str(row.get("device_name", "") or ""),
         "device_ip": str(row.get("device_ip", "") or ""),
         "manufacturer": str(row.get("manufacturer", "") or ""),
         "model": str(row.get("model", "") or ""),
@@ -441,6 +445,7 @@ def render_html(rows: list[dict[str, str]], lookback_hours: int) -> str:
     generated_at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
     headers = [
         ("serial_number", "Serial #"),
+        ("device_name", "Device Name"),
         ("device_ip", "Device IP"),
         ("manufacturer", "Manufacturer"),
         ("model", "Model"),

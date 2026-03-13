@@ -4,6 +4,7 @@ This folder contains `device_observability_report.py`, a Python script that quer
 
 The report includes:
 - Serial #
+- Device Name
 - Device IP
 - Manufacturer
 - Model
