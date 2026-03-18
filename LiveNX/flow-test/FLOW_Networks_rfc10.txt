@@ -1,0 +1,7 @@
+# Cloud providers
+10.48.0.0/14 AWS 5000000
+172.20.64.0/24 AZURE 3000000
+
+# Legacy systems
+10.0.0.0/8 LEGACY1 1
+172.22.190.0/23 LEGACY2 1
