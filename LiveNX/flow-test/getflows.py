@@ -312,7 +312,7 @@ def process_record(record, bucket, logger):
                 net["threshold"]
             )
             continue
-
+        
         if bitrate > net["threshold_val"]:
             logger.info(
                 "ALERT src=%s:%s dst=%s:%s bitrate=%s exceeded %s (%s)",
