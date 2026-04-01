@@ -1,0 +1,1134 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Network Operations Center – real-time alert overview",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 61,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "panels": [],
+      "title": "Summary",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": []
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 72
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT count() AS value\nFROM (\nSELECT\n        alert_type, device_serial, interface_name, policy,\n        argMax(resolution,     timestamp) AS ares,\n        argMax(site_display,   timestamp) AS asite,\n        argMax(device_display, timestamp) AS adevice,\n        argMax(severity_text,  timestamp) AS aseverity\n    FROM livenx_modeldb.Structured_Events\n    WHERE alert_type IN ('DEVICE_DOWN','DEVICE_MEM','DEVICE_CPU','INTERFACE_UTILIZATION','VOICE_VIDEO')\n    GROUP BY alert_type, device_serial, interface_name, policy\n    HAVING ares = false\n)\nWHERE match(asite,     '${site:pipe}')\n  AND match(adevice,   '${device:pipe}')\n  AND match(aseverity, '${severity:pipe}')\n  AND match(alert_type,'${alert_type:pipe}')",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Active Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#F2495C",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": []
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 72
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT count() AS value\nFROM (\nSELECT\n        alert_type, device_serial, interface_name, policy,\n        argMax(resolution,     timestamp) AS ares,\n        argMax(site_display,   timestamp) AS asite,\n        argMax(device_display, timestamp) AS adevice,\n        argMax(severity_text,  timestamp) AS aseverity\n    FROM livenx_modeldb.Structured_Events\n    WHERE alert_type IN ('DEVICE_DOWN','DEVICE_MEM','DEVICE_CPU','INTERFACE_UTILIZATION','VOICE_VIDEO')\n    GROUP BY alert_type, device_serial, interface_name, policy\n    HAVING ares = false\n)\nWHERE aseverity = 'Critical'\n  AND match(asite,    '${site:pipe}')\n  AND match(adevice,  '${device:pipe}')\n  AND match(alert_type,'${alert_type:pipe}')",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#FF9900",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": []
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 72
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT count() AS value\nFROM (\nSELECT\n        alert_type, device_serial, interface_name, policy,\n        argMax(resolution,     timestamp) AS ares,\n        argMax(site_display,   timestamp) AS asite,\n        argMax(device_display, timestamp) AS adevice,\n        argMax(severity_text,  timestamp) AS aseverity\n    FROM livenx_modeldb.Structured_Events\n    WHERE alert_type IN ('DEVICE_DOWN','DEVICE_MEM','DEVICE_CPU','INTERFACE_UTILIZATION','VOICE_VIDEO')\n    GROUP BY alert_type, device_serial, interface_name, policy\n    HAVING ares = false\n)\nWHERE aseverity = 'Warning'\n  AND match(asite,    '${site:pipe}')\n  AND match(adevice,  '${device:pipe}')\n  AND match(alert_type,'${alert_type:pipe}')",
+          "refId": "A"
+        }
+      ],
+      "title": "Warning",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#73BF69",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": []
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 72
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT count() AS value\nFROM (\nSELECT\n        alert_type, device_serial, interface_name, policy,\n        argMax(resolution,     timestamp) AS ares,\n        argMax(site_display,   timestamp) AS asite,\n        argMax(device_display, timestamp) AS adevice,\n        argMax(severity_text,  timestamp) AS aseverity\n    FROM livenx_modeldb.Structured_Events\n    WHERE alert_type IN ('DEVICE_DOWN','DEVICE_MEM','DEVICE_CPU','INTERFACE_UTILIZATION','VOICE_VIDEO')\n    GROUP BY alert_type, device_serial, interface_name, policy\n    HAVING ares = false\n)\nWHERE aseverity = 'Info'\n  AND match(asite,    '${site:pipe}')\n  AND match(adevice,  '${device:pipe}')\n  AND match(alert_type,'${alert_type:pipe}')",
+          "refId": "A"
+        }
+      ],
+      "title": "Info",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 10,
+      "panels": [],
+      "title": "Alert Distribution",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F2495C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Warning"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#FF9900",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Info"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#73BF69",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 6,
+      "options": {
+        "displayLabels": [
+          "name",
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT aseverity, sum(cnt) AS cnt\nFROM (\n    SELECT 'Critical' AS aseverity, 0 AS cnt\n    UNION ALL SELECT 'Warning' AS aseverity, 0 AS cnt\n    UNION ALL SELECT 'Info' AS aseverity, 0 AS cnt\n    UNION ALL\n    SELECT aseverity, count() AS cnt\n    FROM (\n        SELECT\n            alert_type, device_serial, interface_name, policy,\n            argMax(resolution,    timestamp) AS ares,\n            argMax(site_display,  timestamp) AS asite,\n            argMax(device_display,timestamp) AS adevice,\n            argMax(severity_text, timestamp) AS aseverity\n        FROM livenx_modeldb.Structured_Events\n        WHERE alert_type IN ('DEVICE_DOWN','DEVICE_MEM','DEVICE_CPU')\n        GROUP BY alert_type, device_serial, interface_name, policy\n        HAVING ares = false\n    )\n    WHERE match(asite,    '${site:pipe}')\n      AND match(adevice,  '${device:pipe}')\n      AND match(aseverity,'${severity:pipe}')\n    GROUP BY aseverity\n)\nGROUP BY aseverity\nORDER BY aseverity",
+          "refId": "A"
+        }
+      ],
+      "title": "Device Alerts by Severity (DOWN / MEM / CPU)",
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "nameField": "aseverity",
+            "valueField": "cnt"
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F2495C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Warning"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#FF9900",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Info"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#73BF69",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 7,
+      "options": {
+        "displayLabels": [
+          "name",
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT aseverity, sum(cnt) AS cnt\nFROM (\n    SELECT 'Critical' AS aseverity, 0 AS cnt\n    UNION ALL SELECT 'Warning' AS aseverity, 0 AS cnt\n    UNION ALL SELECT 'Info' AS aseverity, 0 AS cnt\n    UNION ALL\n    SELECT aseverity, count() AS cnt\n    FROM (\n        SELECT\n            alert_type, device_serial, interface_name, policy,\n            argMax(resolution,    timestamp) AS ares,\n            argMax(site_display,  timestamp) AS asite,\n            argMax(device_display,timestamp) AS adevice,\n            argMax(severity_text, timestamp) AS aseverity\n        FROM livenx_modeldb.Structured_Events\n        WHERE alert_type IN ('INTERFACE_UTILIZATION','VOICE_VIDEO')\n        GROUP BY alert_type, device_serial, interface_name, policy\n        HAVING ares = false\n    )\n    WHERE match(asite,    '${site:pipe}')\n      AND match(adevice,  '${device:pipe}')\n      AND match(aseverity,'${severity:pipe}')\n    GROUP BY aseverity\n)\nGROUP BY aseverity\nORDER BY aseverity",
+          "refId": "A"
+        }
+      ],
+      "title": "Interface & Voice Alerts by Severity",
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "nameField": "aseverity",
+            "valueField": "cnt"
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 20,
+      "panels": [],
+      "title": "Active Alert Details",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Critical": {
+                        "color": "#F2495C",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "Warning": {
+                        "color": "#FF9900",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "Info": {
+                        "color": "#73BF69",
+                        "index": 2
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "First Seen"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last Seen"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Device"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Site"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Last Seen"
+          }
+        ]
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT\n    min(timestamp)         AS first_seen,\n    max(timestamp)         AS last_seen,\n    argMax(severity_text,  timestamp) AS aseverity,\n    argMax(title,          timestamp) AS atitle,\n    argMax(device_display, timestamp) AS adevice,\n    argMax(site_display,   timestamp) AS asite,\n    argMax(message,        timestamp) AS amessage,\n    argMax(resolution,     timestamp) AS ares\nFROM livenx_modeldb.Structured_Events\nWHERE alert_type IN ('DEVICE_DOWN','DEVICE_MEM','DEVICE_CPU')\nGROUP BY alert_type, device_serial, interface_name, policy\nHAVING ares = false\n  AND match(asite,     '${site:pipe}')\n  AND match(adevice,   '${device:pipe}')\n  AND match(aseverity, '${severity:pipe}')\nORDER BY last_seen DESC\nLIMIT 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Device Alerts (DOWN / MEM / CPU)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "adevice": "Device",
+              "amessage": "Message",
+              "aseverity": "Severity",
+              "asite": "Site",
+              "atitle": "Title",
+              "first_seen": "First Seen",
+              "last_seen": "Last Seen"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Critical": {
+                        "color": "#F2495C",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "Warning": {
+                        "color": "#FF9900",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "Info": {
+                        "color": "#73BF69",
+                        "index": 2
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "First Seen"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last Seen"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Device"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Interface"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Site"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 9,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Last Seen"
+          }
+        ]
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "format": 1,
+          "rawSql": "SELECT\n    min(timestamp)         AS first_seen,\n    max(timestamp)         AS last_seen,\n    argMax(severity_text,  timestamp) AS aseverity,\n    argMax(title,          timestamp) AS atitle,\n    argMax(device_display, timestamp) AS adevice,\n    argMax(interface_name, timestamp) AS ainterface,\n    argMax(site_display,   timestamp) AS asite,\n    argMax(message,        timestamp) AS amessage,\n    argMax(resolution,     timestamp) AS ares\nFROM livenx_modeldb.Structured_Events\nWHERE alert_type IN ('INTERFACE_UTILIZATION','VOICE_VIDEO')\nGROUP BY alert_type, device_serial, interface_name, policy\nHAVING ares = false\n  AND match(asite,     '${site:pipe}')\n  AND match(adevice,   '${device:pipe}')\n  AND match(aseverity, '${severity:pipe}')\nORDER BY last_seen DESC\nLIMIT 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Interface & Voice Alerts",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "adevice": "Device",
+              "ainterface": "Interface",
+              "amessage": "Message",
+              "aseverity": "Severity",
+              "asite": "Site",
+              "atitle": "Title",
+              "first_seen": "First Seen",
+              "last_seen": "Last Seen"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 41,
+  "tags": [
+    "noc",
+    "livenx"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "includeAll": true,
+        "label": "Site",
+        "multi": true,
+        "name": "site",
+        "options": [
+          {
+            "selected": false,
+            "text": "Chicago-DC",
+            "value": "Chicago-DC"
+          },
+          {
+            "selected": false,
+            "text": "Los Angeles",
+            "value": "Los Angeles"
+          },
+          {
+            "selected": false,
+            "text": "New York",
+            "value": "New York"
+          }
+        ],
+        "query": "SELECT DISTINCT site_display FROM livenx_modeldb.Structured_Events WHERE site_display != '' ORDER BY site_display",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "PDEE91DDB90597936"
+        },
+        "includeAll": true,
+        "label": "Device",
+        "multi": true,
+        "name": "device",
+        "options": [
+          {
+            "selected": false,
+            "text": "CAT8K-BR-NY-01.ec2.internal",
+            "value": "CAT8K-BR-NY-01.ec2.internal"
+          },
+          {
+            "selected": false,
+            "text": "CAT8K-DC-CH-01",
+            "value": "CAT8K-DC-CH-01"
+          },
+          {
+            "selected": false,
+            "text": "LW-BR-LA-01",
+            "value": "LW-BR-LA-01"
+          },
+          {
+            "selected": false,
+            "text": "LW-BR-NY-01",
+            "value": "LW-BR-NY-01"
+          },
+          {
+            "selected": false,
+            "text": "LW-DC-CH-01",
+            "value": "LW-DC-CH-01"
+          }
+        ],
+        "query": "SELECT DISTINCT device_display FROM livenx_modeldb.Structured_Events WHERE device_display != '' ORDER BY device_display",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "$__all"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "includeAll": true,
+        "label": "Severity",
+        "multi": true,
+        "name": "severity",
+        "options": [
+          {
+            "selected": false,
+            "text": "Critical",
+            "value": "Critical"
+          },
+          {
+            "selected": false,
+            "text": "Warning",
+            "value": "Warning"
+          },
+          {
+            "selected": false,
+            "text": "Info",
+            "value": "Info"
+          }
+        ],
+        "query": "Critical,Warning,Info",
+        "type": "custom"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "$__all"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "includeAll": true,
+        "label": "Alert Type",
+        "multi": true,
+        "name": "alert_type",
+        "options": [
+          {
+            "selected": false,
+            "text": "DEVICE_DOWN",
+            "value": "DEVICE_DOWN"
+          },
+          {
+            "selected": false,
+            "text": "DEVICE_MEM",
+            "value": "DEVICE_MEM"
+          },
+          {
+            "selected": false,
+            "text": "DEVICE_CPU",
+            "value": "DEVICE_CPU"
+          },
+          {
+            "selected": false,
+            "text": "INTERFACE_UTILIZATION",
+            "value": "INTERFACE_UTILIZATION"
+          },
+          {
+            "selected": false,
+            "text": "VOICE_VIDEO",
+            "value": "VOICE_VIDEO"
+          }
+        ],
+        "query": "DEVICE_DOWN,DEVICE_MEM,DEVICE_CPU,INTERFACE_UTILIZATION,VOICE_VIDEO",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "NOC Dashboard",
+  "uid": "noc-dashboard-v14",
+  "version": 1
+}

@@ -1,0 +1,1001 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "LiveNX device observability — flow, SNMP, traps, syslog, configs",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 75,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "panels": [],
+      "title": "Summary",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#5794F2",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#5794F2",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT countDistinct(DeviceSerial) AS value\nFROM livenx_modeldb.device_dist\nWHERE IsDeleted = false AND DeviceSerial != ''",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Devices (modeldb)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#37872D",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#37872D",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT countDistinct(serial) AS value\nFROM (\n    SELECT device_serial AS serial FROM network_observability.avc_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    UNION DISTINCT\n    SELECT device_serial AS serial FROM network_observability.basic_ipfix_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    UNION DISTINCT\n    SELECT device_serial AS serial FROM network_observability.medianet_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n)",
+          "refId": "A"
+        }
+      ],
+      "title": "Devices With Any Flow",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#73BF69",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#73BF69",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT countDistinct(device_serial) AS value\nFROM network_observability.avc_flows_5m\nWHERE time >= now() - INTERVAL ${lookback_hours} HOUR",
+          "refId": "A"
+        }
+      ],
+      "title": "Devices With AVC Flow",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#E0B400",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#E0B400",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT countDistinct(toString(DeviceId)) AS value\nFROM livenx_snmpdb.device_metric_dist\nWHERE time >= now() - INTERVAL ${lookback_hours} HOUR",
+          "refId": "A"
+        }
+      ],
+      "title": "Devices With SNMP",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#FF9830",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#FF9830",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT count() AS value\nFROM default.otel_logs\nWHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n  AND ServiceName = 'snmptrapreceiver'",
+          "refId": "A"
+        }
+      ],
+      "title": "SNMP Trap Events",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#C4162A",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#C4162A",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT count() AS value\nFROM default.otel_logs\nWHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n  AND Body LIKE '%SYS-%'",
+          "refId": "A"
+        }
+      ],
+      "title": "Syslog Events",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 8,
+      "panels": [],
+      "title": "Signal Coverage",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "device_count"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Devices"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#5794F2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 9,
+      "options": {
+        "barRadius": 0.05,
+        "barWidth": 0.97,
+        "fillOpacity": 85,
+        "fullHighlight": false,
+        "gradientMode": "none",
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "text": {
+          "valueSize": 12
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT signal AS label, device_count AS value\nFROM (\n    SELECT 'AVC Flow' AS signal,\n           countDistinct(device_serial) AS device_count\n    FROM network_observability.avc_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    UNION ALL\n    SELECT 'Basic Flow',\n           countDistinct(device_serial)\n    FROM network_observability.basic_ipfix_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    UNION ALL\n    SELECT 'Medianet Flow',\n           countDistinct(device_serial)\n    FROM network_observability.medianet_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    UNION ALL\n    SELECT 'SNMP Metrics',\n           countDistinct(toString(DeviceId))\n    FROM livenx_snmpdb.device_metric_dist\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    UNION ALL\n    SELECT 'SNMP Traps',\n           countDistinctIf(device_key, device_key != '') AS device_count\n    FROM (\n        SELECT coalesce(\n            nullIf(toString(LogAttributes['deviceSerial']), ''),\n            nullIf(toString(ResourceAttributes['host.name']), ''),\n            nullIf(toString(ResourceAttributes['source.ip']), '')\n        ) AS device_key\n        FROM default.otel_logs\n        WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n          AND ServiceName = 'snmptrapreceiver'\n    )\n    UNION ALL\n    SELECT 'Syslog',\n           countDistinctIf(device_key, device_key != '') AS device_count\n    FROM (\n        SELECT coalesce(\n            nullIf(toString(LogAttributes['deviceSerial']), ''),\n            nullIf(toString(ResourceAttributes['host.name']), ''),\n            nullIf(toString(ResourceAttributes['source.ip']), '')\n        ) AS device_key\n        FROM default.otel_logs\n        WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n          AND Body LIKE '%SYS-%'\n    )\n    UNION ALL\n    SELECT 'Configs',\n           countDistinctIf(device_key, device_key != '') AS device_count\n    FROM (\n        SELECT coalesce(\n            nullIf(toString(LogAttributes['deviceSerial']), ''),\n            nullIf(toString(ResourceAttributes['host.name']), ''),\n            nullIf(toString(ResourceAttributes['source.ip']), '')\n        ) AS device_key\n        FROM default.otel_logs\n        WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n          AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    )\n)\nORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Devices per signal type (coverage)",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "device_count"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Devices"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#5794F2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 10,
+      "options": {
+        "barRadius": 0.05,
+        "barWidth": 0.97,
+        "fillOpacity": 85,
+        "fullHighlight": false,
+        "gradientMode": "none",
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "text": {
+          "valueSize": 12
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT highest_flow AS label, count() AS value\nFROM (\n    SELECT\n        d.DeviceSerial,\n        multiIf(\n            avc.serial != '', 'AVC',\n            med.serial != '', 'Medianet',\n            bas.serial != '', 'Basic',\n            'No Flow'\n        ) AS highest_flow\n    FROM (\n        SELECT DeviceSerial\n        FROM livenx_modeldb.device_dist\n        WHERE IsDeleted = false AND DeviceSerial != ''\n        GROUP BY DeviceSerial\n    ) d\n    LEFT JOIN (\n        SELECT device_serial AS serial FROM network_observability.avc_flows_5m\n        WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n        GROUP BY serial\n    ) avc ON avc.serial = d.DeviceSerial\n    LEFT JOIN (\n        SELECT device_serial AS serial FROM network_observability.medianet_flows_5m\n        WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n        GROUP BY serial\n    ) med ON med.serial = d.DeviceSerial\n    LEFT JOIN (\n        SELECT device_serial AS serial FROM network_observability.basic_ipfix_flows_5m\n        WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n        GROUP BY serial\n    ) bas ON bas.serial = d.DeviceSerial\n)\nGROUP BY highest_flow\nORDER BY value DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Highest flow type — device count",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 11,
+      "panels": [],
+      "title": "Device Inventory",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false,
+            "minWidth": 80
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Highest Flow Supported"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "AVC": {
+                        "color": "#37872D",
+                        "index": 0,
+                        "text": "AVC"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "Medianet": {
+                        "color": "#1F60C4",
+                        "index": 1,
+                        "text": "Medianet"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "Basic": {
+                        "color": "#E0B400",
+                        "index": 2,
+                        "text": "Basic"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "None": {
+                        "color": "#808080",
+                        "index": 3,
+                        "text": "None"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Are we collecting SNMP metrics"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Yes": {
+                        "color": "#37872D",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "No": {
+                        "color": "#808080",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Are we Receiving Traps"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Yes": {
+                        "color": "#37872D",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "No": {
+                        "color": "#808080",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Are we Receiving Logs"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Yes": {
+                        "color": "#37872D",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "No": {
+                        "color": "#808080",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Are we Receiving Configs"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Yes": {
+                        "color": "#37872D",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "No": {
+                        "color": "#808080",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 12,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Device"
+          }
+        ]
+      },
+      "pluginVersion": "12.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "WITH\nbase_devices AS (\n    SELECT\n        DeviceSerial AS serial,\n        coalesce(\n            nullIf(argMax(HostName,   Version), ''),\n            nullIf(argMax(SystemName, Version), ''),\n            DeviceSerial\n        ) AS hostname,\n        argMax(if(DeviceAddress != '', DeviceAddress, ClientAddress), Version) AS device_ip,\n        argMax(VendorName,  Version) AS manufacturer,\n        argMax(VendorModel, Version) AS model,\n        lower(argMax(HostName,   Version)) AS hostname_lc,\n        lower(argMax(SystemName, Version)) AS system_name_lc\n    FROM livenx_modeldb.device_dist\n    WHERE IsDeleted = false AND DeviceSerial != ''\n    GROUP BY DeviceSerial\n),\navc_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.avc_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    GROUP BY serial\n),\nbasic_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.basic_ipfix_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    GROUP BY serial\n),\nmedianet_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.medianet_flows_5m\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    GROUP BY serial\n),\nsnmp_metrics AS (\n    SELECT toString(DeviceId) AS serial, 1 AS v\n    FROM livenx_snmpdb.device_metric_dist\n    WHERE time >= now() - INTERVAL ${lookback_hours} HOUR\n    GROUP BY serial\n),\ntrap_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY serial HAVING serial IS NOT NULL\n),\ntrap_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\ntrap_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY ip HAVING ip IS NOT NULL\n),\nlog_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND Body LIKE '%SYS-%'\n    GROUP BY serial HAVING serial IS NOT NULL\n),\nlog_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND Body LIKE '%SYS-%'\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\nlog_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND Body LIKE '%SYS-%'\n    GROUP BY ip HAVING ip IS NOT NULL\n),\ncfg_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY serial HAVING serial IS NOT NULL\n),\ncfg_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\ncfg_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE TimestampTime >= now() - INTERVAL ${lookback_hours} HOUR\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY ip HAVING ip IS NOT NULL\n)\nSELECT\n    d.hostname          AS \"Device\",\n    d.device_ip         AS \"Device IP\",\n    d.manufacturer      AS \"Manufacturer\",\n    d.model             AS \"Model\",\n    if(arrayStringConcat(arrayFilter(x -> x != '', [\n        if(coalesce(avc.v, 0) > 0, 'AVC', ''),\n        if(coalesce(bas.v, 0) > 0, 'Basic', ''),\n        if(coalesce(med.v, 0) > 0, 'Medianet', '')\n    ]), '/') = '', 'None',\n    arrayStringConcat(arrayFilter(x -> x != '', [\n        if(coalesce(avc.v, 0) > 0, 'AVC', ''),\n        if(coalesce(bas.v, 0) > 0, 'Basic', ''),\n        if(coalesce(med.v, 0) > 0, 'Medianet', '')\n    ]), '/'))           AS \"Receiving Flow Types\",\n    multiIf(\n        coalesce(avc.v, 0) > 0, 'AVC',\n        coalesce(med.v, 0) > 0, 'Medianet',\n        coalesce(bas.v, 0) > 0, 'Basic',\n        'None'\n    )                   AS \"Highest Flow Supported\",\n    if(coalesce(snmp.v, 0) > 0, 'Yes', 'No') AS \"Are we collecting SNMP metrics\",\n    if(greatest(\n        coalesce(ts.v,  0), coalesce(th1.v, 0),\n        coalesce(th2.v, 0), coalesce(ti.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Traps\",\n    if(greatest(\n        coalesce(ls.v,  0), coalesce(lh1.v, 0),\n        coalesce(lh2.v, 0), coalesce(li.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Logs\",\n    if(greatest(\n        coalesce(cs.v,  0), coalesce(ch1.v, 0),\n        coalesce(ch2.v, 0), coalesce(ci.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Configs\"\nFROM base_devices d\nLEFT JOIN avc_flow      avc  ON avc.serial    = d.serial\nLEFT JOIN basic_flow    bas  ON bas.serial    = d.serial\nLEFT JOIN medianet_flow med  ON med.serial    = d.serial\nLEFT JOIN snmp_metrics  snmp ON snmp.serial   = d.serial\nLEFT JOIN trap_seen     ts   ON ts.serial     = d.serial\nLEFT JOIN trap_host     th1  ON th1.host_name = d.hostname_lc\nLEFT JOIN trap_host     th2  ON th2.host_name = d.system_name_lc\nLEFT JOIN trap_ip       ti   ON ti.ip         = d.device_ip\nLEFT JOIN log_seen      ls   ON ls.serial     = d.serial\nLEFT JOIN log_host      lh1  ON lh1.host_name = d.hostname_lc\nLEFT JOIN log_host      lh2  ON lh2.host_name = d.system_name_lc\nLEFT JOIN log_ip        li   ON li.ip         = d.device_ip\nLEFT JOIN cfg_seen      cs   ON cs.serial     = d.serial\nLEFT JOIN cfg_host      ch1  ON ch1.host_name = d.hostname_lc\nLEFT JOIN cfg_host      ch2  ON ch2.host_name = d.system_name_lc\nLEFT JOIN cfg_ip        ci   ON ci.ip         = d.device_ip\nORDER BY d.hostname",
+          "refId": "A"
+        }
+      ],
+      "title": "All devices — full observability coverage",
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "tags": [
+    "livenx",
+    "observability",
+    "network"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "24",
+          "value": "24"
+        },
+        "label": "Lookback (hours)",
+        "name": "lookback_hours",
+        "options": [
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "selected": true,
+            "text": "24",
+            "value": "24"
+          },
+          {
+            "selected": false,
+            "text": "48",
+            "value": "48"
+          },
+          {
+            "selected": false,
+            "text": "72",
+            "value": "72"
+          },
+          {
+            "selected": false,
+            "text": "168",
+            "value": "168"
+          }
+        ],
+        "query": "1,24,48,72,168",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "LiveNX Device Observabilityv2",
+  "uid": "livenx-device-obs-v1",
+  "version": 1
+}
