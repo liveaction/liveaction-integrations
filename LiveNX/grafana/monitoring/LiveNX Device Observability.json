@@ -429,6 +429,78 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.1.10",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 0,
+          "rawSql": "SELECT countDistinct(device_serial) AS value\nFROM network_observability.basic_ipfix_flows_5m\nWHERE $__timeFilter(time)\n  AND flow_direction NOT IN (0, 1)",
+          "refId": "A"
+        }
+      ],
+      "title": "Devices With Missing Flow Direction",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -678,6 +750,124 @@
       "type": "barchart"
     },
     {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "PDEE91DDB90597936"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false,
+            "minWidth": 80
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Flow Direction"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "#37872D",
+                        "index": 0,
+                        "text": "Ingress (0)"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "1": {
+                        "color": "#37872D",
+                        "index": 1,
+                        "text": "Egress (1)"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "255": {
+                        "color": "#FF4444",
+                        "index": 2,
+                        "text": "Not Set (255)"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Flows"
+          }
+        ]
+      },
+      "pluginVersion": "12.1.10",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "PDEE91DDB90597936"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "rawSql": "SELECT\n    d.hostname AS \"Device\",\n    d.device_ip AS \"Device IP\",\n    toString(f.flow_direction) AS \"Flow Direction\",\n    f.flow_type AS \"Flow Type\",\n    f.flows AS \"Flows\"\nFROM (\n    SELECT device_serial AS serial, flow_direction, 'Basic/sFlow' AS flow_type,\n           sum(sum_flow_count) AS flows\n    FROM network_observability.basic_ipfix_flows_5m\n    WHERE $__timeFilter(time) AND flow_direction NOT IN (0, 1)\n    GROUP BY device_serial, flow_direction\n    UNION ALL\n    SELECT device_serial, flow_direction, 'AVC',\n           sum(sum_flow_count)\n    FROM network_observability.avc_flows_5m\n    WHERE $__timeFilter(time) AND flow_direction NOT IN (0, 1)\n    GROUP BY device_serial, flow_direction\n    UNION ALL\n    SELECT device_serial, flow_direction, 'Medianet',\n           sum(sum_flow_count)\n    FROM network_observability.medianet_flows_5m\n    WHERE $__timeFilter(time) AND flow_direction NOT IN (0, 1)\n    GROUP BY device_serial, flow_direction\n) f\nLEFT JOIN (\n    SELECT DeviceSerial AS serial,\n           coalesce(nullIf(argMax(HostName, Version), ''), nullIf(argMax(SystemName, Version), ''), DeviceSerial) AS hostname,\n           argMax(if(DeviceAddress != '', DeviceAddress, ClientAddress), Version) AS device_ip\n    FROM livenx_modeldb.device_dist\n    WHERE IsDeleted = false AND DeviceSerial != ''\n    GROUP BY DeviceSerial\n) d ON d.serial = f.serial\nORDER BY f.flows DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Devices receiving flow without direction set",
+      "type": "table"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -898,6 +1088,37 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Flow Missing Direction"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Yes": {
+                        "color": "#FF4444",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "No": {
+                        "color": "#37872D",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -935,7 +1156,7 @@
           },
           "editorType": "sql",
           "format": 1,
-          "rawSql": "WITH\nbase_devices AS (\n    SELECT\n        DeviceSerial AS serial,\n        coalesce(\n            nullIf(argMax(HostName,   Version), ''),\n            nullIf(argMax(SystemName, Version), ''),\n            DeviceSerial\n        ) AS hostname,\n        argMax(if(DeviceAddress != '', DeviceAddress, ClientAddress), Version) AS device_ip,\n        argMax(VendorName,  Version) AS manufacturer,\n        argMax(VendorModel, Version) AS model,\n        lower(argMax(HostName,   Version)) AS hostname_lc,\n        lower(argMax(SystemName, Version)) AS system_name_lc\n    FROM livenx_modeldb.device_dist\n    WHERE IsDeleted = false AND DeviceSerial != ''\n    GROUP BY DeviceSerial\n),\navc_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.avc_flows_5m\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\nbasic_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.basic_ipfix_flows_5m\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\nmedianet_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.medianet_flows_5m\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\nsnmp_metrics AS (\n    SELECT toString(DeviceId) AS serial, 1 AS v\n    FROM livenx_snmpdb.device_metric_dist\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\ntrap_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY serial HAVING serial IS NOT NULL\n),\ntrap_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\ntrap_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY ip HAVING ip IS NOT NULL\n),\nlog_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND Body LIKE '%SYS-%'\n    GROUP BY serial HAVING serial IS NOT NULL\n),\nlog_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND Body LIKE '%SYS-%'\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\nlog_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND Body LIKE '%SYS-%'\n    GROUP BY ip HAVING ip IS NOT NULL\n),\ncfg_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY serial HAVING serial IS NOT NULL\n),\ncfg_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\ncfg_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY ip HAVING ip IS NOT NULL\n)\nSELECT\n    d.hostname          AS \"Device\",\n    d.device_ip         AS \"Device IP\",\n    d.manufacturer      AS \"Manufacturer\",\n    d.model             AS \"Model\",\n    if(arrayStringConcat(arrayFilter(x -> x != '', [\n        if(coalesce(avc.v, 0) > 0, 'AVC', ''),\n        if(coalesce(bas.v, 0) > 0, 'Basic', ''),\n        if(coalesce(med.v, 0) > 0, 'Medianet', '')\n    ]), '/') = '', 'None',\n    arrayStringConcat(arrayFilter(x -> x != '', [\n        if(coalesce(avc.v, 0) > 0, 'AVC', ''),\n        if(coalesce(bas.v, 0) > 0, 'Basic', ''),\n        if(coalesce(med.v, 0) > 0, 'Medianet', '')\n    ]), '/'))           AS \"Receiving Flow Types\",\n    multiIf(\n        coalesce(avc.v, 0) > 0, 'AVC',\n        coalesce(med.v, 0) > 0, 'Medianet',\n        coalesce(bas.v, 0) > 0, 'Basic',\n        'None'\n    )                   AS \"Highest Flow Supported\",\n    if(coalesce(snmp.v, 0) > 0, 'Yes', 'No') AS \"Are we collecting SNMP metrics\",\n    if(greatest(\n        coalesce(ts.v,  0), coalesce(th1.v, 0),\n        coalesce(th2.v, 0), coalesce(ti.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Traps\",\n    if(greatest(\n        coalesce(ls.v,  0), coalesce(lh1.v, 0),\n        coalesce(lh2.v, 0), coalesce(li.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Logs\",\n    if(greatest(\n        coalesce(cs.v,  0), coalesce(ch1.v, 0),\n        coalesce(ch2.v, 0), coalesce(ci.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Configs\"\nFROM base_devices d\nLEFT JOIN avc_flow      avc  ON avc.serial    = d.serial\nLEFT JOIN basic_flow    bas  ON bas.serial    = d.serial\nLEFT JOIN medianet_flow med  ON med.serial    = d.serial\nLEFT JOIN snmp_metrics  snmp ON snmp.serial   = d.serial\nLEFT JOIN trap_seen     ts   ON ts.serial     = d.serial\nLEFT JOIN trap_host     th1  ON th1.host_name = d.hostname_lc\nLEFT JOIN trap_host     th2  ON th2.host_name = d.system_name_lc\nLEFT JOIN trap_ip       ti   ON ti.ip         = d.device_ip\nLEFT JOIN log_seen      ls   ON ls.serial     = d.serial\nLEFT JOIN log_host      lh1  ON lh1.host_name = d.hostname_lc\nLEFT JOIN log_host      lh2  ON lh2.host_name = d.system_name_lc\nLEFT JOIN log_ip        li   ON li.ip         = d.device_ip\nLEFT JOIN cfg_seen      cs   ON cs.serial     = d.serial\nLEFT JOIN cfg_host      ch1  ON ch1.host_name = d.hostname_lc\nLEFT JOIN cfg_host      ch2  ON ch2.host_name = d.system_name_lc\nLEFT JOIN cfg_ip        ci   ON ci.ip         = d.device_ip\nORDER BY d.hostname",
+          "rawSql": "WITH\nbase_devices AS (\n    SELECT\n        DeviceSerial AS serial,\n        coalesce(\n            nullIf(argMax(HostName,   Version), ''),\n            nullIf(argMax(SystemName, Version), ''),\n            DeviceSerial\n        ) AS hostname,\n        argMax(if(DeviceAddress != '', DeviceAddress, ClientAddress), Version) AS device_ip,\n        argMax(VendorName,  Version) AS manufacturer,\n        argMax(VendorModel, Version) AS model,\n        lower(argMax(HostName,   Version)) AS hostname_lc,\n        lower(argMax(SystemName, Version)) AS system_name_lc\n    FROM livenx_modeldb.device_dist\n    WHERE IsDeleted = false AND DeviceSerial != ''\n    GROUP BY DeviceSerial\n),\navc_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.avc_flows_5m\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\nbasic_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.basic_ipfix_flows_5m\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\nmedianet_flow AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.medianet_flows_5m\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\nsnmp_metrics AS (\n    SELECT toString(DeviceId) AS serial, 1 AS v\n    FROM livenx_snmpdb.device_metric_dist\n    WHERE $__timeFilter(time)\n    GROUP BY serial\n),\ntrap_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY serial HAVING serial IS NOT NULL\n),\ntrap_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\ntrap_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName = 'snmptrapreceiver'\n    GROUP BY ip HAVING ip IS NOT NULL\n),\nlog_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND Body LIKE '%SYS-%'\n    GROUP BY serial HAVING serial IS NOT NULL\n),\nlog_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND Body LIKE '%SYS-%'\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\nlog_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND Body LIKE '%SYS-%'\n    GROUP BY ip HAVING ip IS NOT NULL\n),\ncfg_seen AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(LogAttributes['deviceSerial']), ''),\n        nullIf(toString(LogAttributes['sinfo.DEVICE.deviceSerial']), '')\n    ), '') AS serial, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY serial HAVING serial IS NOT NULL\n),\ncfg_host AS (\n    SELECT nullIf(lower(coalesce(\n        nullIf(toString(ResourceAttributes['host.name']), ''),\n        nullIf(toString(LogAttributes['host.name']), '')\n    )), '') AS host_name, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY host_name HAVING host_name IS NOT NULL\n),\ncfg_ip AS (\n    SELECT nullIf(coalesce(\n        nullIf(toString(ResourceAttributes['source.ip']), ''),\n        nullIf(toString(ResourceAttributes['host.ip']), '')\n    ), '') AS ip, 1 AS v\n    FROM default.otel_logs\n    WHERE $__timeFilter(TimestampTime)\n      AND ServiceName IN ('routerconfig', 'recommendrouterconfig')\n    GROUP BY ip HAVING ip IS NOT NULL\n),\nflow_dir_missing AS (\n    SELECT device_serial AS serial, 1 AS v\n    FROM network_observability.basic_ipfix_flows_5m\n    WHERE $__timeFilter(time) AND flow_direction NOT IN (0, 1)\n    GROUP BY serial\n    UNION DISTINCT\n    SELECT device_serial, 1\n    FROM network_observability.avc_flows_5m\n    WHERE $__timeFilter(time) AND flow_direction NOT IN (0, 1)\n    GROUP BY device_serial\n)\nSELECT\n    d.hostname          AS \"Device\",\n    d.device_ip         AS \"Device IP\",\n    d.manufacturer      AS \"Manufacturer\",\n    d.model             AS \"Model\",\n    if(arrayStringConcat(arrayFilter(x -> x != '', [\n        if(coalesce(avc.v, 0) > 0, 'AVC', ''),\n        if(coalesce(bas.v, 0) > 0, 'Basic', ''),\n        if(coalesce(med.v, 0) > 0, 'Medianet', '')\n    ]), '/') = '', 'None',\n    arrayStringConcat(arrayFilter(x -> x != '', [\n        if(coalesce(avc.v, 0) > 0, 'AVC', ''),\n        if(coalesce(bas.v, 0) > 0, 'Basic', ''),\n        if(coalesce(med.v, 0) > 0, 'Medianet', '')\n    ]), '/'))           AS \"Receiving Flow Types\",\n    multiIf(\n        coalesce(avc.v, 0) > 0, 'AVC',\n        coalesce(med.v, 0) > 0, 'Medianet',\n        coalesce(bas.v, 0) > 0, 'Basic',\n        'None'\n    )                   AS \"Highest Flow Supported\",\n    if(coalesce(snmp.v, 0) > 0, 'Yes', 'No') AS \"Are we collecting SNMP metrics\",\n    if(greatest(\n        coalesce(ts.v,  0), coalesce(th1.v, 0),\n        coalesce(th2.v, 0), coalesce(ti.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Traps\",\n    if(greatest(\n        coalesce(ls.v,  0), coalesce(lh1.v, 0),\n        coalesce(lh2.v, 0), coalesce(li.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Logs\",\n    if(greatest(\n        coalesce(cs.v,  0), coalesce(ch1.v, 0),\n        coalesce(ch2.v, 0), coalesce(ci.v,  0)\n    ) > 0, 'Yes', 'No') AS \"Are we Receiving Configs\",\n    if(coalesce(fdm.v, 0) > 0, 'Yes', 'No') AS \"Flow Missing Direction\"\nFROM base_devices d\nLEFT JOIN avc_flow      avc  ON avc.serial    = d.serial\nLEFT JOIN basic_flow    bas  ON bas.serial    = d.serial\nLEFT JOIN medianet_flow med  ON med.serial    = d.serial\nLEFT JOIN snmp_metrics  snmp ON snmp.serial   = d.serial\nLEFT JOIN trap_seen     ts   ON ts.serial     = d.serial\nLEFT JOIN trap_host     th1  ON th1.host_name = d.hostname_lc\nLEFT JOIN trap_host     th2  ON th2.host_name = d.system_name_lc\nLEFT JOIN trap_ip       ti   ON ti.ip         = d.device_ip\nLEFT JOIN log_seen      ls   ON ls.serial     = d.serial\nLEFT JOIN log_host      lh1  ON lh1.host_name = d.hostname_lc\nLEFT JOIN log_host      lh2  ON lh2.host_name = d.system_name_lc\nLEFT JOIN log_ip        li   ON li.ip         = d.device_ip\nLEFT JOIN cfg_seen      cs   ON cs.serial     = d.serial\nLEFT JOIN cfg_host      ch1  ON ch1.host_name = d.hostname_lc\nLEFT JOIN cfg_host      ch2  ON ch2.host_name = d.system_name_lc\nLEFT JOIN cfg_ip        ci   ON ci.ip         = d.device_ip\nLEFT JOIN flow_dir_missing fdm ON fdm.serial = d.serial\nORDER BY d.hostname",
           "refId": "A"
         }
       ],
