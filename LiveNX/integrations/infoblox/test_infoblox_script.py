@@ -45,11 +45,14 @@ def test_pull_nat_data_from_LiveNX_skips_top_analysis_line(monkeypatch):
 
     called = {}
 
-    def fake_get(url, headers=None, verify=None, timeout=None):
+    def fake_get(url, *args, **kwargs):
         called["url"] = url
         return FakeResponse()
 
-    monkeypatch.setattr(script.requests, "get", fake_get)
+    # Reset the session so it gets re-created, then patch the session's get
+    monkeypatch.setattr(script, "_http_session", None)
+    session = script.get_http_session()
+    monkeypatch.setattr(session, "get", fake_get)
 
     data = script.pull_nat_data_from_LiveNX("host", "token", 0, 1, "rid", "ds")
     assert data[0].startswith("Time,Flow Record Count")
@@ -105,14 +108,16 @@ def test_script_with_mock_infoblox_api(monkeypatch):
         ]
     }
    
-    # Save original requests.get
-    original_get = requests.get
+    # Reset session and patch its get method
+    monkeypatch.setattr(script, "_http_session", None)
+    session = script.get_http_session()
+    original_get = session.get
 
     def fake_get(url,  *args, **kwargs):
-        if "/wapi/" in url and "/lease" in url:            
+        if "/wapi/" in url and "/lease" in url:
             response = requests.models.Response()
             response.status_code = 200
-                
+
             # Randomly add next page id for pagination
             if random.randint(1,10) % 2 == 0:
                 mock_response["next_page_id"] = "abcdef"
@@ -121,10 +126,10 @@ def test_script_with_mock_infoblox_api(monkeypatch):
 
             # Set the _content as bytes
             response._content = json.dumps(mock_response).encode('utf-8')
-            return response            
-        return original_get(url,  *args, **kwargs)        
+            return response
+        return original_get(url,  *args, **kwargs)
 
-    monkeypatch.setattr(script.requests, "get", fake_get)    
+    monkeypatch.setattr(session, "get", fake_get)    
     
     # Load the config file
     with open(SCRIPT_DIR.joinpath("test_config.json")) as config_file:
