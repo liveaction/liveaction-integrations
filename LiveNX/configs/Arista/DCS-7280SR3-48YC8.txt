@@ -15,12 +15,18 @@ no sflow run
 ! Enable IP routing for IPFIX packet to be routed to the collector 
 ip routing
 
-! Define the hardware flow tracker
+
+### Note:
+###The hardware flow tracking configuration shown below may not be supported on all device models, software
+###versions, or hardware platforms and License type. Customers are strongly advised to verify compatibility and official
+###support with the device OEM/vendor before applying this configuration in production environments.
+
+! Define the hardware flow tracker 
 flow tracking hardware
    tracker LiveNX-Tracker
       record export on inactive timeout 60000
       record export on interval 30000
-      !
+ ! Add Exporter
       exporter LiveNX-Exporter
          local interface <Management>
          template interval 5000
