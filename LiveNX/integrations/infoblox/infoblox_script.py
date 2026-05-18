@@ -617,6 +617,7 @@ def main(args):
         local_logger.info("ClickHouse configuration not provided; results will be printed to stdout only.")
 
     poll_interval_seconds = max(1, int(args.poll_interval_seconds))
+    run_once = getattr(args, 'once', False)
     infoblox_cache = InfobloxCache(ttl_seconds=INFOBLOX_CACHE_TTL_SECONDS)
 
     # Setup LiveNX Report Results Limit
@@ -709,6 +710,10 @@ def main(args):
                   f"Consolidated records: {total_consolidated_records}\n" +
                   f"Failed windows pending retry: {len(failed_windows)}\n" + "="*100)
 
+            if run_once:
+                local_logger.info("Single run complete (--once mode).")
+                break
+
             if sleep_for > 0:
                 local_logger.info(f"Sleeping for {sleep_for:.1f} seconds before next poll.")
                 time.sleep(sleep_for)
@@ -743,6 +748,7 @@ if __name__ == "__main__":
     parser.add_argument("--clickhouse_certfile", help="Path to ClickHouse client cert (or set CLICKHOUSE_CERTFILE)")
     parser.add_argument("--clickhouse_keyfile", help="Path to ClickHouse client key (or set CLICKHOUSE_KEYFILE)")
     parser.add_argument("--poll_interval_seconds", default=60, type=int, help="Polling interval in seconds.")
+    parser.add_argument("--once", action="store_true", help="Run a single poll iteration and exit (non-continuous mode).")
     parser.add_argument("--trace_src_ip", help="Src IP to trace")
     parser.add_argument("--trace_dst_ip", help="Dst IP to trace")
 

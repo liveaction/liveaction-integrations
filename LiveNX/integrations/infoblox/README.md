@@ -18,20 +18,44 @@ This tool fetch the device NAT data.
 
 ## Usage
 
-### Basic Command
+The script supports two modes of operation: **continuous** (default) and **single-run**.
+
+### Continuous Mode (default)
+
+Polls LiveNX and Infoblox repeatedly at a configurable interval. Use this for production deployments where the script runs as a service.
+
 ```bash
-# Run monitor script (polls every minute and writes to ClickHouse)
 python infoblox_script.py \
   --livenx_host=<livenx.host> \
   --livenx_token=<livenx-api-token> \
   --report_id=<livenx-report-id> \
   --device_serial=<livenx-device-serial> \
-  --infoblox_host=<inflox-host> \
-  --infoblox_username=<inflox-username> \
-  --infoblox_password=<inflox-password> \
+  --infoblox_host=<infoblox-host> \
+  --infoblox_username=<infoblox-username> \
+  --infoblox_password=<infoblox-password> \
   --clickhouse_host=<clickhouse-host> \
   --clickhouse_username=<clickhouse-user> \
-  --clickhouse_password=<clickhouse-pass>
+  --clickhouse_password=<clickhouse-pass> \
+  --poll_interval_seconds 60
+```
+
+### Single-Run Mode (`--once`)
+
+Runs a single poll iteration and exits. Useful for testing, cron jobs, or one-off data pulls.
+
+```bash
+python infoblox_script.py \
+  --livenx_host=<livenx.host> \
+  --livenx_token=<livenx-api-token> \
+  --report_id=<livenx-report-id> \
+  --device_serial=<livenx-device-serial> \
+  --infoblox_host=<infoblox-host> \
+  --infoblox_username=<infoblox-username> \
+  --infoblox_password=<infoblox-password> \
+  --clickhouse_host=<clickhouse-host> \
+  --clickhouse_username=<clickhouse-user> \
+  --clickhouse_password=<clickhouse-pass> \
+  --once
 ```
 
 The script:
@@ -66,5 +90,105 @@ Set ClickHouse connection values via flags or environment variables: `CLICKHOUSE
 | `--clickhouse_certfile` | Client cert for ClickHouse TLS | No |
 | `--clickhouse_keyfile` | Client key for ClickHouse TLS | No |
 | `--poll_interval_seconds` | Poll interval in seconds (default 60) | No |
+| `--once` | Run a single poll iteration and exit | No |
 | `--trace_src_ip` | source ip to trace(troubleshooting purpose only) | No |
 | `--trace_dst_ip` | destination ip to trace(troubleshooting purpose only) | No |
+
+## Systemd Service Installation
+
+The included `install_systemd_service.sh` script automates deploying the integration as a systemd service on a Linux server. This is the recommended approach for production use.
+
+### Interactive Installation
+
+Run the installer as root on the target server:
+
+```bash
+sudo bash install_systemd_service.sh
+```
+
+The installer will prompt for all required configuration values, then:
+1. Copies the script to `/opt/livenx-infoblox/`
+2. Creates a Python virtual environment and installs dependencies
+3. Stores configuration in `/etc/livenx-infoblox/livenx-infoblox.env` (mode 600)
+4. Creates and enables a systemd service unit
+5. Starts the service
+
+### Non-Interactive Installation
+
+For automated deployments, copy the script files to the server and run the setup manually:
+
+```bash
+# Copy files to the server
+INSTALL_DIR="/opt/livenx-infoblox"
+sudo mkdir -p "$INSTALL_DIR"
+sudo cp infoblox_script.py requirements.txt "$INSTALL_DIR/"
+
+# Create virtual environment
+sudo python3 -m venv "$INSTALL_DIR/venv"
+sudo "$INSTALL_DIR/venv/bin/pip" install -r "$INSTALL_DIR/requirements.txt"
+
+# Create environment file with arguments
+sudo mkdir -p /etc/livenx-infoblox
+sudo tee /etc/livenx-infoblox/livenx-infoblox.env > /dev/null <<'EOF'
+INFOBLOX_ARGS=--livenx_host localhost --livenx_token "<token>" --report_id 90 --device_serial <serial> --infoblox_host <infoblox-host> --infoblox_username admin --infoblox_password "<password>" --poll_interval_seconds 60 --clickhouse_host localhost --clickhouse_port 9440 --clickhouse_username default --clickhouse_password "<password>" --clickhouse_database default --clickhouse_table infoblox_nat_dhcp
+EOF
+sudo chmod 600 /etc/livenx-infoblox/livenx-infoblox.env
+
+# Create systemd unit file
+sudo tee /etc/systemd/system/livenx-infoblox.service > /dev/null <<EOF
+[Unit]
+Description=LiveNX Infoblox NAT/DHCP Integration Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/livenx-infoblox/livenx-infoblox.env
+ExecStart=$INSTALL_DIR/venv/bin/python3 $INSTALL_DIR/infoblox_script.py \$INFOBLOX_ARGS
+WorkingDirectory=$INSTALL_DIR
+
+Restart=on-failure
+RestartSec=10
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=livenx-infoblox
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=$INSTALL_DIR
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start
+sudo systemctl daemon-reload
+sudo systemctl enable livenx-infoblox
+sudo systemctl start livenx-infoblox
+```
+
+### Managing the Service
+
+```bash
+# Check status
+systemctl status livenx-infoblox
+
+# View live logs
+journalctl -u livenx-infoblox -f
+
+# Restart after config changes
+systemctl restart livenx-infoblox
+
+# Stop the service
+systemctl stop livenx-infoblox
+
+# Uninstall
+systemctl stop livenx-infoblox
+systemctl disable livenx-infoblox
+rm /etc/systemd/system/livenx-infoblox.service
+rm -rf /opt/livenx-infoblox
+rm -rf /etc/livenx-infoblox
+systemctl daemon-reload
+```
