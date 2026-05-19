@@ -57,11 +57,11 @@ class InfobloxCache:
     def get_leases(self, infoblox_host, infoblox_username, infoblox_password):
         now = time.time()
         if self._leases and (now - self._fetched_at) < self._ttl:
-            local_logger.info(f"Using cached Infoblox leases ({len(self._leases)} leases, age {now - self._fetched_at:.0f}s)")
+            local_logger.info(f"Using cached Infoblox enrichment records ({len(self._leases)} entries, age {now - self._fetched_at:.0f}s)")
             return self._leases
-        leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
-        if leases:
-            self._leases = leases
+        entries = get_infoblox_all(infoblox_host, infoblox_username, infoblox_password)
+        if entries:
+            self._leases = entries
             self._fetched_at = now
         return self._leases
 
@@ -379,6 +379,85 @@ def get_infoblox(infoblox_host, infoblox_username, infoblox_password):
         local_logger.info(f"Total leases: {len(infoblox_leases)}")
         local_logger.debug(f"\nSample Infoblox Lease Data (First {MAX_ITEMS_TO_PRINT}):\n {infoblox_leases[:MAX_ITEMS_TO_PRINT]}")  # Print first 3 leases for debugging
     return infoblox_leases
+
+
+def _paged_wapi_get(infoblox_host, infoblox_username, infoblox_password, object_path, return_fields):
+    wapi_version = '2.2'
+    url = f'https://{infoblox_host}/wapi/v{wapi_version}/{object_path}'
+    session = get_http_session()
+    page_id = None
+    max_results = 1000
+    results = []
+    try:
+        while True:
+            params = {
+                "_paging": 1,
+                "_return_as_object": 1,
+                "_max_results": max_results,
+                "_return_fields": return_fields,
+            }
+            if page_id:
+                params["_page_id"] = page_id
+            response = session.get(url, params=params, auth=(infoblox_username, infoblox_password), timeout=30)
+            if response.status_code != 200:
+                local_logger.error(f"Error fetching Infoblox {object_path}: Status {response.status_code}, Content: {response.text}")
+                break
+            data = response.json()
+            results.extend(data.get("result", []))
+            page_id = data.get("next_page_id")
+            if not page_id:
+                break
+    except requests.exceptions.RequestException as e:
+        local_logger.error(f"Error pulling {object_path} from Infoblox: {e}")
+    return results
+
+
+def get_infoblox_fixedaddresses(infoblox_host, infoblox_username, infoblox_password):
+    """Fetch Infoblox fixedaddress entries, normalized to lease-shaped dicts."""
+    entries = _paged_wapi_get(infoblox_host, infoblox_username, infoblox_password, "fixedaddress", "ipv4addr,mac,name")
+    normalized = []
+    for entry in entries:
+        addr = entry.get("ipv4addr")
+        mac = entry.get("mac")
+        if not (addr and mac):
+            continue
+        normalized.append({
+            "address": addr,
+            "hardware": mac,
+            "client_hostname": entry.get("name") or "",
+        })
+    local_logger.info(f"Infoblox returned {len(normalized)} fixedaddress entry(s).")
+    return normalized
+
+
+def get_infoblox_hostrecords(infoblox_host, infoblox_username, infoblox_password):
+    """Fetch Infoblox host records, expanding per-IP MAC, normalized to lease-shaped dicts."""
+    records = _paged_wapi_get(infoblox_host, infoblox_username, infoblox_password, "record:host", "name,ipv4addrs")
+    normalized = []
+    for record in records:
+        name = record.get("name") or ""
+        for ipv4 in record.get("ipv4addrs", []) or []:
+            addr = ipv4.get("ipv4addr")
+            mac = ipv4.get("mac")
+            if not (addr and mac):
+                continue
+            normalized.append({
+                "address": addr,
+                "hardware": mac,
+                "client_hostname": name,
+            })
+    local_logger.info(f"Infoblox returned {len(normalized)} host-record IPv4 entry(s).")
+    return normalized
+
+
+def get_infoblox_all(infoblox_host, infoblox_username, infoblox_password):
+    """Combine leases, fixedaddress, and host records. Lease wins on duplicate address."""
+    fixedaddresses = get_infoblox_fixedaddresses(infoblox_host, infoblox_username, infoblox_password)
+    hostrecords = get_infoblox_hostrecords(infoblox_host, infoblox_username, infoblox_password)
+    leases = get_infoblox(infoblox_host, infoblox_username, infoblox_password)
+    # Order matters: process_consolidation builds a dict keyed by address; later entries overwrite earlier ones.
+    return fixedaddresses + hostrecords + leases
+
 
 def normalize_key(key):
     """Lowercase and replace non-alphanumerics with underscores for flexible header matching."""
