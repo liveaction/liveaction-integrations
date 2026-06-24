@@ -165,40 +165,10 @@ The remediation scripts back up every file they modify to `<file>.stig_bak`
 - `stig_stage1_low_risk.sh` — Stage 1 remediation (#2)
 - `stig_stage2_medium_risk.sh` — Stage 2 remediation (#3)
 - `stig_stage3_high_risk.sh` — Stage 3 remediation (#4)
-- `stig_remediate.sh` — *legacy* monolithic remediation, superseded by the three staged scripts (kept for reference)
 
-**Inputs / reference**
-- `STIG checklist.csv` — the 179-rule benchmark checklist (source of truth)
-- `stig-findings.pdf` — original manual audit findings
-- `stig_remediation_plan.csv` — fixable rules categorized by risk (HIGH/MEDIUM/LOW)
-- `.env.example` — sample SSH credentials file (only relevant to the legacy SSH-based workflow; the current scripts run locally and do **not** need it)
 
-**Outputs (generated)**
-- `stig_report_*.json` / `stig_report_*.html` — timestamped audit reports
-- `stig_stage1.log`, `stig_stage2.log`, `stig_stage3.log` — remediation run logs
-- `audit-report-after-*.json` — audit snapshots captured after each stage + reboot
 
----
 
-## Before you push to git
 
-A few large/sensitive files are in this directory and should probably be excluded
-with a `.gitignore`:
 
-```gitignore
-# Large binary not part of the project
-Claude.dmg
 
-# Local secrets (never commit real credentials)
-.env
-
-# Python cache
-__pycache__/
-*.pyc
-
-# OS cruft
-.DS_Store
-```
-
-Keep `.env.example` (template only); never commit a filled-in `.env`.
-`Claude.dmg` (~300 MB) is unrelated to this project and should not be pushed.
