@@ -13,7 +13,7 @@ This Python script is designed to perform various network diagnostic tasks such 
 
 ## Prerequisites
 
-- Python 3.x
+- Python 3.6+ (standard library only — no `pip install` required)
 - `snmpwalk` installed (for SNMP operations)
 - `tcpdump` installed (for packet capture)
 - `ping` installed (for pinging targets)
@@ -23,17 +23,19 @@ This Python script is designed to perform various network diagnostic tasks such 
 
 ## Installation
 
-1. Clone this repository or copy the script to your local environment.
-2. Install the necessary Python libraries:
-   ```bash
-   pip install requests argparse
-   ```
-
-3. Ensure the system has the required tools installed:
+1. Copy `diag.py` to the target machine (e.g. `scp diag.py user@livenx-host:~`). No Python
+   packages need to be installed — the script uses only the standard library, so it runs on a
+   LiveNX appliance as-is without `pip` or network access to a package index.
+2. Ensure the system has the required tools installed:
    - `snmpwalk`
    - `tcpdump`
    - `ping`
    - `tracepath`
+
+> The HTTP calls use `urllib.request` via the small `HttpSession` / `http_get` helpers at the top
+> of `diag.py` (self-signed certificates are accepted, matching the previous `verify=False`
+> behaviour). Running the optional pytest suite (`test_diag.py`) is the only thing that still
+> needs `pip install pytest`; `diag.py --livenx_healthcheck` performs the same checks without it.
 
 ## Usage
 

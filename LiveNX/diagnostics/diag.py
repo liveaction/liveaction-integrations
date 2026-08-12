@@ -1,15 +1,90 @@
 import os
 import subprocess
 import time
-import requests
 import argparse
 import threading
-import urllib
-import urllib3
+import base64
+import http.cookiejar
+import json
+import ssl
+import urllib.error
+import urllib.parse
+import urllib.request
 from datetime import datetime, timedelta
 
-# Suppress the SSL warnings
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# Socket timeout (seconds) applied to every HTTP request.
+HTTP_TIMEOUT = 60
+
+# Devices and LiveNX servers commonly present self-signed certificates, so
+# certificate verification is disabled here (equivalent to verify=False).
+_UNVERIFIED_SSL_CONTEXT = ssl._create_unverified_context()
+
+class HttpResponse:
+    """Minimal stand-in for a requests Response, covering what this script uses."""
+
+    def __init__(self, status_code, body, headers):
+        self.status_code = status_code
+        self.headers = headers
+        self.content = body
+        self.text = body.decode(headers.get_content_charset() or 'utf-8', errors='replace')
+
+    def __repr__(self):
+        return f'<Response [{self.status_code}]>'
+
+    def json(self):
+        return json.loads(self.text)
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise Exception(f'HTTP {self.status_code} error: {self.text[:200]}')
+
+class HttpSession:
+    """Minimal stand-in for a requests Session (cookies, basic auth, headers)."""
+
+    def __init__(self):
+        self.headers = {}
+        self.auth = None
+        self._cookie_jar = http.cookiejar.CookieJar()
+        self._opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(self._cookie_jar),
+            urllib.request.HTTPSHandler(context=_UNVERIFIED_SSL_CONTEXT),
+        )
+
+    @property
+    def cookies(self):
+        return {cookie.name: cookie.value for cookie in self._cookie_jar}
+
+    def get(self, url, headers=None):
+        return self.request('GET', url, headers=headers)
+
+    def post(self, url, data=None, headers=None):
+        return self.request('POST', url, data=data, headers=headers)
+
+    def request(self, method, url, data=None, headers=None):
+        body = None
+        request_headers = dict(self.headers)
+
+        if data != None:
+            body = urllib.parse.urlencode(data).encode('utf-8')
+            request_headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
+        if self.auth != None:
+            credentials = base64.b64encode(f'{self.auth[0]}:{self.auth[1]}'.encode('utf-8')).decode('ascii')
+            request_headers['Authorization'] = f'Basic {credentials}'
+
+        request_headers.update(headers or {})
+        request = urllib.request.Request(url, data=body, headers=request_headers, method=method)
+
+        try:
+            with self._opener.open(request, timeout=HTTP_TIMEOUT) as response:
+                return HttpResponse(response.status, response.read(), response.headers)
+        except urllib.error.HTTPError as err:
+            # Match requests: an error status is a response, not an exception.
+            return HttpResponse(err.code, err.read(), err.headers)
+
+def http_get(url, headers=None):
+    """One-off GET, equivalent to requests.get(url, headers=headers, verify=False)."""
+    return HttpSession().get(url, headers=headers)
 
 def get_vmanage_client_token(vmanage_ip, vmanage_port, username, password):
     try:
@@ -17,14 +92,14 @@ def get_vmanage_client_token(vmanage_ip, vmanage_port, username, password):
         token_url = f'{base_url}/client/token'
         
         # Create a session for authentication
-        session = requests.Session()
+        session = HttpSession()
 
         # First, log in to get an authenticated session
         login_url = f'{base_url}/j_security_check'
         login_data = {'j_username': username, 'j_password': password}
 
         # Login to vManage
-        login_response = session.post(login_url, data=login_data, verify=False)
+        login_response = session.post(login_url, data=login_data)
         print(login_response)
         if login_response.status_code != 200 or 'JSESSIONID' not in session.cookies:
             print("Failed to login to vManage.")
@@ -32,7 +107,7 @@ def get_vmanage_client_token(vmanage_ip, vmanage_port, username, password):
 
         # Request token from /client/token
         print(f'Requesting vManage URL {token_url}')
-        token_response = session.get(token_url, verify=False)
+        token_response = session.get(token_url)
         if token_response.status_code == 200:
             # Extract the token from the headers
             token = token_response.text
@@ -97,7 +172,7 @@ def get_vmanage_data(vmanage_ip, vmanage_port, username, password, token, url_pa
         while True:
             base_url = f"https://{vmanage_ip}:{vmanage_port}/dataservice"
             # Create a session for authentication
-            session = requests.Session()
+            session = HttpSession()
 
             if token == None:
                 session.auth = (username, password)
@@ -111,7 +186,7 @@ def get_vmanage_data(vmanage_ip, vmanage_port, username, password, token, url_pa
                 full_path += f'{url_params}'
             
             print(f'Requesting vManage URL {full_path}')
-            response = session.get(f'{full_path}', verify=False)
+            response = session.get(full_path)
             response.raise_for_status()  # Raise an exception for bad status codes
 
             data = response.json()
@@ -194,7 +269,7 @@ def version_ip(hostname, port, token, fw):
     try:
         url = f"https://{hostname}:{port}/v1/version"
         fw.write("Version requested...\n")
-        response = requests.get(url, headers=headers, verify=False)
+        response = http_get(url, headers=headers)
         responses = []
         if response.status_code == 200:
             response_json = response.json()
@@ -221,7 +296,7 @@ def fetch_nodes(hostname, port, token, fw):
     try:
         url = f"https://{hostname}:{port}/v1/nodes"
         
-        response = requests.get(url, headers=headers, verify=False)
+        response = http_get(url, headers=headers)
         node_name_mapping = {}
         fw.write("Nodes requested...\n")
         if response.status_code == 200:
@@ -266,7 +341,7 @@ def fetch_system_statistics(hostname, port, token, fw):
     }
     try:
         url = f"https://{hostname}:{port}/v1/system/statistics"
-        response = requests.get(url, headers=headers, verify=False)
+        response = http_get(url, headers=headers)
         fw.write("System Statistic requested...\n")
         node_name_mapping = fetch_nodes(hostname, port, token, fw)
         if response.status_code == 200:
@@ -330,7 +405,7 @@ def fetch_app_mailer_settings(hostname, port, token, fw):
     }
     try:
         url = f"https://{hostname}:{port}/v1/appMailer/settings"
-        response = requests.get(url, headers=headers, verify=False)
+        response = http_get(url, headers=headers)
         fw.write("App Mailer Settings requested...\n")
         if response.status_code == 200:
             response_json = response.json()
@@ -371,7 +446,7 @@ def fetch_syslog_config(hostname, port, token, fw):
     }
     try:
         url = f"https://{hostname}:{port}/v1/syslog/config"
-        response = requests.get(url, headers=headers, verify=False)
+        response = http_get(url, headers=headers)
         fw.write("Syslog Config requested...\n")
         if response.status_code == 200:
             response_json = response.json()
@@ -420,7 +495,7 @@ def fetch_snmp_trap_config(hostname, port, token, fw):
     }
     try:
         url = f"https://{hostname}:{port}/v1/alerting/couriers"
-        response = requests.get(url, headers=headers, verify=False)
+        response = http_get(url, headers=headers)
         fw.write("SNMP Trap Config requested...\n")
         if response.status_code == 200:
             response_json = response.json()
@@ -473,7 +548,7 @@ def fetch_webhooks_config(hostname, port, token, fw):
     }
     try:
         url = f"https://{hostname}:{port}/v1/webhooks/"
-        response = requests.get(url, headers=headers, verify=False)
+        response = http_get(url, headers=headers)
         fw.write("Webhooks Config requested...\n")
         if response.status_code == 200:
             response_json = response.json()
