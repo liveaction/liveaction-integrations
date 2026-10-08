@@ -47,7 +47,7 @@
 | eval hit=if(("$src_ip$"="*" OR src_ip="$src_ip$") AND ("$src_port$"="*" OR tostring(src_port)="$src_port$") AND ("$dest_ip$"="*" OR dest_ip="$dest_ip$") AND ("$dest_port$"="*" OR tostring(dest_port)="$dest_port$") AND ("$app$"="*" OR Application="$app$") AND ($mitre_category|s$="*" OR mitre_category=$mitre_category|s$) AND ($message|s$="*" OR message=$message|s$), 1, 0)
 | stats sum(hit) AS Matches max(_time) AS last_seen by exporter_ip
 | addinfo
-| eval filter=if("$src_ip$"="*", "", " & addr(ip: '$src_ip$')").if("$src_port$"="*", "", " & port($src_port$)").if("$dest_ip$"="*", "", " & addr(ip: '$dest_ip$')").if("$dest_port$"="*", "", " & port($dest_port$)").if("$app$"="*", "", " & app($app$)")
+| eval filter=if("$src_ip$"="*", "", " & addr(ip: '$src_ip$')").if("$src_port$"="*", "", " & port($src_port$)").if("$dest_ip$"="*", "", " & addr(ip: '$dest_ip$')").if("$dest_port$"="*", "", " & port($dest_port$)").if("$app$"="*", "", " & app('$app$')")
 | eval filter=replace(filter, "^ & ", "")
 | eval filter=replace(replace(replace(replace(replace(replace(replace(filter, "%", "%25"), " ", "%20"), "&", "%26"), "'", "%27"), "\(", "%28"), "\)", "%29"), "\+", "%2B")
 | eval start=replace(strftime(info_min_time, "%Y-%m-%dT%H:%M:%S.%Q%z"), "\+", "%2B"), end=replace(strftime(info_max_time, "%Y-%m-%dT%H:%M:%S.%Q%z"), "\+", "%2B")
