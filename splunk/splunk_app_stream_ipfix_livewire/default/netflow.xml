@@ -247,5 +247,269 @@
       <Type>uint16</Type>
       <Comment>dnsQType</Comment>
     </Term>
+    <Term id="cisco.measuredRate">
+      <Type>uint32</Type>
+      <Comment>measuredRate</Comment>
+    </Term>
+    <Term id="cisco.mediaStreamOctetCount">
+      <Type>uint32</Type>
+      <Comment>mediaStreamOctetCount</Comment>
+    </Term>
+    <Term id="cisco.mediaStreamPacketCount">
+      <Type>uint32</Type>
+      <Comment>mediaStreamPacketCount</Comment>
+    </Term>
+    <Term id="cisco.mediaPacketRate">
+      <Type>uint32</Type>
+      <Comment>mediaPacketRate</Comment>
+    </Term>
+    <Term id="cisco.mediaEvent">
+      <Type>uint8</Type>
+      <Comment>mediaEvent</Comment>
+    </Term>
+    <Term id="cisco.mediaEventError">
+      <Type>uint8</Type>
+      <Comment>mediaEventError</Comment>
+    </Term>
+    <Term id="cisco.timestampInterval">
+      <Type>uint64</Type>
+      <Comment>timestampInterval</Comment>
+    </Term>
+    <Term id="cisco.lossEventCount">
+      <Type>uint32</Type>
+      <Comment>lossEventCount</Comment>
+    </Term>
+    <Term id="cisco.ciscoServerBytesNetwork">
+      <Type>uint64</Type>
+      <Comment>ciscoServerBytesNetwork</Comment>
+    </Term>
+    <Term id="cisco.ciscoClientBytesNetwork">
+      <Type>uint64</Type>
+      <Comment>ciscoClientBytesNetwork</Comment>
+    </Term>
+    <Term id="cisco.artCountTransactions">
+      <Type>uint32</Type>
+      <Comment>artCountTransactions</Comment>
+    </Term>
+    <Term id="cisco.artCountTransactionTimeSum">
+      <Type>uint32</Type>
+      <Comment>artCountTransactionTimeSum</Comment>
+    </Term>
+    <Term id="cisco.artCountTransactionTimeMaximum">
+      <Type>uint32</Type>
+      <Comment>artCountTransactionTimeMaximum</Comment>
+    </Term>
+    <Term id="cisco.artCountTransactionTimeMinimum">
+      <Type>uint32</Type>
+      <Comment>artCountTransactionTimeMinimum</Comment>
+    </Term>
+    <Term id="cisco.artCountLateResponses">
+      <Type>uint32</Type>
+      <Comment>artCountLateResponses</Comment>
+    </Term>
+    <Term id="cisco.artTotalResponseTimeSum">
+      <Type>uint32</Type>
+      <Comment>artTotalResponseTimeSum</Comment>
+    </Term>
+    <Term id="cisco.applicationHttpUriStatistics">
+      <Type>string</Type>
+      <Comment>applicationHttpUriStatistics</Comment>
+    </Term>
+    <Term id="cisco.ETAInitialDataPacket">
+      <Type>string</Type>
+      <Comment>ETAInitialDataPacket</Comment>
+    </Term>
+    <Term id="cisco.ETAByteDistribution">
+      <Type>string</Type>
+      <Comment>ETAByteDistribution</Comment>
+    </Term>
+    <Term id="cisco.ciscoTlsHandshakeVersion">
+      <Type>uint16</Type>
+      <Comment>ciscoTlsHandshakeVersion</Comment>
+    </Term>
+    <Term id="cisco.appCategoryName">
+      <Type>string</Type>
+      <Comment>appCategoryName</Comment>
+    </Term>
+    <Term id="cisco.appGroupName">
+      <Type>string</Type>
+      <Comment>appGroupName</Comment>
+    </Term>
+    <Term id="cisco.applicationHttpHost">
+      <Type>string</Type>
+      <Comment>applicationHttpHost</Comment>
+    </Term>
+    <Term id="cisco.clientIPv6Address">
+      <Type>ipv6</Type>
+      <Comment>clientIPv6Address</Comment>
+    </Term>
+    <Term id="cisco.serverIPv6Address">
+      <Type>ipv6</Type>
+      <Comment>serverIPv6Address</Comment>
+    </Term>
+    <Term id="cisco.appBusiness">
+      <Type>string</Type>
+      <Comment>appBusiness</Comment>
+    </Term>
+    <Term id="cisco.ETASequenceofPktLengthsandTimes">
+      <Type>string</Type>
+      <Comment>ETASequenceofPktLengthsandTimes</Comment>
+    </Term>
+    <Term id="livewire.codec">
+      <Type>string</Type>
+      <Comment>codec</Comment>
+    </Term>
+    <Term id="livewire.mos">
+      <Type>float</Type>
+      <Comment>mos</Comment>
+    </Term>
+    <Term id="livewire.dialNumber">
+      <Type>string</Type>
+      <Comment>dialNumber</Comment>
+    </Term>
+    <Term id="livewire.mediaEndpointIPv6">
+      <Type>ipv6</Type>
+      <Comment>mediaEndpointIPv6</Comment>
+    </Term>
+    <Term id="livewire.mosLong">
+      <Type>int64</Type>
+      <Comment>mosLong</Comment>
+    </Term>
+    <Term id="livewire.mosCount">
+      <Type>int64</Type>
+      <Comment>mosCount</Comment>
+    </Term>
+    <Term id="livewire.omniPeekCrossLaunch">
+      <Type>string</Type>
+      <Comment>omniPeekCrossLaunch</Comment>
+    </Term>
+    <Term id="livewire.dialNumberTo">
+      <Type>string</Type>
+      <Comment>dialNumberTo</Comment>
+    </Term>
+    <Term id="livewire.callId">
+      <Type>string</Type>
+      <Comment>callId</Comment>
+    </Term>
+    <Term id="livewire.ETAEntropy">
+      <Type>float</Type>
+      <Comment>ETAEntropy</Comment>
+    </Term>
+    <Term id="livewire.ETABdVariance">
+      <Type>float</Type>
+      <Comment>ETABdVariance</Comment>
+    </Term>
+    <Term id="livewire.ETABdMean">
+      <Type>float</Type>
+      <Comment>ETABdMean</Comment>
+    </Term>
+    <Term id="livewire.ETAProducerConsumerRatio">
+      <Type>float</Type>
+      <Comment>ETAProducerConsumerRatio</Comment>
+    </Term>
+    <Term id="livewire.ETASrcId">
+      <Type>string</Type>
+      <Comment>ETASrcId</Comment>
+    </Term>
+    <Term id="livewire.ETACause">
+      <Type>string</Type>
+      <Comment>ETACause</Comment>
+    </Term>
+    <Term id="livewire.flowStartIso8601">
+      <Type>string</Type>
+      <Comment>flowStartIso8601</Comment>
+    </Term>
+    <Term id="livewire.flowLastIso8601">
+      <Type>string</Type>
+      <Comment>flowLastIso8601</Comment>
+    </Term>
+    <Term id="livewire.isTCP">
+      <Type>bool</Type>
+      <Comment>isTCP</Comment>
+    </Term>
+    <Term id="livewire.intervalStartTime">
+      <Type>int64</Type>
+      <Comment>intervalStartTime</Comment>
+    </Term>
+    <Term id="livewire.intervalEndTime">
+      <Type>int64</Type>
+      <Comment>intervalEndTime</Comment>
+    </Term>
+    <Term id="livewire.sae">
+      <Type>float</Type>
+      <Comment>sae</Comment>
+    </Term>
+    <Term id="livewire.dae">
+      <Type>float</Type>
+      <Comment>dae</Comment>
+    </Term>
+    <Term id="livewire.tlsSha1">
+      <Type>string</Type>
+      <Comment>tlsSha1</Comment>
+    </Term>
+    <Term id="livewire.sshSSignature">
+      <Type>string</Type>
+      <Comment>sshSSignature</Comment>
+    </Term>
+    <Term id="livewire.sshCSignature">
+      <Type>string</Type>
+      <Comment>sshCSignature</Comment>
+    </Term>
+    <Term id="livewire.tlsIssuer">
+      <Type>string</Type>
+      <Comment>tlsIssuer</Comment>
+    </Term>
+    <Term id="livewire.tlsSubject">
+      <Type>string</Type>
+      <Comment>tlsSubject</Comment>
+    </Term>
+    <Term id="livewire.tlsNotBefore">
+      <Type>string</Type>
+      <Comment>tlsNotBefore</Comment>
+    </Term>
+    <Term id="livewire.tlsNotAfter">
+      <Type>string</Type>
+      <Comment>tlsNotAfter</Comment>
+    </Term>
+    <Term id="livewire.tlsCertSNI">
+      <Type>string</Type>
+      <Comment>tlsCertSNI</Comment>
+    </Term>
+    <Term id="livewire.tlsJa3">
+      <Type>string</Type>
+      <Comment>tlsJa3</Comment>
+    </Term>
+    <Term id="livewire.tlsJa3s">
+      <Type>string</Type>
+      <Comment>tlsJa3s</Comment>
+    </Term>
+    <Term id="livewire.tlsChloSNI">
+      <Type>string</Type>
+      <Comment>tlsChloSNI</Comment>
+    </Term>
+    <Term id="livewire.dnsRCode">
+      <Type>uint8</Type>
+      <Comment>dnsRCode</Comment>
+    </Term>
+    <Term id="livewire.dnsQName">
+      <Type>string</Type>
+      <Comment>dnsQName</Comment>
+    </Term>
+    <Term id="livewire.tlsChloCipherSuites">
+      <Type>string</Type>
+      <Comment>tlsChloCipherSuites</Comment>
+    </Term>
+    <Term id="livewire.artConnectionSetupTimeSum">
+      <Type>uint32</Type>
+      <Comment>artConnectionSetupTimeSum</Comment>
+    </Term>
+    <Term id="livewire.flowUuid">
+      <Type>string</Type>
+      <Comment>flowUuid</Comment>
+    </Term>
+    <Term id="livewire.rollupUuids">
+      <Type>string</Type>
+      <Comment>rollupUuids</Comment>
+    </Term>
   </Vocabulary>
 </CmConfig>

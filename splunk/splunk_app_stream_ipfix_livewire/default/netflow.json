@@ -1558,6 +1558,468 @@
       "enabled": true,
       "name": "dnsQType",
       "term": "livewire.dnsQType"
+    },
+    {
+      "aggType": "value",
+      "desc": "measuredRate",
+      "enabled": true,
+      "name": "measuredRate",
+      "term": "cisco.measuredRate"
+    },
+    {
+      "aggType": "value",
+      "desc": "mediaStreamOctetCount",
+      "enabled": true,
+      "name": "mediaStreamOctetCount",
+      "term": "cisco.mediaStreamOctetCount"
+    },
+    {
+      "aggType": "value",
+      "desc": "mediaStreamPacketCount",
+      "enabled": true,
+      "name": "mediaStreamPacketCount",
+      "term": "cisco.mediaStreamPacketCount"
+    },
+    {
+      "aggType": "value",
+      "desc": "mediaPacketRate",
+      "enabled": true,
+      "name": "mediaPacketRate",
+      "term": "cisco.mediaPacketRate"
+    },
+    {
+      "aggType": "value",
+      "desc": "mediaEvent",
+      "enabled": true,
+      "name": "mediaEvent",
+      "term": "cisco.mediaEvent"
+    },
+    {
+      "aggType": "value",
+      "desc": "mediaEventError",
+      "enabled": true,
+      "name": "mediaEventError",
+      "term": "cisco.mediaEventError"
+    },
+    {
+      "aggType": "value",
+      "desc": "timestampInterval",
+      "enabled": true,
+      "name": "timestampInterval",
+      "term": "cisco.timestampInterval"
+    },
+    {
+      "aggType": "value",
+      "desc": "lossEventCount",
+      "enabled": true,
+      "name": "lossEventCount",
+      "term": "cisco.lossEventCount"
+    },
+    {
+      "aggType": "value",
+      "desc": "ciscoServerBytesNetwork",
+      "enabled": true,
+      "name": "ciscoServerBytesNetwork",
+      "term": "cisco.ciscoServerBytesNetwork"
+    },
+    {
+      "aggType": "value",
+      "desc": "ciscoClientBytesNetwork",
+      "enabled": true,
+      "name": "ciscoClientBytesNetwork",
+      "term": "cisco.ciscoClientBytesNetwork"
+    },
+    {
+      "aggType": "value",
+      "desc": "artCountTransactions",
+      "enabled": true,
+      "name": "artCountTransactions",
+      "term": "cisco.artCountTransactions"
+    },
+    {
+      "aggType": "value",
+      "desc": "artCountTransactionTimeSum",
+      "enabled": true,
+      "name": "artCountTransactionTimeSum",
+      "term": "cisco.artCountTransactionTimeSum"
+    },
+    {
+      "aggType": "value",
+      "desc": "artCountTransactionTimeMaximum",
+      "enabled": true,
+      "name": "artCountTransactionTimeMaximum",
+      "term": "cisco.artCountTransactionTimeMaximum"
+    },
+    {
+      "aggType": "value",
+      "desc": "artCountTransactionTimeMinimum",
+      "enabled": true,
+      "name": "artCountTransactionTimeMinimum",
+      "term": "cisco.artCountTransactionTimeMinimum"
+    },
+    {
+      "aggType": "value",
+      "desc": "artCountLateResponses",
+      "enabled": true,
+      "name": "artCountLateResponses",
+      "term": "cisco.artCountLateResponses"
+    },
+    {
+      "aggType": "value",
+      "desc": "artTotalResponseTimeSum",
+      "enabled": true,
+      "name": "artTotalResponseTimeSum",
+      "term": "cisco.artTotalResponseTimeSum"
+    },
+    {
+      "aggType": "value",
+      "desc": "applicationHttpUriStatistics",
+      "enabled": true,
+      "name": "applicationHttpUriStatistics",
+      "term": "cisco.applicationHttpUriStatistics"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETAInitialDataPacket",
+      "enabled": true,
+      "name": "ETAInitialDataPacket",
+      "term": "cisco.ETAInitialDataPacket"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETAByteDistribution",
+      "enabled": true,
+      "name": "ETAByteDistribution",
+      "term": "cisco.ETAByteDistribution"
+    },
+    {
+      "aggType": "value",
+      "desc": "ciscoTlsHandshakeVersion",
+      "enabled": true,
+      "name": "ciscoTlsHandshakeVersion",
+      "term": "cisco.ciscoTlsHandshakeVersion"
+    },
+    {
+      "aggType": "value",
+      "desc": "appCategoryName",
+      "enabled": true,
+      "name": "appCategoryName",
+      "term": "cisco.appCategoryName"
+    },
+    {
+      "aggType": "value",
+      "desc": "appGroupName",
+      "enabled": true,
+      "name": "appGroupName",
+      "term": "cisco.appGroupName"
+    },
+    {
+      "aggType": "value",
+      "desc": "applicationHttpHost",
+      "enabled": true,
+      "name": "applicationHttpHost",
+      "term": "cisco.applicationHttpHost"
+    },
+    {
+      "aggType": "value",
+      "desc": "clientIPv6Address",
+      "enabled": true,
+      "name": "clientIPv6Address",
+      "term": "cisco.clientIPv6Address"
+    },
+    {
+      "aggType": "value",
+      "desc": "serverIPv6Address",
+      "enabled": true,
+      "name": "serverIPv6Address",
+      "term": "cisco.serverIPv6Address"
+    },
+    {
+      "aggType": "value",
+      "desc": "appBusiness",
+      "enabled": true,
+      "name": "appBusiness",
+      "term": "cisco.appBusiness"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETASequenceofPktLengthsandTimes",
+      "enabled": true,
+      "name": "ETASequenceofPktLengthsandTimes",
+      "term": "cisco.ETASequenceofPktLengthsandTimes"
+    },
+    {
+      "aggType": "value",
+      "desc": "codec",
+      "enabled": true,
+      "name": "codec",
+      "term": "livewire.codec"
+    },
+    {
+      "aggType": "value",
+      "desc": "mos",
+      "enabled": true,
+      "name": "mos",
+      "term": "livewire.mos"
+    },
+    {
+      "aggType": "value",
+      "desc": "dialNumber",
+      "enabled": true,
+      "name": "dialNumber",
+      "term": "livewire.dialNumber"
+    },
+    {
+      "aggType": "value",
+      "desc": "mediaEndpointIPv6",
+      "enabled": true,
+      "name": "mediaEndpointIPv6",
+      "term": "livewire.mediaEndpointIPv6"
+    },
+    {
+      "aggType": "value",
+      "desc": "mosLong",
+      "enabled": true,
+      "name": "mosLong",
+      "term": "livewire.mosLong"
+    },
+    {
+      "aggType": "value",
+      "desc": "mosCount",
+      "enabled": true,
+      "name": "mosCount",
+      "term": "livewire.mosCount"
+    },
+    {
+      "aggType": "value",
+      "desc": "omniPeekCrossLaunch",
+      "enabled": true,
+      "name": "omniPeekCrossLaunch",
+      "term": "livewire.omniPeekCrossLaunch"
+    },
+    {
+      "aggType": "value",
+      "desc": "dialNumberTo",
+      "enabled": true,
+      "name": "dialNumberTo",
+      "term": "livewire.dialNumberTo"
+    },
+    {
+      "aggType": "value",
+      "desc": "callId",
+      "enabled": true,
+      "name": "callId",
+      "term": "livewire.callId"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETAEntropy",
+      "enabled": true,
+      "name": "ETAEntropy",
+      "term": "livewire.ETAEntropy"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETABdVariance",
+      "enabled": true,
+      "name": "ETABdVariance",
+      "term": "livewire.ETABdVariance"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETABdMean",
+      "enabled": true,
+      "name": "ETABdMean",
+      "term": "livewire.ETABdMean"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETAProducerConsumerRatio",
+      "enabled": true,
+      "name": "ETAProducerConsumerRatio",
+      "term": "livewire.ETAProducerConsumerRatio"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETASrcId",
+      "enabled": true,
+      "name": "ETASrcId",
+      "term": "livewire.ETASrcId"
+    },
+    {
+      "aggType": "value",
+      "desc": "ETACause",
+      "enabled": true,
+      "name": "ETACause",
+      "term": "livewire.ETACause"
+    },
+    {
+      "aggType": "value",
+      "desc": "flowStartIso8601",
+      "enabled": true,
+      "name": "flowStartIso8601",
+      "term": "livewire.flowStartIso8601"
+    },
+    {
+      "aggType": "value",
+      "desc": "flowLastIso8601",
+      "enabled": true,
+      "name": "flowLastIso8601",
+      "term": "livewire.flowLastIso8601"
+    },
+    {
+      "aggType": "value",
+      "desc": "isTCP",
+      "enabled": true,
+      "name": "isTCP",
+      "term": "livewire.isTCP"
+    },
+    {
+      "aggType": "value",
+      "desc": "intervalStartTime",
+      "enabled": true,
+      "name": "intervalStartTime",
+      "term": "livewire.intervalStartTime"
+    },
+    {
+      "aggType": "value",
+      "desc": "intervalEndTime",
+      "enabled": true,
+      "name": "intervalEndTime",
+      "term": "livewire.intervalEndTime"
+    },
+    {
+      "aggType": "value",
+      "desc": "sae",
+      "enabled": true,
+      "name": "sae",
+      "term": "livewire.sae"
+    },
+    {
+      "aggType": "value",
+      "desc": "dae",
+      "enabled": true,
+      "name": "dae",
+      "term": "livewire.dae"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsSha1",
+      "enabled": true,
+      "name": "tlsSha1",
+      "term": "livewire.tlsSha1"
+    },
+    {
+      "aggType": "value",
+      "desc": "sshSSignature",
+      "enabled": true,
+      "name": "sshSSignature",
+      "term": "livewire.sshSSignature"
+    },
+    {
+      "aggType": "value",
+      "desc": "sshCSignature",
+      "enabled": true,
+      "name": "sshCSignature",
+      "term": "livewire.sshCSignature"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsIssuer",
+      "enabled": true,
+      "name": "tlsIssuer",
+      "term": "livewire.tlsIssuer"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsSubject",
+      "enabled": true,
+      "name": "tlsSubject",
+      "term": "livewire.tlsSubject"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsNotBefore",
+      "enabled": true,
+      "name": "tlsNotBefore",
+      "term": "livewire.tlsNotBefore"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsNotAfter",
+      "enabled": true,
+      "name": "tlsNotAfter",
+      "term": "livewire.tlsNotAfter"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsCertSNI",
+      "enabled": true,
+      "name": "tlsCertSNI",
+      "term": "livewire.tlsCertSNI"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsJa3",
+      "enabled": true,
+      "name": "tlsJa3",
+      "term": "livewire.tlsJa3"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsJa3s",
+      "enabled": true,
+      "name": "tlsJa3s",
+      "term": "livewire.tlsJa3s"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsChloSNI",
+      "enabled": true,
+      "name": "tlsChloSNI",
+      "term": "livewire.tlsChloSNI"
+    },
+    {
+      "aggType": "value",
+      "desc": "dnsRCode",
+      "enabled": true,
+      "name": "dnsRCode",
+      "term": "livewire.dnsRCode"
+    },
+    {
+      "aggType": "value",
+      "desc": "dnsQName",
+      "enabled": true,
+      "name": "dnsQName",
+      "term": "livewire.dnsQName"
+    },
+    {
+      "aggType": "value",
+      "desc": "tlsChloCipherSuites",
+      "enabled": true,
+      "name": "tlsChloCipherSuites",
+      "term": "livewire.tlsChloCipherSuites"
+    },
+    {
+      "aggType": "value",
+      "desc": "artConnectionSetupTimeSum",
+      "enabled": true,
+      "name": "artConnectionSetupTimeSum",
+      "term": "livewire.artConnectionSetupTimeSum"
+    },
+    {
+      "aggType": "value",
+      "desc": "flowUuid",
+      "enabled": true,
+      "name": "flowUuid",
+      "term": "livewire.flowUuid"
+    },
+    {
+      "aggType": "value",
+      "desc": "rollupUuids",
+      "enabled": true,
+      "name": "rollupUuids",
+      "term": "livewire.rollupUuids"
     }
   ],
   "id": "livewire_netflow",
