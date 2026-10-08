@@ -32,3 +32,5 @@ Contains a script to generate the app mappings, see the readme for more informat
 ## README
 
 Refer to the individual README's in each app.
+
+### Copyright (c) 2026 BlueCat Networks, Inc. All rights reserved.
