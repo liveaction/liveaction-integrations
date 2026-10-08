@@ -18,8 +18,8 @@ This repository contains integration components for various LiveAction products,
 To use any of the integrations, refer to the respective folder for detailed setup instructions and usage examples.
 
 ### Prerequisites
-- [LiveNX](https://www.liveaction.com/livenx/)
-- [LiveWire](https://www.liveaction.com/livewire/)
+- [LiveNX](https://bluecatnetworks.com/products/livenx/)
+- [LiveWire](https://bluecatnetworks.com/products/livewire/)
 - [Splunk](https://www.splunk.com/)
 
 ## License

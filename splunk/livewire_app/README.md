@@ -1,5 +1,4 @@
 # LiveWire App for Splunk
----
 
 ## Purpose
 
@@ -8,6 +7,10 @@
 The LiveWire App for Splunk has several premade dashboards which utilize telemetry sent from a LiveWire Packet Capture device. The dashboards may serve useful in many situations, including Network Performance Monitoring and Security Operations.
 
 Many of the provided graphics may provide the ability to click-through to the LiveWire web application to either perform more detailed analysis or download relevant packets.
+
+Clicking a value opens the LiveWire Cross-Launch page in a new tab. It lists every LiveWire that sent data in the selected time range, with the LiveWires that saw the clicked traffic listed first. Click "Open" under "Forensic search" or "Distributed forensic search" to open that LiveWire's forensic search with the matching filter and time range.
+
+As of 26.3.0, this app now ships with dashboards to ingest open telemetry from LiveWire.
 
 ### LiveNX
 
@@ -35,6 +38,16 @@ A default configuration may look like:
 
 NOTE: Be sure that ports are not blocked by a firewall and are approved by your security team.
 
+### LiveWire OTLP Alerts
+
+The "Security Alerts" dashboard shows security alerts that LiveWire sends over OTLP. To receive them in Splunk:
+
+1. Create an HEC token in Splunk.
+2. Install **Splunk Connect for OTLP** - [splunkbase link](https://splunkbase.splunk.com/app/8704)
+3. Open the gRPC port in your firewall. Check the add-on docs for its default port. The OTLP standard port is 4317, this can be configured in the add-on's settings UI.
+4. In Splunk Web, go to Settings -> Data Inputs and add an OTLP input named `livewire_otlp`.
+5. Send the events. Be sure to configure liveflow's otel settings to send to splunk. LiveWire must be running 26.3.0 or later to send otel events to Splunk.
+
 ## Architecture
 
 The **splunk_app_stream_ipfix_livewire** add-on must be installed on the forwarder.
@@ -53,11 +66,11 @@ Restart your splunk instance.
 
 ## Author
 
-LiveAction
+BlueCat
 
 ## Support
 
 Developer-Supported
-<splunk-support@liveaction.com>
+<la-support@bluecatnetworks.com>
 
-### Copyright (c) 2024 LiveAction , Inc. All rights reserved.
+### Copyright (c) 2026 BlueCat Networks , Inc. All rights reserved.

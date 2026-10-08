@@ -23,7 +23,7 @@ Splunk imports apps with a *.tgz file extension. This is how it should be distri
 
 Run `tar -cvzf splunk_app_stream_ipfix_livewire.tgz splunk_app_stream_ipfix_livewire/`
 
-Run `tar -cvzf liveaction_app.tgz liveaction_app`
+Run `tar -cvzf livewire_app.tgz livewire_app`
 
 ## /Src
 
@@ -32,3 +32,5 @@ Contains a script to generate the app mappings, see the readme for more informat
 ## README
 
 Refer to the individual README's in each app.
+
+### Copyright (c) 2026 BlueCat Networks, Inc. All rights reserved.

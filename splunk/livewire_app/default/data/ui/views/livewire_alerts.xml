@@ -1,0 +1,124 @@
+<form version="1.1" theme="dark">
+  <label>Security Alerts</label>
+  <description>Shows security alerts sent by LiveWire over OTLP. Click on any data to cross-launch to a LiveWire.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-1h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="lw_source" searchWhenChanged="true">
+      <label>LiveWire Sources</label>
+      <fieldForLabel>host.ip</fieldForLabel>
+      <fieldForValue>host.ip</fieldForValue>
+      <search>
+        <query>`livewire_otlp` | stats count by host.ip</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <delimiter>,</delimiter>
+    </input>
+  </fieldset>
+  <search id="alerts">
+    <query>`livewire_otlp` | search host.ip IN($lw_source$) | fillnull value="" mitre_category | stats count by saddr daddr sport dport mitre_category message</query>
+    <earliest>$earliest$</earliest>
+    <latest>$latest$</latest>
+  </search>
+  <row>
+    <panel>
+      <title>Top Source Addresses</title>
+      <chart>
+        <search base="alerts">
+          <query>stats sum(count) AS count by saddr | sort -count | head 10</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.src_ip=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Destination Addresses</title>
+      <chart>
+        <search base="alerts">
+          <query>stats sum(count) AS count by daddr | sort -count | head 10</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.dest_ip=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Source Ports</title>
+      <chart>
+        <search base="alerts">
+          <query>stats sum(count) AS count by sport | sort -count | head 10</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.src_port=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Destination Ports</title>
+      <chart>
+        <search base="alerts">
+          <query>stats sum(count) AS count by dport | sort -count | head 10</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.dest_port=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top MITRE Categories</title>
+      <chart>
+        <search base="alerts">
+          <query>where mitre_category!="" | stats sum(count) AS count by mitre_category | sort -count | head 10</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.mitre_category=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Alerts</title>
+      <chart>
+        <search base="alerts">
+          <query>stats sum(count) AS count by message | sort -count | head 10</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.message=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Recent Alerts</title>
+      <table>
+        <search>
+          <query>`livewire_otlp` | search host.ip IN($lw_source$) | head 100 | eval timestamp=strftime(_time, "%Y-%m-%d %H:%M:%S"), t_start=_time-300, t_end=_time+300 | table timestamp saddr daddr message description sport dport t_start t_end</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <fields>["timestamp","saddr","daddr","message","description"]</fields>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$row.t_start$&amp;latest=$row.t_end$&amp;form.src_ip=$row.saddr$&amp;form.dest_ip=$row.daddr$&amp;form.src_port=$row.sport$&amp;form.dest_port=$row.dport$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

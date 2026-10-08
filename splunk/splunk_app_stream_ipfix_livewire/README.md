@@ -1,5 +1,4 @@
 # Splunk App Stream IPFIX LiveWire
----
 
 ## Purpose
 
@@ -13,23 +12,13 @@ The following official splunk apps are also required to ingest netflow/ipfix:
 1. **Splunk App for Stream on Search Heads** - [splunkbase link](http://splunkbase.splunk.com/app/1809)
 2. **Splunk Add-On for Stream Wire Data** - [splunkbase link](http://splunkbase.splunk.com/app/5234)
 
-You will also need a LiveWire to send telemetry, please contact <sales@liveaction.com> for information on purchasing a LiveWire product.
+You will also need a LiveWire to send telemetry, please visit [our website](https://bluecatnetworks.com/contact-us/) for information on purchasing a LiveWire product.
 
 #### Sending Telemetry from LiveWire
 
 In the Captures tab, create a new Liveflow Capture.
-
-Use the following settings as a baseline in your Liveflow Capture:
-- Capture to disk - enabled
-- Capture Statistics
-- - Timeline statistics - enabled
-- - Application statistics - enabled
-- Packet File Indexing
-- - Application - enabled
-- Records
-- - LiveNX Telemtry - enabled
-- - - Server - the ip of your forwarder with the port of your netflow receiver. This information is configured in `$STREAMFWD_HOME/local/streamfwd.conf`.
-- - - All relevant options enabled
+- To receive security alerts, enable the OpenTelemetry (LiveFlow Alerts) output.
+- To receive network and application data via ipfix, enable the IPFIX Telemetry output.
 
 Start your capture!
 
@@ -51,11 +40,11 @@ Restart your Splunk instance. `$SPLUNK_HOME/bin/splunk restart`
 
 ## Author
 
-LiveAction
+BlueCat Networks
 
 ## Support
 
 Developer-Supported
-<splunk-support@liveaction.com>
+<la-support@bluecatnetworks.com>
 
-#### Copyright (c) 2024 LiveAction , Inc. All rights reserved.
+### Copyright (c) 2026 BlueCat Networks, Inc. All rights reserved.

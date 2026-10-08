@@ -1,6 +1,6 @@
 # WARNING
 
-This file is not to be included in releases, this is a script for generating liveaction_app/lookups/livewire_mappings.csv
+This file is not to be included in releases, this is a script for generating livewire_app/lookups/livewire_mappings.csv
 
 ### How to run
 
