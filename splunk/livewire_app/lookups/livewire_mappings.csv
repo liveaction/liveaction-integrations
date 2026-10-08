@@ -259,6 +259,49 @@ Zattoo,13,428
 ZenDesk,13,685
 Zillow,13,654
 Zscaler,13,1275
+CNET,13,645
+DICOM,13,76
+WeTransfer,13,712
+Amazon S3,13,1248
+EtherIP,1,97
+Proton VPN,13,1277
+FTP,3,21
+IPsec,13,9
+IRC,3,194
+MapleStory,13,448
+RealMedia,13,507
+RSVP,1,46
+Speedtest,13,692
+Tudou,13,630
+WAP-WSP,3,9200
+Youku,13,623
+FTP,3,21
+IPsec,13,9
+IRC,3,194
+MapleStory,13,448
+RealMedia,13,507
+RSVP,1,46
+Speedtest,13,692
+Tudou,13,630
+WAP-WSP,3,9200
+Youku,13,623
+FTP,3,21
+IPsec,13,9
+IRC,3,194
+MapleStory,13,448
+RealMedia,13,507
+RSVP,1,46
+Speedtest,13,692
+Tudou,13,630
+WAP-WSP,3,9200
+Youku,13,623
+Link-Local Multicast Name Resolution,13,1246
+LWAPP,13,378
+NDMP,3,10000
+Netflix,13,457
+Sanity,3,643
+USA Today,13,679
+Livedoor,13,631
 10upload-com,6,16777187
 123upload,6,16777186
 123upload-pl,6,16777185
@@ -2826,3 +2869,1178 @@ United Airlines,6,16774831
 WPS Office,6,16774830
 Yalla Services,6,16774829
 YoHo,6,16774828
+4based,6,16774827
+7-Eleven,6,16774826
+Abu Dhabi Government Services,6,16774825
+Adskeeper,6,16774824
+ADTv,6,16774823
+Aegean Airlines,6,16774822
+Air Canada,6,16774821
+Air China,6,16774820
+Air India,6,16774819
+Ashley Madison,6,16774818
+Asphalt Legends Unite,6,16774817
+Avianca,6,16774816
+Babbel,6,16774815
+Builder-io,6,16774814
+CAPWAP,6,16774813
+Careem,6,16774812
+Cartoon Network,6,16774811
+CIBN Services,6,16774810
+CleanBrowsing,6,16774809
+CNIP,6,16774808
+Cricbuzz,6,16774807
+Dahua Services,6,16774806
+Delivery Hero,6,16774805
+DPD,6,16774804
+Dumpert,6,16774803
+Ethernet Global Data,6,16774802
+EtherSIO,6,16774801
+ESPNcricinfo,6,16774800
+ExoClick,6,16774799
+GitLab,6,16774798
+Google Fonts,6,16774797
+GungHo,6,16774796
+HART-IP,6,16774795
+Hily,6,16774794
+HSRP,6,16774793
+IBM Cloud,6,16774792
+IGN,6,16774791
+IGT PlaySports,6,16774790
+IKEA,6,16774789
+Imou,6,16774788
+Innova Group Services,6,16774787
+Ko-fi,6,16774786
+LaLiga,6,16774785
+LIAPP,6,16774784
+LISP,6,16774783
+Live Me,6,16774782
+Loft Services,6,16774781
+M3UA,6,16774780
+MainStreaming TV,6,16774779
+Manga BANG,6,16774778
+Mediastream,6,16774777
+Miaozhen Systems,6,16774776
+MicroAd,6,16774775
+Mobile Voip,6,16774774
+New Yorker,6,16774773
+NLZiet,6,16774772
+noon,6,16774771
+NPO Radio,6,16774770
+NPO Services,6,16774769
+NPO Start,6,16774768
+Onething Technologies,6,16774767
+OPC Classic,6,16774766
+OpenDNS,6,16774765
+Oray,6,16774764
+Perfect World International,6,16774763
+Qatar Airways,6,16774762
+Qonversion,6,16774761
+RaiNews,6,16774760
+RTL Group Services,6,16774759
+S1 Application Protocol,6,16774758
+S7comm Plus,6,16774757
+Sauce Labs,6,16774756
+Sawa,6,16774755
+EtherSBUS,6,16774754
+Shadow Tech,6,16774753
+SLMP,6,16774752
+Sportradar,6,16774751
+Sprocket,6,16774750
+STARZ ON,6,16774749
+Storyblok,6,16774748
+Storyteller,6,16774747
+SwissDisk,6,16774746
+Talabat,6,16774745
+TapTap,6,16774744
+Teppen,6,16774743
+Text Inc Services,6,16774742
+the ENTERTAINER,6,16774741
+Thunder VPN,6,16774740
+True,6,16774739
+Two-Way Active Measurement Protocol,6,16774738
+Twiago,6,16774737
+U-Next,6,16774736
+Viaplay,6,16774735
+Videoland,6,16774734
+Vipps,6,16774733
+Voetbal International,6,16774732
+VPN Nederland,6,16774731
+XinDong Services,6,16774730
+Xunlei Feitong Shuyi,6,16774729
+Yahoo News,6,16774728
+Yahoo Weather,6,16774727
+Yalla Services,6,16774726
+Zello,6,16774725
+Zello,6,16774725
+ZEP,6,16774724
+Znipe TV,6,16774723
+ZoomInfo,6,16774722
+ZScaler Client Connector,6,16774721
+Zuiyou,6,16774720
+3asafeer,6,16774719
+3P Learning Services,6,16774718
+Adobe Firefly,6,16774717
+Air New Zealand,6,16774716
+Alef Education,6,16774715
+Apple Account,6,16774714
+Apple GameKit,6,16774713
+Apple Update,6,16774712
+Askfm,6,16774711
+Automattic Services,6,16774710
+Beeper,6,16774709
+Bending Spoons Services,6,16774708
+Bixby,6,16774707
+Chartable,6,16774706
+Clapper,6,16774705
+CoHost Podcasting,6,16774704
+Cyberlink Services,6,16774703
+Deliveroo,6,16774702
+Doctolib,6,16774701
+DouBao,6,16774700
+Embark Studios,6,16774699
+Embark Studios,6,16774699
+Esaad Card,6,16774698
+Fazaa,6,16774697
+Flower Ave Services,6,16774696
+FunPlus,6,16774695
+Gen Digital Services,6,16774694
+Google Firebase,6,16774693
+Google Gemini,6,16774692
+Google reCaptcha,6,16774691
+GoPro Services,6,16774690
+Grand Theft Auto V,6,16774689
+Grand Theft Auto V,6,16774689
+HitzMaker,6,16774688
+HM,6,16774687
+Holla,6,16774686
+Ideagen Services,6,16774685
+JOYY Services,6,16774684
+Kahoot,6,16774683
+Kii Corporation,6,16774682
+KineMaster,6,16774681
+Kiri Engine,6,16774680
+LaMusica,6,16774679
+LAZEL Services,6,16774678
+Liberty Global Services,6,16774677
+Majestic RP,6,16774676
+Majestic RP,6,16774676
+Majid Al Futtaim Services,6,16774675
+Mega TV,6,16774674
+Microsoft Clarity,6,16774673
+Microsoft Copilot,6,16774672
+Microsoft Update,6,16774671
+Mitake,6,16774670
+MyEdit ,6,16774669
+Next Generation Application Protocol,6,16774668
+Ola Party Services,6,16774667
+Onde,6,16774666
+Orange Services,6,16774665
+Party Star,6,16774664
+PayBy,6,16774663
+Perplexity,6,16774662
+Poki,6,16774661
+Polycam,6,16774660
+PureVPN,6,16774659
+Qiniu Cloud,6,16774658
+Ragnarok,6,16774657
+Raz-Kids,6,16774656
+Radio Link Simulation,6,16774655
+Rockstar Games,6,16774654
+RunwayML,6,16774653
+Sardine,6,16774652
+Scaniverse,6,16774651
+Sevenbank,6,16774650
+SHARE Rewards,6,16774649
+Signal Lab VPN Services,6,16774648
+Signal Lab VPN Services,6,16774648
+Smiles,6,16774647
+Snap for Developers,6,16774646
+South African Airways,6,16774645
+Spanish Broadcasting System,6,16774644
+Swiss International Air Lines,6,16774643
+Ticketmaster,6,16774642
+Tron Services,6,16774641
+Troop Messenger,6,16774640
+ViSenze,6,16774639
+VO Secure Player,6,16774638
+Wooga Services,6,16774637
+YI Technology,6,16774636
+YouNow,6,16774635
+Yubo,6,16774634
+Zalando,6,16774633
+Ziggo Services,6,16774632
+2e Systems,6,16774631
+3Q,6,16774630
+Authentication Header,6,16774629
+Anthropic,6,16774628
+Appice,6,16774627
+Apple Books,6,16774626
+Apple Fitness,6,16774625
+Apple Siri,6,16774624
+Apple Static,6,16774623
+Apple Remote Desktop,6,16774622
+Asiana Airlines,6,16774621
+Beyond Trust,6,16774620
+CarTrawler,6,16774619
+Cashman Casino,6,16774618
+Chick-fil-A,6,16774617
+Claude,6,16774616
+Croatia Airlines,6,16774615
+CS50,6,16774614
+CS50 Video Player,6,16774613
+DeepSeek,6,16774612
+DEGIRO,6,16774611
+Discourse,6,16774610
+Disney Streaming,6,16774609
+DramaBox,6,16774608
+Ease Live,6,16774607
+ElevenLabs,6,16774606
+Encapsulating Security Payload,6,16774605
+EVA Air,6,16774604
+evergent,6,16774603
+EveryMundo,6,16774602
+Firsty,6,16774601
+Forter,6,16774600
+GoodShort,6,16774599
+Google Play Books,6,16774598
+Guns of Glory,6,16774597
+Hunt Showdown,6,16774596
+Hunt Showdown,6,16774596
+Ideogram,6,16774595
+iResearch Consulting Group,6,16774594
+Jasper AI,6,16774593
+KakaoCloud,6,16774592
+Kakao Entertainment,6,16774591
+Kakaogames,6,16774590
+Kakao Mobility,6,16774589
+Kayak,6,16774588
+Khoros,6,16774587
+Knight Online,6,16774586
+Knight Online,6,16774586
+Kollective Technology,6,16774585
+Kollective Technology,6,16774585
+Ladbrokes,6,16774584
+Lapse,6,16774583
+LiveAdmins,6,16774582
+LOT Polish Airlines,6,16774581
+Luma Labs,6,16774580
+Matomo,6,16774579
+MAVLink,6,16774578
+Meta AI,6,16774577
+Microsoft 365,6,16774576
+Microsoft Intune,6,16774575
+Microsoft Power Platform,6,16774574
+Migu Kuaiyou,6,16774573
+Migu Video,6,16774572
+Nami ML,6,16774571
+Nexon Services,6,16774570
+Notion,6,16774569
+NTTGame Services,6,16774568
+Okta,6,16774567
+OnlyFans TV,6,16774566
+Ookla Speedtest,6,16774565
+Oqupie,6,16774564
+Party Star,6,16774563
+Priceline,6,16774562
+Product Madness Services,6,16774561
+RealityScan,6,16774560
+Recurly,6,16774559
+Remini,6,16774558
+Sanlih Group,6,16774557
+SAS Airlines,6,16774556
+Sistema Brasileiro de Televisao,6,16774555
+SBT Mais,6,16774554
+Sendbird,6,16774553
+ShortMax,6,16774552
+Sinch,6,16774551
+Splice,6,16774550
+Spring Technologies,6,16774549
+State of Survival,6,16774548
+Suno AI,6,16774547
+TAP Airlines,6,16774546
+TaxiF,6,16774545
+Tencent Meeting,6,16774544
+TradPlus,6,16774543
+Tripomatic,6,16774542
+Underdog Media,6,16774541
+Zapier,6,16774540
+Zowie,6,16774539
+BIGO Services,6,16774538
+Block Craft 3D,6,16774537
+Google App Engine,6,16774536
+Party Star,6,16774535
+Shalltry Group,6,16774534
+Sweet Selfie,6,16774533
+Warhammer TV,6,16774532
+Xiaomi ShareMe,6,16774531
+Youtube Music,6,16774530
+ABTasty,6,16774529
+AFK Journey,6,16774528
+Amadeus,6,16774527
+Amazon Interactive Video Services,6,16774526
+Automation Message Specification,6,16774525
+Ankama Games,6,16774524
+Annuoxun Network,6,16774523
+Aylo Services,6,16774522
+Bitmovin,6,16774521
+Bluesky,6,16774520
+Brightspot,6,16774519
+Broadcom Services,6,16774518
+Brussels Airlines,6,16774517
+Canva,6,16774516
+Chai,6,16774515
+CharacterAI,6,16774514
+Cineverse,6,16774513
+Comera,6,16774512
+Copa Airlines,6,16774511
+Covatic,6,16774510
+CuriosityStream,6,16774509
+Day One,6,16774508
+Disney Advertising,6,16774507
+EAPOL,6,16774506
+EA Sports FC Mobile,6,16774505
+EdgeCenter-Ru,6,16774504
+EDIS Services,6,16774503
+Egyptair,6,16774502
+Fandor,6,16774501
+Farlight Games,6,16774500
+Fatshark Games,6,16774499
+Firework,6,16774498
+Firstory,6,16774497
+FMOD,6,16774496
+Frequency Networks,6,16774495
+GenXi,6,16774494
+GeoNetworking,6,16774493
+GetUI,6,16774492
+Google Play Games,6,16774491
+Gran Turismo,6,16774490
+GSI Services,6,16774489
+Honor of Kings,6,16774488
+HUMAN,6,16774487
+IEC 60870-5 104,6,16774486
+IEC 62439 HSR,6,16774485
+IEC 62439 PRP,6,16774484
+Innersloth Services,6,16774483
+JioHotstar,6,16774482
+Jujutsu Kaisen Phantom Parade,6,16774481
+Kakaogames,6,16774480
+Kakao Page,6,16774479
+Kick,6,16774478
+Kidoodle-TV,6,16774477
+KKBOX,6,16774476
+Koala,6,16774475
+LiveKit,6,16774474
+Magnolia,6,16774473
+Marfeel,6,16774472
+Marigold,6,16774471
+Matchpoint TV,6,16774470
+Matter,6,16774469
+Maze,6,16774468
+MisCabling Protocol,6,16774467
+MGM Plus,6,16774466
+Microsoft Azure PlayFab,6,16774465
+Microsoft Movies and TV,6,16774464
+Miniclip Services,6,16774463
+Minute Media Services,6,16774462
+MobTech,6,16774461
+Monster Hunter,6,16774460
+Netlify,6,16774459
+NewToolsWorks,6,16774458
+NewToolsWorks Services,6,16774457
+NordPass,6,16774456
+OpenTable,6,16774455
+OpenWeather,6,16774454
+Parsec,6,16774453
+Parsec,6,16774453
+Pizza Hut,6,16774452
+Pocket Casts,6,16774451
+PolyAI,6,16774450
+QQMail,6,16774449
+QuestMobile,6,16774448
+Red Bull Services,6,16774447
+Red Bull TV,6,16774446
+Roku Advertising,6,16774445
+Roku Services,6,16774444
+Roku Streaming,6,16774443
+Rooter,6,16774442
+Scripps Services,6,16774441
+Shopee,6,16774440
+SimpleX Chat,6,16774439
+Some/IP,6,16774438
+SoundStack,6,16774437
+Sourcepoint,6,16774436
+SSH T PROJECT Services,6,16774435
+SSH T PROJECT VPN,6,16774434
+Subway,6,16774433
+Taco Bell,6,16774432
+Talkie AI,6,16774431
+Tapo,6,16774430
+Tawasal,6,16774429
+Tencent Sports,6,16774428
+TNT Sports Services,6,16774427
+TopTop,6,16774426
+TP Link Services,6,16774425
+Transsion Services,6,16774424
+Trbo,6,16774423
+Trend Micro Services,6,16774422
+Tuya Smart,6,16774421
+TV4 Media,6,16774420
+TV Azteca,6,16774419
+TVB Anywhere,6,16774418
+TVB News,6,16774417
+TVB Services,6,16774416
+VK Services,6,16774415
+Vultr,6,16774414
+Warcraft Rumble,6,16774413
+Warhammer 40000 Darktide,6,16774412
+Warhammer 40000 Darktide,6,16774412
+Wondershare Services,6,16774411
+Yandex Alice,6,16774410
+Yandex Static,6,16774409
+Yum Brands Services,6,16774408
+Zego,6,16774407
+Zenoh,6,16774406
+Zepp Health,6,16774405
+360 Mobile Security,6,16774404
+Ably Realtime,6,16774403
+Absolute Software Services,6,16774402
+AdGuard DNS,6,16774401
+AdGuard Services,6,16774400
+AETV,6,16774399
+Akta,6,16774398
+AliDNS,6,16774397
+Anker Services,6,16774396
+Anymind Group,6,16774395
+Avira Antivirus,6,16774394
+Betternet,6,16774393
+BIGO Services,6,16774392
+Block Craft 3D,6,16774391
+CHECK24,6,16774390
+Cisco Services,6,16774389
+CIRA,6,16774388
+Clash Royal,6,16774387
+Cloudflare DNS,6,16774386
+Cloud Imperium Games,6,16774385
+Cloud Imperium Games,6,16774385
+Commanders Act,6,16774384
+ComodoUnite,6,16774383
+ComScore,6,16774382
+Dahua Security,6,16774381
+Dash VPN,6,16774380
+DataWeb Global,6,16774379
+Daum Services,6,16774378
+Dellmont Services,6,16774377
+Deutsche Post,6,16774376
+DHCP Failover,6,16774375
+DHL,6,16774374
+DMM-com,6,16774373
+DNS4EU,6,16774372
+DNSPod,6,16774371
+DNS SB,6,16774370
+Dreamline,6,16774369
+Easy VPN,6,16774368
+eFootball,6,16774367
+Electronic Arts,6,16774366
+Elex Technology,6,16774365
+Embark Studios,6,16774364
+Entain Services,6,16774363
+Eporner,6,16774362
+Ethiopian Airlines,6,16774361
+eufyMake,6,16774360
+eufy Services,6,16774359
+Expedia Group Services,6,16774358
+Fandango at Home,6,16774357
+Fandango Media,6,16774356
+FAST Speed Test,6,16774355
+Framer,6,16774354
+Friendica,6,16774353
+FromSoftware Services,6,16774352
+Funkwhale,6,16774351
+GameKit,6,16774350
+Gcore DNS,6,16774349
+Google App Engine,6,16774348
+Google Assistant,6,16774347
+Google NotebookLM,6,16774346
+Google Public DNS,6,16774345
+Hago,6,16774344
+HMA VPN,6,16774343
+Hotspot VPN,6,16774342
+Hyphanet,6,16774341
+Hyphanet,6,16774341
+ICQ Webchat,6,16774340
+IEEE 80211,6,16774339
+IP Multimedia Subsystem,6,16774338
+Innervate,6,16774337
+Intuition Machines,6,16774336
+Isekai Saga Awaken,6,16774335
+Ketch Kloud,6,16774334
+Konami Services,6,16774333
+Last War Survival,6,16774332
+Le concierge,6,16774331
+Lemmy,6,16774330
+LilithGames,6,16774329
+LinkVPN,6,16774328
+Ludo King,6,16774327
+Lumen Technoloies,6,16774326
+LVFS Services,6,16774325
+MACsec,6,16774324
+MapMyRun,6,16774323
+MediaForEurope,6,16774322
+Mediaset Infinity,6,16774321
+Melon,6,16774320
+Mintlify,6,16774319
+Mi Video,6,16774318
+Momo,6,16774317
+MotoAmerica,6,16774316
+MultimediaMessaging,6,16774315
+NextDNS,6,16774314
+Nokia Services,6,16774313
+Norton Antivirus,6,16774312
+NTLM,6,16774311
+onX Maps Services,6,16774310
+Optimove,6,16774309
+Oracle Cloud,6,16774308
+Oray,6,16774307
+Oscar,6,16774306
+OutlookMobile,6,16774305
+Party Star,6,16774304
+Phrase,6,16774303
+Plants vs Zombies 2,6,16774302
+Play JP,6,16774301
+Pou,6,16774300
+PS3,6,16774299
+PXR Services,6,16774298
+Quillbot,6,16774297
+Qwen AI,6,16774296
+Rare Services,6,16774295
+Readme,6,16774294
+Reown,6,16774293
+RocketVPN,6,16774292
+Rogue Company,6,16774291
+ROS,6,16774290
+RTB House,6,16774289
+Ruby Game Studio,6,16774288
+Samsung Max Privacy VPN,6,16774287
+Screeb,6,16774286
+Seal One,6,16774285
+Sea of Thieves,6,16774284
+Shalltry Group,6,16774283
+Shenzhen Airlines,6,16774282
+ShowIt,6,16774281
+Shumei,6,16774280
+Spark Live,6,16774279
+Speed VPN Inventive,6,16774278
+Statsig,6,16774277
+Stratum Mining Version 2,6,16774276
+Substack,6,16774275
+Subway Surfers,6,16774274
+SuperVPN,6,16774273
+SuperVPN,6,16774273
+SuperVPN by Cheng,6,16774272
+Surfeasy,6,16774271
+Swann Services,6,16774270
+Sweet Selfie,6,16774269
+Thai Airways,6,16774268
+Throne and Liberty,6,16774267
+Throne and Liberty,6,16774267
+Total Security Services,6,16774266
+Total VPN,6,16774265
+Touch VPN,6,16774264
+TPKT,6,16774263
+TP-Link Smart Home,6,16774262
+Treasure Data,6,16774261
+Trend Micro VPN,6,16774260
+TVer,6,16774259
+UncensoredDNS,6,16774258
+Unity Ads,6,16774257
+Userpilot,6,16774256
+Volantio,6,16774255
+VPN in Touch,6,16774254
+VPN Master,6,16774253
+VPN Proxy Master Unlimited,6,16774252
+Warhammer TV,6,16774251
+Warhammer Vermintide 2,6,16774250
+Warlander,6,16774249
+Warlander,6,16774249
+Watt Games,6,16774248
+WebDAV,6,16774247
+Weiling Technologies,6,16774246
+Where Winds Meet,6,16774245
+Wildscapes,6,16774244
+World of Tanks,6,16774243
+WOWOW,6,16774242
+WTFast,6,16774241
+Xiaomi ShareMe,6,16774240
+Yandex DNS,6,16774239
+YouCam Makeup,6,16774238
+Youtube Music,6,16774237
+ZeroTier,6,16774236
+ZeroTier,6,16774236
+Zeta Global,6,16774235
+360 Mobile Security,6,16774234
+Ably Realtime,6,16774233
+Absolute Software Services,6,16774232
+AdGuard DNS,6,16774231
+AdGuard Services,6,16774230
+AETV,6,16774229
+Akta,6,16774228
+AliDNS,6,16774227
+Anker Services,6,16774226
+Anymind Group,6,16774225
+Avira Antivirus,6,16774224
+Betternet,6,16774223
+BIGO Services,6,16774222
+Block Craft 3D,6,16774221
+CHECK24,6,16774220
+Cisco Services,6,16774219
+CIRA,6,16774218
+Clash Royal,6,16774217
+Cloudflare DNS,6,16774216
+Cloud Imperium Games,6,16774215
+Cloud Imperium Games,6,16774215
+Commanders Act,6,16774214
+ComodoUnite,6,16774213
+ComScore,6,16774212
+Dahua Security,6,16774211
+Dash VPN,6,16774210
+DataWeb Global,6,16774209
+Daum Services,6,16774208
+Dellmont Services,6,16774207
+Deutsche Post,6,16774206
+DHCP Failover,6,16774205
+DHL,6,16774204
+DMM-com,6,16774203
+DNS4EU,6,16774202
+DNSPod,6,16774201
+DNS SB,6,16774200
+Dreamline,6,16774199
+Easy VPN,6,16774198
+eFootball,6,16774197
+Electronic Arts,6,16774196
+Elex Technology,6,16774195
+Embark Studios,6,16774194
+Entain Services,6,16774193
+Eporner,6,16774192
+Ethiopian Airlines,6,16774191
+eufyMake,6,16774190
+eufy Services,6,16774189
+Expedia Group Services,6,16774188
+Fandango at Home,6,16774187
+Fandango Media,6,16774186
+FAST Speed Test,6,16774185
+Framer,6,16774184
+Friendica,6,16774183
+FromSoftware Services,6,16774182
+Funkwhale,6,16774181
+GameKit,6,16774180
+Gcore DNS,6,16774179
+Google App Engine,6,16774178
+Google Assistant,6,16774177
+Google NotebookLM,6,16774176
+Google Public DNS,6,16774175
+Hago,6,16774174
+HMA VPN,6,16774173
+Hotspot VPN,6,16774172
+Hyphanet,6,16774171
+Hyphanet,6,16774171
+ICQ Webchat,6,16774170
+IEEE 80211,6,16774169
+IP Multimedia Subsystem,6,16774168
+Innervate,6,16774167
+Intuition Machines,6,16774166
+Isekai Saga Awaken,6,16774165
+Ketch Kloud,6,16774164
+Konami Services,6,16774163
+Last War Survival,6,16774162
+Le concierge,6,16774161
+Lemmy,6,16774160
+LilithGames,6,16774159
+LinkVPN,6,16774158
+Ludo King,6,16774157
+Lumen Technoloies,6,16774156
+LVFS Services,6,16774155
+MACsec,6,16774154
+MapMyRun,6,16774153
+MediaForEurope,6,16774152
+Mediaset Infinity,6,16774151
+Melon,6,16774150
+Mintlify,6,16774149
+Mi Video,6,16774148
+Momo,6,16774147
+MotoAmerica,6,16774146
+MultimediaMessaging,6,16774145
+NextDNS,6,16774144
+Nokia Services,6,16774143
+Norton Antivirus,6,16774142
+NTLM,6,16774141
+onX Maps Services,6,16774140
+Optimove,6,16774139
+Oracle Cloud,6,16774138
+Oray,6,16774137
+Oscar,6,16774136
+OutlookMobile,6,16774135
+Party Star,6,16774134
+Phrase,6,16774133
+Plants vs Zombies 2,6,16774132
+Play JP,6,16774131
+Pou,6,16774130
+PS3,6,16774129
+PXR Services,6,16774128
+Quillbot,6,16774127
+Qwen AI,6,16774126
+Rare Services,6,16774125
+Readme,6,16774124
+Reown,6,16774123
+RocketVPN,6,16774122
+Rogue Company,6,16774121
+ROS,6,16774120
+RTB House,6,16774119
+Ruby Game Studio,6,16774118
+Samsung Max Privacy VPN,6,16774117
+Screeb,6,16774116
+Seal One,6,16774115
+Sea of Thieves,6,16774114
+Shalltry Group,6,16774113
+Shenzhen Airlines,6,16774112
+ShowIt,6,16774111
+Shumei,6,16774110
+Spark Live,6,16774109
+Speed VPN Inventive,6,16774108
+Statsig,6,16774107
+Stratum Mining Version 2,6,16774106
+Substack,6,16774105
+Subway Surfers,6,16774104
+SuperVPN,6,16774103
+SuperVPN,6,16774103
+SuperVPN by Cheng,6,16774102
+Surfeasy,6,16774101
+Swann Services,6,16774100
+Sweet Selfie,6,16774099
+Thai Airways,6,16774098
+Throne and Liberty,6,16774097
+Throne and Liberty,6,16774097
+Total Security Services,6,16774096
+Total VPN,6,16774095
+Touch VPN,6,16774094
+TPKT,6,16774093
+TP-Link Smart Home,6,16774092
+Treasure Data,6,16774091
+Trend Micro VPN,6,16774090
+TVer,6,16774089
+UncensoredDNS,6,16774088
+Unity Ads,6,16774087
+Userpilot,6,16774086
+Volantio,6,16774085
+VPN in Touch,6,16774084
+VPN Master,6,16774083
+VPN Proxy Master Unlimited,6,16774082
+Warhammer TV,6,16774081
+Warhammer Vermintide 2,6,16774080
+Warlander,6,16774079
+Warlander,6,16774079
+Watt Games,6,16774078
+WebDAV,6,16774077
+Weiling Technologies,6,16774076
+Where Winds Meet,6,16774075
+Wildscapes,6,16774074
+World of Tanks,6,16774073
+WOWOW,6,16774072
+WTFast,6,16774071
+Xiaomi ShareMe,6,16774070
+Yandex DNS,6,16774069
+YouCam Makeup,6,16774068
+Youtube Music,6,16774067
+ZeroTier,6,16774066
+ZeroTier,6,16774066
+Zeta Global,6,16774065
+360 Mobile Security,6,16774404
+Ably Realtime,6,16774403
+Absolute Software Services,6,16774402
+AdGuard DNS,6,16774401
+AdGuard Services,6,16774400
+AETV,6,16774399
+Akta,6,16774398
+AliDNS,6,16774397
+Anker Services,6,16774396
+Anymind Group,6,16774395
+Avira Antivirus,6,16774394
+Betternet,6,16774393
+BIGO Services,6,16774392
+Block Craft 3D,6,16774391
+CHECK24,6,16774390
+Cisco Services,6,16774389
+CIRA,6,16774388
+Clash Royal,6,16774387
+Cloudflare DNS,6,16774386
+Cloud Imperium Games,6,16774385
+Cloud Imperium Games,6,16774385
+Commanders Act,6,16774384
+ComodoUnite,6,16774383
+ComScore,6,16774382
+Dahua Security,6,16774381
+Dash VPN,6,16774380
+DataWeb Global,6,16774379
+Daum Services,6,16774378
+Dellmont Services,6,16774377
+Deutsche Post,6,16774376
+DHCP Failover,6,16774375
+DHL,6,16774374
+DMM-com,6,16774373
+DNS4EU,6,16774372
+DNSPod,6,16774371
+DNS SB,6,16774370
+Dreamline,6,16774369
+Easy VPN,6,16774368
+eFootball,6,16774367
+Electronic Arts,6,16774366
+Elex Technology,6,16774365
+Embark Studios,6,16774364
+Entain Services,6,16774363
+Eporner,6,16774362
+Ethiopian Airlines,6,16774361
+eufyMake,6,16774360
+eufy Services,6,16774359
+Expedia Group Services,6,16774358
+Fandango at Home,6,16774357
+Fandango Media,6,16774356
+FAST Speed Test,6,16774355
+Framer,6,16774354
+Friendica,6,16774353
+FromSoftware Services,6,16774352
+Funkwhale,6,16774351
+GameKit,6,16774350
+Gcore DNS,6,16774349
+Google App Engine,6,16774348
+Google Assistant,6,16774347
+Google NotebookLM,6,16774346
+Google Public DNS,6,16774345
+Hago,6,16774344
+HMA VPN,6,16774343
+Hotspot VPN,6,16774342
+Hyphanet,6,16774341
+Hyphanet,6,16774341
+ICQ Webchat,6,16774340
+IEEE 80211,6,16774339
+IP Multimedia Subsystem,6,16774338
+Innervate,6,16774337
+Intuition Machines,6,16774336
+Isekai Saga Awaken,6,16774335
+Ketch Kloud,6,16774334
+Konami Services,6,16774333
+Last War Survival,6,16774332
+Le concierge,6,16774331
+Lemmy,6,16774330
+LilithGames,6,16774329
+LinkVPN,6,16774328
+Ludo King,6,16774327
+Lumen Technoloies,6,16774326
+LVFS Services,6,16774325
+MACsec,6,16774324
+MapMyRun,6,16774323
+MediaForEurope,6,16774322
+Mediaset Infinity,6,16774321
+Melon,6,16774320
+Mintlify,6,16774319
+Mi Video,6,16774318
+Momo,6,16774317
+MotoAmerica,6,16774316
+MultimediaMessaging,6,16774315
+NextDNS,6,16774314
+Nokia Services,6,16774313
+Norton Antivirus,6,16774312
+NTLM,6,16774311
+onX Maps Services,6,16774310
+Optimove,6,16774309
+Oracle Cloud,6,16774308
+Oray,6,16774307
+Oscar,6,16774306
+OutlookMobile,6,16774305
+Party Star,6,16774304
+Phrase,6,16774303
+Plants vs Zombies 2,6,16774302
+Play JP,6,16774301
+Pou,6,16774300
+PS3,6,16774299
+PXR Services,6,16774298
+Quillbot,6,16774297
+Qwen AI,6,16774296
+Rare Services,6,16774295
+Readme,6,16774294
+Reown,6,16774293
+RocketVPN,6,16774292
+Rogue Company,6,16774291
+ROS,6,16774290
+RTB House,6,16774289
+Ruby Game Studio,6,16774288
+Samsung Max Privacy VPN,6,16774287
+Screeb,6,16774286
+Seal One,6,16774285
+Sea of Thieves,6,16774284
+Shalltry Group,6,16774283
+Shenzhen Airlines,6,16774282
+ShowIt,6,16774281
+Shumei,6,16774280
+Spark Live,6,16774279
+Speed VPN Inventive,6,16774278
+Statsig,6,16774277
+Stratum Mining Version 2,6,16774276
+Substack,6,16774275
+Subway Surfers,6,16774274
+SuperVPN,6,16774273
+SuperVPN,6,16774273
+SuperVPN by Cheng,6,16774272
+Surfeasy,6,16774271
+Swann Services,6,16774270
+Sweet Selfie,6,16774269
+Thai Airways,6,16774268
+Throne and Liberty,6,16774267
+Throne and Liberty,6,16774267
+Total Security Services,6,16774266
+Total VPN,6,16774265
+Touch VPN,6,16774264
+TPKT,6,16774263
+TP-Link Smart Home,6,16774262
+Treasure Data,6,16774261
+Trend Micro VPN,6,16774260
+TVer,6,16774259
+UncensoredDNS,6,16774258
+Unity Ads,6,16774257
+Userpilot,6,16774256
+Volantio,6,16774255
+VPN in Touch,6,16774254
+VPN Master,6,16774253
+VPN Proxy Master Unlimited,6,16774252
+Warhammer TV,6,16774251
+Warhammer Vermintide 2,6,16774250
+Warlander,6,16774249
+Warlander,6,16774249
+Watt Games,6,16774248
+WebDAV,6,16774247
+Weiling Technologies,6,16774246
+Where Winds Meet,6,16774245
+Wildscapes,6,16774244
+World of Tanks,6,16774243
+WOWOW,6,16774242
+WTFast,6,16774241
+Xiaomi ShareMe,6,16774240
+Yandex DNS,6,16774239
+YouCam Makeup,6,16774238
+Youtube Music,6,16774237
+ZeroTier,6,16774236
+ZeroTier,6,16774236
+Zeta Global,6,16774235
+9292,6,16774234
+AbemaTV,6,16774233
+ABN AMRO,6,16774232
+AD,6,16774231
+AdaptMX,6,16774230
+Airalo,6,16774229
+Albert Heijn,6,16774228
+Aloha Browser,6,16774227
+Appier,6,16774226
+ASN Bank,6,16774225
+Audiorella,6,16774224
+Baldurs Gate 3,6,16774223
+Bigo Ads,6,16774222
+Bol,6,16774221
+Brave Browser,6,16774220
+Buienradar,6,16774219
+Bunq,6,16774218
+Campfire FM,6,16774217
+CD Projekt Services,6,16774216
+Chivalry 2,6,16774215
+Coda,6,16774214
+Contentstack,6,16774213
+Coolblue,6,16774212
+COTP,6,16774211
+CurseForge,6,16774210
+DataDome,6,16774209
+DeepL,6,16774208
+De Telegraaf,6,16774207
+Dingxiang,6,16774206
+DJI,6,16774205
+DPG Media Services,6,16774204
+Element-io,6,16774203
+eTravelSim,6,16774202
+EX-CO,6,16774201
+F1 TV,6,16774200
+FANSHIP JP,6,16774199
+Formula 1,6,16774198
+Frontier Airlines,6,16774197
+Funda,6,16774196
+Gainsight,6,16774195
+Gamekings,6,16774194
+Generic VPN,6,16774193
+Grammarly,6,16774192
+Grok,6,16774191
+Guardian Firewall,6,16774190
+Hearst Communication,6,16774189
+Hetzner Online Services,6,16774188
+HolaFly,6,16774187
+Intent IQ,6,16774186
+iRidge,6,16774185
+Just Eat Takeaway,6,16774184
+Kaufland,6,16774183
+KDDI,6,16774182
+KFC,6,16774181
+Koddi,6,16774180
+KPN Services,6,16774179
+Kuroco,6,16774178
+Larian Studios,6,16774177
+Lightway,6,16774176
+Marktplaats,6,16774175
+Matrix-org,6,16774174
+Mattel,6,16774173
+Mediahuis Services,6,16774172
+MediaMarkt,6,16774171
+MediaMarktSaturn Services,6,16774170
+Microsoft Auth,6,16774169
+Microsoft Edge,6,16774168
+Microsoft PowerPoint,6,16774167
+Mobolize,6,16774166
+Mod,6,16774165
+Mozilla Firefox,6,16774164
+Mullvad DNS,6,16774163
+Mullvad Services,6,16774162
+MyEdit,6,16774161
+Nederlandse Spoorwegen,6,16774160
+Netcetera,6,16774159
+NewSpark,6,16774158
+NewStore,6,16774157
+NextDay,6,16774156
+Nederlandse Omroep Stichting,6,16774155
+NU-nl,6,16774154
+Omoda,6,16774153
+OneDNS,6,16774152
+Opera VPN,6,16774151
+Overwolf,6,16774150
+PartnerStack,6,16774149
+Pathe,6,16774148
+Picnic,6,16774147
+Polarsteps,6,16774146
+PostNL,6,16774145
+PulsePoint,6,16774144
+Rabobank,6,16774143
+Redbooth,6,16774142
+Saily,6,16774141
+Schwarz Group,6,16774140
+Seedtag,6,16774139
+Snowplow,6,16774138
+Soft-World,6,16774137
+Superhuman Services,6,16774136
+Syncsearch JP,6,16774135
+Talkative,6,16774134
+Tokyo Broadcasting System,6,16774133
+Tikkie,6,16774132
+Trendyol,6,16774131
+UnionPay,6,16774130
+Uniqlo,6,16774129
+USA Today Co Services,6,16774128
+VoetbalPrimeur,6,16774127
+Volkskrant,6,16774126
+What3words,6,16774125
+X AI,6,16774124
+Yahoo Maps,6,16774123
+Yu-Gi-Oh,6,16774122
+Zabbix,6,16774121
+Zenoti,6,16774120
+Zona,6,16774119
+ALDI Nord,6,16774118
+Aldi Services,6,16774117
+ALDI Sued,6,16774116
+ArenaNet,6,16774115
+Asics Services,6,16774114
+AS Watson Services,6,16774113
+Bible Chat,6,16774112
+Boosteroid,6,16774111
+Boosteroid,6,16774111
+Claritas,6,16774110
+CloudPano,6,16774109
+CRA,6,16774108
+De Bijenkorf,6,16774107
+Delta Force,6,16774106
+dm-drogerie markt,6,16774105
+DNSFilter,6,16774104
+DramaReels,6,16774103
+EA SPORTS FC 26,6,16774102
+Equinix,6,16774101
+FamilyMart,6,16774100
+FileZilla,6,16774099
+Flagpedia,6,16774098
+Flightradar24,6,16774097
+GCore CDN,6,16774096
+Gemmy AI,6,16774095
+Generic Audio Video,6,16774094
+Generic IEC,6,16774093
+Generic Mail,6,16774092
+Generic Monitoring,6,16774091
+Generic Remote Access,6,16774090
+GMO Internet Group,6,16774089
+Google Client Services,6,16774088
+Google Health,6,16774087
+IEEE 802154,6,16774086
+IEEE 8023 Slow,6,16774085
+Insider One,6,16774084
+Internet Computer,6,16774083
+Intimate Merger,6,16774082
+iRacing,6,16774081
+Jetpac,6,16774080
+JR East,6,16774079
+Japan Railways Group,6,16774078
+Kakaku-com,6,16774077
+Kalshi,6,16774076
+Karakuri AI,6,16774075
+Klaviyo,6,16774074
+Kroger,6,16774073
+Kruidvat,6,16774072
+Lawson,6,16774071
+Linux Foundation,6,16774070
+Marvel Rivals,6,16774069
+MetaCDN,6,16774068
+Mikan,6,16774067
+Mobilus,6,16774066
+Nikkei,6,16774065
+Nimbus,6,16774064
+njavtv,6,16774063
+note,6,16774062
+OHRA,6,16774061
+OpenChat,6,16774060
+Pagely,6,16774059
+PASMO,6,16774058
+Pendo IO,6,16774057
+Philips Services,6,16774056
+PhotonEngine,6,16774055
+Planet Fitness,6,16774054
+Praktika AI,6,16774053
+ProtoBuf,6,16774052
+Quadrofleet,6,16774051
+REWE,6,16774050
+REWE Group,6,16774049
+Rocket Companies,6,16774048
+Rocket Money,6,16774047
+Sakura Internet,6,16774046
+Scaleway,6,16774045
+Shadow Tech,6,16774044
+Simplifi,6,16774043
+Soniox,6,16774042
+Spider AF,6,16774041
+Squla,6,16774040
+Supership JP,6,16774039
+Surfer Network,6,16774038
+Tabelog,6,16774037
+Tenki JP,6,16774036
+Tesla,6,16774035
+Thales Group,6,16774034
+The Home Depot,6,16774033
+Torn Banner Studios,6,16774032
+Unbounce,6,16774031
+UnitedHealth Group,6,16774030
+UpCloud,6,16774029
+Vacan,6,16774028
+Waymo,6,16774027
+Yamato Transport,6,16774026
+Yandex Games,6,16774025
+Zabbix,6,16774024
+Zoiper,6,16774023
+Zooplus,6,16774022
