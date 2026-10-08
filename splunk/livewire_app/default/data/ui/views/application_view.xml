@@ -1,6 +1,6 @@
 <form version="1.1" theme="dark">
   <label>Application View</label>
-  <description>Provides a customized view of applications running on your network. Click an application to open it in a LiveWire.</description>
+  <description>Provides a snapshot of applications running on your network. Click on any data to cross-launch to a LiveWire.</description>
   <fieldset autorun="true" submitButton="false">
     <input type="time" searchWhenChanged="true">
       <label>Date &amp; Time</label>

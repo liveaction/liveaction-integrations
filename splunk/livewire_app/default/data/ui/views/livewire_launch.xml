@@ -1,6 +1,6 @@
 <form version="1.1" theme="dark" isVisible="false">
   <label>LiveWire Cross-Launch</label>
-  <description>Choose a LiveWire to perform a forensic search. LiveWires that saw the selected traffic are listed first.</description>
+  <description>Choose a LiveWire to perform a forensic search. LiveWires that saw the selected traffic are listed first. Click one of the "open" cells to cross launch.</description>
   <fieldset autorun="true" submitButton="false">
     <input type="time" searchWhenChanged="true">
       <label>Date &amp; Time</label>
@@ -29,14 +29,22 @@
       <label>Application</label>
       <default>*</default>
     </input>
+    <input type="text" token="mitre_category" depends="$hidden$" searchWhenChanged="true">
+      <label>MITRE Category</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="message" depends="$hidden$" searchWhenChanged="true">
+      <label>Alert</label>
+      <default>*</default>
+    </input>
   </fieldset>
   <row>
     <panel>
       <title>LiveWires</title>
       <table>
         <search>
-          <query><![CDATA[`livewire_netflow` | `livewire_app`
-| eval hit=if(("$src_ip$"="*" OR src_ip="$src_ip$") AND ("$src_port$"="*" OR tostring(src_port)="$src_port$") AND ("$dest_ip$"="*" OR dest_ip="$dest_ip$") AND ("$dest_port$"="*" OR tostring(dest_port)="$dest_port$") AND ("$app$"="*" OR Application="$app$"), 1, 0)
+          <query><![CDATA[| multisearch [search `livewire_netflow` | `livewire_app`] [search `livewire_otlp` | eval exporter_ip='host.ip', src_ip=saddr, dest_ip=daddr, src_port=sport, dest_port=dport, Application=application]
+| eval hit=if(("$src_ip$"="*" OR src_ip="$src_ip$") AND ("$src_port$"="*" OR tostring(src_port)="$src_port$") AND ("$dest_ip$"="*" OR dest_ip="$dest_ip$") AND ("$dest_port$"="*" OR tostring(dest_port)="$dest_port$") AND ("$app$"="*" OR Application="$app$") AND ($mitre_category|s$="*" OR mitre_category=$mitre_category|s$) AND ($message|s$="*" OR message=$message|s$), 1, 0)
 | stats sum(hit) AS Matches max(_time) AS last_seen by exporter_ip
 | addinfo
 | eval filter=if("$src_ip$"="*", "", " & addr(ip: '$src_ip$')").if("$src_port$"="*", "", " & port($src_port$)").if("$dest_ip$"="*", "", " & addr(ip: '$dest_ip$')").if("$dest_port$"="*", "", " & port($dest_port$)").if("$app$"="*", "", " & app($app$)")

@@ -3,6 +3,7 @@
   <collection label="LiveWire Dashboards">
     <view name="net_overview"  default='true'/>
     <view name="application_view" />
+    <view name="livewire_alerts" />
   </collection>
 
   <collection label="LiveNX Dashboards">

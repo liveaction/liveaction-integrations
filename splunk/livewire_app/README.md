@@ -38,6 +38,16 @@ A default configuration may look like:
 
 NOTE: Be sure that ports are not blocked by a firewall and are approved by your security team.
 
+### LiveWire OTLP Alerts
+
+The "LiveWire Security Alerts" dashboard shows security alerts that LiveWire sends over OTLP. To receive them in Splunk:
+
+1. Create an HEC token in Splunk.
+2. Install **Splunk Connect for OTLP** - [splunkbase link](https://splunkbase.splunk.com/app/8704)
+3. Open the gRPC port in your firewall. Check the add-on docs for its default port. The OTLP standard port is 4317, this can be configured in the add-on's settings UI.
+4. In Splunk Web, go to Settings -> Data Inputs and add an OTLP input named `livewire_otlp`.
+5. Send the events. Be sure to configure liveflow's otel settings to send to splunk.
+
 ## Architecture
 
 The **splunk_app_stream_ipfix_livewire** add-on must be installed on the forwarder.
