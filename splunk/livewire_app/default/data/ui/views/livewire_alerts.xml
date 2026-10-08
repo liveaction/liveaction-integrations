@@ -1,5 +1,5 @@
 <form version="1.1" theme="dark">
-  <label>LiveWire Security Alerts</label>
+  <label>Security Alerts</label>
   <description>Shows security alerts sent by LiveWire over OTLP. Click on any data to cross-launch to a LiveWire.</description>
   <fieldset autorun="true" submitButton="false">
     <input type="time" searchWhenChanged="true">

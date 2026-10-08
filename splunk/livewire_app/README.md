@@ -40,7 +40,7 @@ NOTE: Be sure that ports are not blocked by a firewall and are approved by your 
 
 ### LiveWire OTLP Alerts
 
-The "LiveWire Security Alerts" dashboard shows security alerts that LiveWire sends over OTLP. To receive them in Splunk:
+The "Security Alerts" dashboard shows security alerts that LiveWire sends over OTLP. To receive them in Splunk:
 
 1. Create an HEC token in Splunk.
 2. Install **Splunk Connect for OTLP** - [splunkbase link](https://splunkbase.splunk.com/app/8704)
