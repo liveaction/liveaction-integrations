@@ -1,0 +1,71 @@
+<form version="1.1" theme="dark" isVisible="false">
+  <label>LiveWire Cross-Launch</label>
+  <description>Choose a LiveWire to perform a forensic search. LiveWires that saw the selected traffic are listed first.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-1h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="src_ip" searchWhenChanged="true">
+      <label>Source IP</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="src_port" searchWhenChanged="true">
+      <label>Source Port</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="dest_ip" searchWhenChanged="true">
+      <label>Destination IP</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="dest_port" searchWhenChanged="true">
+      <label>Destination Port</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="app" searchWhenChanged="true">
+      <label>Application</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>LiveWires</title>
+      <table>
+        <search>
+          <query><![CDATA[`livewire_netflow` | `livewire_app`
+| eval hit=if(("$src_ip$"="*" OR src_ip="$src_ip$") AND ("$src_port$"="*" OR tostring(src_port)="$src_port$") AND ("$dest_ip$"="*" OR dest_ip="$dest_ip$") AND ("$dest_port$"="*" OR tostring(dest_port)="$dest_port$") AND ("$app$"="*" OR Application="$app$"), 1, 0)
+| stats sum(hit) AS Matches max(_time) AS last_seen by exporter_ip
+| addinfo
+| eval filter=if("$src_ip$"="*", "", " & addr(ip: '$src_ip$')").if("$src_port$"="*", "", " & port($src_port$)").if("$dest_ip$"="*", "", " & addr(ip: '$dest_ip$')").if("$dest_port$"="*", "", " & port($dest_port$)").if("$app$"="*", "", " & app($app$)")
+| eval filter=replace(filter, "^ & ", "")
+| eval filter=replace(replace(replace(replace(replace(replace(replace(filter, "%", "%25"), " ", "%20"), "&", "%26"), "'", "%27"), "\(", "%28"), "\)", "%29"), "\+", "%2B")
+| eval start=replace(strftime(info_min_time, "%Y-%m-%dT%H:%M:%S.%Q%z"), "\+", "%2B"), end=replace(strftime(info_max_time, "%Y-%m-%dT%H:%M:%S.%Q%z"), "\+", "%2B")
+| eval query="startTime=".start."&endTime=".end.if(filter="", "", "&filter=".filter)."&showDialog=true"
+| eval local_url="http://".exporter_ip."/omnipeek/forensics?".query, distributed_url="http://".exporter_ip."/omnipeek/distributed-forensic-searches/new-distributed-forensic-search?".query
+| eval Status=if(Matches>0, "Saw this traffic", "Not seen"), "Last seen"=strftime(last_seen, "%Y-%m-%d %H:%M:%S"), "Forensic search"="Open", "Distributed forensic search"="Open"
+| sort -Matches exporter_ip
+| rename exporter_ip AS LiveWire]]></query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <fields>["LiveWire","Status","Matches","Last seen","Forensic search","Distributed forensic search"]</fields>
+        <option name="drilldown">cell</option>
+        <format type="color" field="Status">
+          <colorPalette type="map">{"Saw this traffic":#53A051,"Not seen":#708794}</colorPalette>
+        </format>
+        <drilldown>
+          <condition field="Forensic search">
+            <link target="_blank">$row.local_url|n$</link>
+          </condition>
+          <condition field="Distributed forensic search">
+            <link target="_blank">$row.distributed_url|n$</link>
+          </condition>
+          <condition></condition>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

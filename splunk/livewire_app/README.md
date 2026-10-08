@@ -1,5 +1,4 @@
 # LiveWire App for Splunk
----
 
 ## Purpose
 
@@ -8,6 +7,10 @@
 The LiveWire App for Splunk has several premade dashboards which utilize telemetry sent from a LiveWire Packet Capture device. The dashboards may serve useful in many situations, including Network Performance Monitoring and Security Operations.
 
 Many of the provided graphics may provide the ability to click-through to the LiveWire web application to either perform more detailed analysis or download relevant packets.
+
+Clicking a value opens the LiveWire Cross-Launch page in a new tab. It lists every LiveWire that sent data in the selected time range, with the LiveWires that saw the clicked traffic listed first. Click "Open" under "Forensic search" or "Distributed forensic search" to open that LiveWire's forensic search with the matching filter and time range.
+
+As of 26.3.0, this app now ships with dashboards to ingest open telemetry from LiveWire.
 
 ### LiveNX
 
@@ -53,11 +56,11 @@ Restart your splunk instance.
 
 ## Author
 
-LiveAction
+BlueCat
 
 ## Support
 
 Developer-Supported
-<splunk-support@liveaction.com>
+<la-support@bluecatnetworks.com>
 
-### Copyright (c) 2024 LiveAction , Inc. All rights reserved.
+### Copyright (c) 2026 BlueCat Networks , Inc. All rights reserved.

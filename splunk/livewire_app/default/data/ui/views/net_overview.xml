@@ -1,0 +1,358 @@
+<form version="1.1" theme="dark">
+  <label>Network Overview</label>
+  <description>Provides a customized view of your network's health. Click a value to open it in a LiveWire.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-1h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="dataspan" searchWhenChanged="true">
+      <label>Data Span</label>
+      <default>10m</default>
+      <choice value="1m">1 min</choice>
+      <choice value="5m">5 min</choice>
+      <choice value="10m">10 min</choice>
+      <choice value="30m">30 min</choice>
+      <choice value="60m">60 min</choice>
+    </input>
+    <input type="multiselect" token="lw_source" searchWhenChanged="true">
+      <label>LiveWire Sources</label>
+      <fieldForLabel>exporter_ip</fieldForLabel>
+      <fieldForValue>exporter_ip</fieldForValue>
+      <search>
+        <query>`livewire_netflow` | stats count by exporter_ip</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <delimiter>,</delimiter>
+    </input>
+  </fieldset>
+  <search id="totals">
+    <query>`livewire_netflow` exporter_ip IN($lw_source$) | eval flow=src_ip.":".src_port."-".dest_ip.":".dest_port | stats count sum(packets_in) AS packets sum(bytes_in) AS bytes dc(flow) AS flows | eval MB=round(bytes/1000000, 2)</query>
+    <earliest>$earliest$</earliest>
+    <latest>$latest$</latest>
+  </search>
+  <search id="trends">
+    <query>`livewire_netflow` exporter_ip IN($lw_source$) | timechart span=$dataspan$ sum(bytes_in) AS bytes avg(NetworkLatencyAvg) AS net_avg max(NetworkLatencyMax) AS net_max avg(ApplicationLatencyAvg) AS app_avg max(ApplicationLatencyMax) AS app_max max(ResponseTimeMax) AS resp_max | eval MB=bytes/1000000</query>
+    <earliest>$earliest$</earliest>
+    <latest>$latest$</latest>
+  </search>
+  <search id="dest_geo">
+    <query>`livewire_netflow` exporter_ip IN($lw_source$) | stats count by dest_ip | iplocation dest_ip</query>
+    <earliest>$earliest$</earliest>
+    <latest>$latest$</latest>
+  </search>
+  <search id="src_geo">
+    <query>`livewire_netflow` exporter_ip IN($lw_source$) | stats count by src_ip | iplocation src_ip</query>
+    <earliest>$earliest$</earliest>
+    <latest>$latest$</latest>
+  </search>
+  <row>
+    <panel>
+      <title>Number of Packets</title>
+      <single>
+        <search base="totals">
+          <query>fields packets</query>
+        </search>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Megabytes Ingested</title>
+      <single>
+        <search base="totals">
+          <query>fields MB</query>
+        </search>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Number of Splunk Events</title>
+      <single>
+        <search base="totals">
+          <query>fields count</query>
+        </search>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Number of Unique Flows</title>
+      <single>
+        <search base="totals">
+          <query>fields flows</query>
+        </search>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$</link>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Network Usage</title>
+      <chart>
+        <search base="trends">
+          <query>fields _time MB | rename MB AS Megabytes</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Average Network Latency</title>
+      <chart>
+        <search base="trends">
+          <query>fields _time net_avg | rename net_avg AS "Latency in ms"</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Maximum Network Latency</title>
+      <chart>
+        <search base="trends">
+          <query>fields _time net_max | rename net_max AS "Latency in ms"</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Average Application Latency</title>
+      <chart>
+        <search base="trends">
+          <query>fields _time app_avg | rename app_avg AS "Latency in ms"</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Max Application Latency</title>
+      <chart>
+        <search base="trends">
+          <query>fields _time app_max | rename app_max AS "Latency in ms"</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Recent Flows</title>
+      <table>
+        <search>
+          <query>`livewire_netflow` exporter_ip IN($lw_source$) | stats latest(_time) AS last_seen by src_ip src_port dest_ip dest_port | sort -last_seen | head 100 | eval last_seen=strftime(last_seen, "%Y-%m-%d %H:%M:%S") | table last_seen src_ip src_port dest_ip dest_port</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="count">20</option>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.src_ip=$row.src_ip$&amp;form.src_port=$row.src_port$&amp;form.dest_ip=$row.dest_ip$&amp;form.dest_port=$row.dest_port$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Rare Web Servers</title>
+      <chart>
+        <search>
+          <query>`livewire_netflow` exporter_ip IN($lw_source$) | rare cisco_app_ssl_common_name</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Rare Destination IPs</title>
+      <chart>
+        <search>
+          <query>`livewire_netflow` exporter_ip IN($lw_source$) | rare dest_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.dest_ip=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Rare Server Ports</title>
+      <chart>
+        <search>
+          <query>`livewire_netflow` exporter_ip IN($lw_source$) | rare dest_port</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.dest_port=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Maximum Response Time (ms)</title>
+      <chart>
+        <search base="trends">
+          <query>fields _time resp_max | rename resp_max AS "Maximum Response Time"</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Common Destination IP Locations</title>
+      <map>
+        <search base="dest_geo">
+          <query>geostats sum(count) AS count</query>
+        </search>
+        <option name="mapping.type">marker</option>
+        <option name="drilldown">none</option>
+      </map>
+    </panel>
+    <panel>
+      <title>Common Source IP Locations</title>
+      <map>
+        <search base="src_geo">
+          <query>geostats sum(count) AS count</query>
+        </search>
+        <option name="mapping.type">marker</option>
+        <option name="drilldown">none</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Common Destination IP Location List</title>
+      <input type="multiselect" token="country_dst" searchWhenChanged="true">
+        <label>Countries</label>
+        <fieldForLabel>Country</fieldForLabel>
+        <fieldForValue>Country</fieldForValue>
+        <search base="dest_geo">
+          <query>where Country!="" | stats sum(count) AS count by Country | sort -count</query>
+        </search>
+        <choice value="*">All</choice>
+        <default>*</default>
+        <valuePrefix>"</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter>,</delimiter>
+      </input>
+      <table>
+        <search base="dest_geo">
+          <query>where Country!="" | search Country IN ($country_dst$) | table Country dest_ip count | sort -count</query>
+        </search>
+        <option name="count">20</option>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.dest_ip=$row.dest_ip$</link>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>Common Source IP Location List</title>
+      <input type="multiselect" token="country_src" searchWhenChanged="true">
+        <label>Countries</label>
+        <fieldForLabel>Country</fieldForLabel>
+        <fieldForValue>Country</fieldForValue>
+        <search base="src_geo">
+          <query>where Country!="" | stats sum(count) AS count by Country | sort -count</query>
+        </search>
+        <choice value="*">All</choice>
+        <default>*</default>
+        <valuePrefix>"</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter>,</delimiter>
+      </input>
+      <table>
+        <search base="src_geo">
+          <query>where Country!="" | search Country IN ($country_src$) | table Country src_ip count | sort -count</query>
+        </search>
+        <option name="count">20</option>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.src_ip=$row.src_ip$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Destinations</title>
+      <chart>
+        <search>
+          <query>`livewire_netflow` exporter_ip IN($lw_source$) | top dest_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.dest_ip=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Sources</title>
+      <chart>
+        <search>
+          <query>`livewire_netflow` exporter_ip IN($lw_source$) | top src_ip</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.src_ip=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+</form>

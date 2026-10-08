@@ -1,5 +1,4 @@
 # Splunk App Stream IPFIX LiveWire
----
 
 ## Purpose
 
@@ -56,6 +55,6 @@ LiveAction
 ## Support
 
 Developer-Supported
-<splunk-support@liveaction.com>
+<la-support@bluecatnetworks.com>
 
-#### Copyright (c) 2024 LiveAction , Inc. All rights reserved.
+### Copyright (c) 2026 BlueCat Networks, Inc. All rights reserved.

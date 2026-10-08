@@ -1,0 +1,123 @@
+<form version="1.1" theme="dark">
+  <label>Application View</label>
+  <description>Provides a customized view of applications running on your network. Click an application to open it in a LiveWire.</description>
+  <fieldset autorun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <label>Date &amp; Time</label>
+      <default>
+        <earliest>-1h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="dataspan" searchWhenChanged="true">
+      <label>Data Span</label>
+      <default>10m</default>
+      <choice value="1m">1 min</choice>
+      <choice value="5m">5 min</choice>
+      <choice value="10m">10 min</choice>
+      <choice value="30m">30 min</choice>
+      <choice value="60m">60 min</choice>
+    </input>
+    <input type="multiselect" token="lw_source" searchWhenChanged="true">
+      <label>LiveWire Sources</label>
+      <fieldForLabel>exporter_ip</fieldForLabel>
+      <fieldForValue>exporter_ip</fieldForValue>
+      <search>
+        <query>`livewire_netflow` | stats count by exporter_ip</query>
+        <earliest>$earliest$</earliest>
+        <latest>$latest$</latest>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <delimiter>,</delimiter>
+    </input>
+  </fieldset>
+  <search id="apps">
+    <query>`livewire_netflow` exporter_ip IN($lw_source$) | `livewire_app` | stats count sum(bytes_in) AS bytes by Application | eventstats sum(count) AS total | eval percent=round(count*100/total, 2)</query>
+    <earliest>$earliest$</earliest>
+    <latest>$latest$</latest>
+  </search>
+  <row>
+    <panel>
+      <title>Traffic by Application</title>
+      <input type="multiselect" token="app_choices" searchWhenChanged="true">
+        <label>Applications</label>
+        <fieldForLabel>Application</fieldForLabel>
+        <fieldForValue>Application</fieldForValue>
+        <search base="apps">
+          <query>sort -count</query>
+        </search>
+        <choice value="*">All</choice>
+        <default>*</default>
+        <valuePrefix>"</valuePrefix>
+        <valueSuffix>"</valueSuffix>
+        <delimiter>,</delimiter>
+      </input>
+      <chart>
+        <search>
+          <query>`livewire_netflow` exporter_ip IN($lw_source$) | `livewire_app` | search Application IN ($app_choices$) | timechart span=$dataspan$ sum(bytes_in) by Application</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Application Counts</title>
+      <table>
+        <search base="apps">
+          <query>sort -count | table Application count</query>
+        </search>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.app=$row.Application$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Rare Applications</title>
+      <table>
+        <search base="apps">
+          <query>sort count | head 10 | table Application count percent</query>
+        </search>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.app=$row.Application$</link>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>Application Breakdown</title>
+      <chart>
+        <search base="apps">
+          <query>sort -count | head 10 | table Application count</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.app=$click.value$</link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Applications</title>
+      <table>
+        <search base="apps">
+          <query>sort -count | head 10 | table Application count percent</query>
+        </search>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link target="_blank">livewire_launch?earliest=$earliest$&amp;latest=$latest$&amp;form.app=$row.Application$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>
