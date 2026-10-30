@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "2.0.0",
+  "info": {
+    "title": "LiveWire IPFIX Stream for Splunk",
+    "id": {
+      "group": null,
+      "name": "splunk_app_stream_ipfix_livewire",
+      "version": "26.3.0"
+    },
+    "author": [
+      {
+        "name": "BlueCat Networks",
+        "email": null,
+        "company": "BlueCat Networks"
+      }
+    ],
+    "releaseDate": null,
+    "description": "Provides the capability to ingest and translate telemetry from a LiveWire. Requires the splunk streams app.",
+    "classification": {
+      "intendedAudience": null,
+      "categories": [],
+      "developmentStatus": null
+    },
+    "commonInformationModels": null,
+    "license": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "privacyPolicy": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "releaseNotes": {
+      "name": null,
+      "text": null,
+      "uri": null
+    }
+  },
+  "dependencies": null,
+  "tasks": null,
+  "inputGroups": null,
+  "incompatibleApps": null,
+  "platformRequirements": null,
+  "supportedDeployments": [
+    "_standalone",
+    "_distributed",
+    "_search_head_clustering"
+  ],
+  "targetWorkloads": [
+    "_search_heads"
+  ]
+}
