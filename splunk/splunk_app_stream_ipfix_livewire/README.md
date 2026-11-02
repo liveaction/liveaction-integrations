@@ -42,9 +42,4 @@ Restart your Splunk instance. `$SPLUNK_HOME/bin/splunk restart`
 
 BlueCat Networks
 
-## Support
-
-Developer-Supported
-<la-support@bluecatnetworks.com>
-
 ### Copyright (c) 2026 BlueCat Networks, Inc. All rights reserved.

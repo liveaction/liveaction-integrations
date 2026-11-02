@@ -29,9 +29,9 @@ A default configuration may look like:
         [streamfwd]
         port = 8889
         processingThreads = 4
-        httpEventCollectorToken = \<your token\>
-        indexer.0.uri = <indexer ip>:8088
-        netflowReceiver.0.ip = <receiver ip>
+        httpEventCollectorToken = "your token"
+        indexer.0.uri = "indexer ip":8088
+        netflowReceiver.0.ip = "receiver ip"
         netflowReceiver.0.port = 9995
         netflowReceiver.0.decoder = netflow
         netflowReceiver.0.decodingThreads = 8
@@ -66,11 +66,6 @@ Restart your splunk instance.
 
 ## Author
 
-BlueCat
-
-## Support
-
-Developer-Supported
-<la-support@bluecatnetworks.com>
+BlueCat Networks
 
 ### Copyright (c) 2026 BlueCat Networks , Inc. All rights reserved.

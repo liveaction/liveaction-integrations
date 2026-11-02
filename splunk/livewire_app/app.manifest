@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "2.0.0",
+  "info": {
+    "title": "BlueCat Network Observability App for Splunk",
+    "id": {
+      "group": null,
+      "name": "livewire_app",
+      "version": "26.3.0"
+    },
+    "author": [
+      {
+        "name": "BlueCat Networks",
+        "email": null,
+        "company": "BlueCat Networks"
+      }
+    ],
+    "releaseDate": null,
+    "description": "Contains dashboards for ipfix/oTel traffic being sent from LiveWires and OTel from LiveNX.",
+    "classification": {
+      "intendedAudience": null,
+      "categories": [],
+      "developmentStatus": null
+    },
+    "commonInformationModels": null,
+    "license": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "privacyPolicy": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "releaseNotes": {
+      "name": null,
+      "text": null,
+      "uri": null
+    }
+  },
+  "dependencies": null,
+  "tasks": null,
+  "inputGroups": null,
+  "incompatibleApps": null,
+  "platformRequirements": null,
+  "supportedDeployments": [
+    "_standalone",
+    "_distributed",
+    "_search_head_clustering"
+  ],
+  "targetWorkloads": [
+    "_search_heads"
+  ]
+}
