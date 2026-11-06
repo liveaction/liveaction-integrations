@@ -1,0 +1,28 @@
+[Unit]
+Description=BlueCat Address Manager alerts to LiveNX OTEL collector
+Documentation=file:///opt/bam-alerts/bam_alerts_to_otel.py
+After=network-online.target la-otelcol.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=admin
+# Settings (BAM_BASE, BAM_USER, BAM_PASS, ...). Contains the BAM password: chmod 600.
+EnvironmentFile=/etc/bam-alerts/bam_alerts.env
+# Cursor file lives in /var/lib/bam-alerts (created automatically, owned by User=)
+StateDirectory=bam-alerts
+Environment=STATE_FILE=/var/lib/bam-alerts/state.json
+ExecStart=/usr/bin/python3 -u /opt/bam-alerts/bam_alerts_to_otel.py
+Restart=always
+RestartSec=10
+
+# Hardening (the script only needs network, /etc/la-otelcol.yaml read, and its state dir)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target
