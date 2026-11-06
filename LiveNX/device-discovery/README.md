@@ -25,8 +25,9 @@ pass `--verify-tls`.
 
 ## livenx_discover.py
 
-Starts a discovery job, polls it until it finishes, and prints the discovered devices. It
-**only discovers**: it does not add devices to LiveNX.
+Starts a discovery job, polls it until it finishes, and prints the discovered devices. By
+default it **only discovers**: it does not add devices to LiveNX. Add `--add-devices` to also
+add the newly discovered ones (see [Adding new devices](#adding-new-devices-to-livenx)).
 
 Targets are positional arguments and/or one per line in a `--file` (`-` reads stdin; `#`
 starts a comment). Anything LiveNX accepts as an address or range is passed through
@@ -60,6 +61,9 @@ Example `targets.txt`:
 | `--port` | `8093` | LiveNX API port |
 | `--api-key` | (required) | LiveNX API key |
 | `--node-ip` / `--node-id` | local server node | Node to run discovery from (mutually exclusive) |
+| `--add-devices` | off | Add newly discovered devices (not already onboarded) to LiveNX |
+| `--preview-add` | off | Report which devices would be added and the request that would be sent; adds nothing |
+| `--add-node-ip` / `--add-node-id` | the discovery node | Node to add the devices to (mutually exclusive; need `--add-devices` or `--preview-add`) |
 | `--community` | LiveNX credentials store | SNMPv2c community string |
 | `--snmp-port` | `161` | SNMP port, used with `--community` |
 | `--poll-interval` | `3` | Seconds between job status polls |
@@ -67,12 +71,40 @@ Example `targets.txt`:
 | `--verify-tls` | off | Verify the server certificate |
 | `--dry-run` | off | Print the request and exit |
 
+### Adding new devices to LiveNX
+
+With `--add-devices`, once the job finishes successfully the script:
+
+1. Fetches the devices already onboarded (`GET /v1/devices`).
+2. Treats a discovered device as **new** if neither its serial/result ID nor its primary IP
+   matches an onboarded device. The rest are reported as `existing` and left untouched.
+3. Adds the new ones with `POST /v1/devices`, carrying over the discovered site, tags, group,
+   polling settings and interfaces.
+
+The node the devices are added to is the node discovery ran from (`--node-ip`/`--node-id`, or
+the local server node). Use `--add-node-ip` or `--add-node-id` to add them to a different
+node. The node is validated before discovery starts, so a typo fails immediately.
+
+```bash
+# See what would be added, without changing LiveNX
+./livenx_discover.py --host 10.4.205.50 --api-key '<key>' --preview-add 10.0.1.0/24
+
+# Discover from the local node, but add the new devices to another node
+./livenx_discover.py --host 10.4.205.50 --api-key '<key>' --add-devices --add-node-ip 10.4.205.51 10.0.1.0/24
+```
+
+Nothing is added if the job finishes with `ERROR` or `CANCELLED`. Only devices that are not
+already onboarded are sent, so re-running the same command is safe.
+
 ### Output
 
 Progress goes to stderr while the job runs, for example
 `status=RUNNING attempted=40/256 discovered=3`. The CSV on stdout has these columns:
 
 `serial, hostName, systemName, primaryIp, vendor, model, osVersion`
+
+When `--add-devices` or `--preview-add` is used, an extra `addStatus` column is appended
+(`new`, `existing` or `added`); the default output is unchanged.
 
 The script exits non-zero if the job finishes with a status other than `SUCCESS` (`ERROR` or
 `CANCELLED`), after printing whatever results were returned.
