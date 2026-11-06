@@ -11,6 +11,10 @@ This repository is designed to perform various network diagnostic tasks such as 
 
 This repository contains the integrations from LiveAction's LiveNX to third party platforms.
 
+## device-discovery
+
+Standard-library Python scripts that use the LiveNX API to discover network devices on IP addresses/ranges (`livenx_discover.py`) and to list the devices already onboarded to LiveNX (`livenx_devices_csv.py`), both as CSV. See [device-discovery/README.md](device-discovery/README.md).
+
 ## kafka
 
 This repository contains support for streaming data from LiveAction's LiveNX to Apache Kafka.
