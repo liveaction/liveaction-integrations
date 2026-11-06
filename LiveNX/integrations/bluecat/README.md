@@ -211,6 +211,111 @@ docker run --env-file .env bluecat-importer
 - MAC addresses may be empty for static assignments
 - PTR records are optional and may not exist for all IPs
 
+## BAM Alerts to LiveNX OTEL Collector
+
+`bam_alerts_to_otel.py` is a separate script from the entity importer above. It polls the
+BAM RESTful v2 API (`/api/v2/events`) at a regular interval and forwards new system events
+(deployment failures, DHCP alerts, server monitoring, etc.) as OpenTelemetry logs to the
+OTEL collector on LiveNX. The collector stores them in ClickHouse (`default.otel_logs`).
+
+It runs directly on the LiveNX host with the stock Python 3 (3.10 on Ubuntu 22.04) and needs
+**no pip packages**: it uses only the standard library. Because Python has no built-in gRPC
+client, the script includes its own minimal protobuf encoder and HTTP/2 client for the single
+OTLP `Export` call.
+
+### How it works
+
+1. Logs in with `POST /api/v2/sessions` and re-logs in automatically if the session expires.
+2. Fetches events newer than the saved cursor (`id:gt(<last id>)`, ordered by id).
+3. Keeps events at or above `MIN_SEVERITY` and sends them to the collector over OTLP/gRPC
+   (default `127.0.0.1:4317`, TLS, bearer token).
+4. Saves the cursor only after a successful send, so failed deliveries are retried on the
+   next poll. On the very first run it starts after the latest event unless
+   `INITIAL_BACKFILL` is set.
+
+Severity mapping (BAM `eventType` to OTel severity):
+
+| BAM eventType | OTel severity |
+|---------------|---------------|
+| INFO, SUCCESS, VALID | INFO |
+| WARNING, NOT_DEPLOYED, RESPONSE_POLICY_ZONES_NOT_DEPLOYED | WARN |
+| ERROR, FAILED, INVALID, NO_ROLE | ERROR |
+
+The default `MIN_SEVERITY=WARN` forwards only warnings and failures. Set `MIN_SEVERITY=INFO`
+to also forward things like "Deployment Started/Finished".
+
+### Configuration
+
+Settings come from environment variables or an env file (`--env-file`); real environment
+variables win over the file. See `bam_alerts.env.sample`.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BAM_BASE` | (required) | BAM base URL, e.g. `https://10.244.29.80` |
+| `BAM_USER` / `BAM_PASS` | (required) | BAM API credentials |
+| `BAM_VERIFY_TLS` | `false` | `true`, `false`, or path to a CA bundle |
+| `OTEL_ENDPOINT` | `127.0.0.1:4317` | Collector OTLP/gRPC `host:port` |
+| `OTEL_AUTH_TOKEN` | read from `/etc/la-otelcol.yaml` | Collector bearer token (`bearertokenauth`) |
+| `OTEL_VERIFY_TLS` | `false` | `true`, `false`, or path to a CA bundle |
+| `POLL_INTERVAL` | `60` | Seconds between polls |
+| `MIN_SEVERITY` | `WARN` | `INFO`, `WARN` or `ERROR` |
+| `PAGE_SIZE` | `200` | Events requested per API call |
+| `INITIAL_BACKFILL` | `0` | Events to send on first run (0 = only new events) |
+| `STATE_FILE` | `~/.bam_alerts_state.json` | Cursor file |
+| `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+
+### Usage
+
+```bash
+cp bam_alerts.env.sample bam_alerts.env   # edit BAM_BASE, BAM_USER, BAM_PASS
+./bam_alerts_to_otel.py --env-file bam_alerts.env                 # run continuously
+./bam_alerts_to_otel.py --env-file bam_alerts.env --once          # single poll
+./bam_alerts_to_otel.py --env-file bam_alerts.env --once --dry-run  # print OTLP JSON, send nothing
+./bam_alerts_to_otel.py --env-file bam_alerts.env --reset-state   # forget the saved cursor
+```
+
+### Install as a systemd service
+
+On the LiveNX host, from this directory:
+
+```bash
+sudo ./install_bam_alerts.sh
+sudo vi /etc/bam-alerts/bam_alerts.env     # set BAM_BASE, BAM_USER, BAM_PASS (file is mode 600)
+sudo systemctl start bam-alerts-to-otel
+journalctl -u bam-alerts-to-otel -f
+```
+
+The installer copies the script to `/opt/bam-alerts/`, installs
+`bam-alerts-to-otel.service` (runs as `admin`, restarts on failure), and keeps the cursor in
+`/var/lib/bam-alerts/state.json`. It enables the service but does not start it.
+
+### Data in ClickHouse
+
+Records are written with `ServiceName = 'bluecat-address-manager'`, the event message as
+`Body`, and these `LogAttributes`: `alert.source`, `bluecat.event.id`, `.type`, `.category`,
+`.subcategory`, `.source_name`, `.source.id/.type/.name`, `.user`, `.task_id`, `.payload`
+and `.details` (JSON). The log timestamp is the BAM event time.
+
+```sql
+SELECT Timestamp, SeverityText, LogAttributes['bluecat.event.category'], Body
+FROM default.otel_logs
+WHERE ServiceName = 'bluecat-address-manager'
+ORDER BY Timestamp DESC
+LIMIT 20;
+```
+
+### Notes and limitations
+
+- **Network access:** the LiveNX host must reach BAM on TCP 443. Otherwise the script logs
+  `POST /api/v2/sessions failed: timed out` and keeps retrying.
+- **Retention:** `otel_logs` has a 3-day TTL on the log timestamp, so events older than three
+  days are dropped by ClickHouse. `INITIAL_BACKFILL` therefore only helps for recent events.
+- **Collector rejections:** a missing or wrong bearer token is reported as
+  `collector rejected Export`. The detail text is not decoded (the script has no HPACK Huffman
+  decoder), so check `OTEL_AUTH_TOKEN` first.
+- Each Export message is kept under about 48 KB to stay inside the default HTTP/2 flow-control
+  window; larger batches are split automatically.
+
 ## License
 
 This project is licensed under the MIT License.
