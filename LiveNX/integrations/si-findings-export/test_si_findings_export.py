@@ -167,3 +167,21 @@ def test_api_wrong_path_404_is_an_error(monkeypatch):
     monkeypatch.setattr(mod.urllib.request, "urlopen", fake_urlopen)
     with pytest.raises(RuntimeError):
         mod.ApiSource(mod.Config()).fetch(10, 20)
+
+
+def test_cli_options_override_environment_and_env_file(tmp_path, monkeypatch):
+    for name in ("SI_LIVENX_HOST", "SI_API_URL", "SI_API_TOKEN", "SI_API_VERIFY_TLS", "SI_OUTPUT_FILE"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("SI_STATE_FILE", "/from/environment.json")
+    env_file = tmp_path / "settings.env"
+    env_file.write_text(
+        "# comment\nSI_LIVENX_HOST=from-file\nSI_API_TOKEN='quoted token'\nSI_STATE_FILE=/from/file.json\n"
+    )
+    out = tmp_path / "out.jsonl"
+    mod.parse_args(["--env-file", str(env_file), "--livenx-host", "from-cli", "--output", str(out), "--insecure"])
+    cfg = mod.Config()
+    assert cfg.api_url == "https://from-cli/api/security-proxy/api/v1/findings"
+    assert cfg.api_token == "quoted token"
+    assert cfg.state_file == "/from/environment.json"
+    assert cfg.output_file == str(out)
+    assert cfg.api_verify_tls is False

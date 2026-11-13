@@ -25,6 +25,24 @@ schema, and it works off-box. ClickHouse's HTTPS port is not opened by the
 LiveNX firewall, so the ClickHouse source is only for installs on the LiveNX
 server itself.
 
+## Run without the package
+
+The exporter is a single standard-library script (Python 3.8+), so it also runs
+straight from this directory on any machine that reaches LiveNX on port 443:
+
+```bash
+export SI_API_TOKEN=<LiveNX API token>
+python3 si_findings_export.py --livenx-host livenx.example.com --insecure \
+    --output ./si_findings.jsonl --state ./state.json
+```
+
+It runs until interrupted (Ctrl-C); add `--once` for a single pass. Every
+setting has an `SI_*` environment variable and most have an option
+(`python3 si_findings_export.py --help`). Command-line options override the
+environment, which overrides `--env-file PATH` (the same file format the
+package installs). Without `--output` and `--state` the script writes to
+`/data/si-findings-export/`, which must exist and be writable.
+
 ## Build
 
 ```bash
@@ -161,8 +179,6 @@ Exported files in `/data/si-findings-export/` are never deleted by the package.
 pip install pytest
 pytest test_si_findings_export.py
 
-# One cycle against a LiveNX, writing to the current directory
-SI_LIVENX_HOST=livenx.example.com SI_API_TOKEN=... SI_API_VERIFY_TLS=false \
-SI_OUTPUT_FILE=./out.jsonl SI_STATE_FILE=./state.json \
-python3 si_findings_export.py --once
 ```
+
+`dist/` (the built package) is ignored by git; run `./build_deb.sh` to produce it.

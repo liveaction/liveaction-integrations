@@ -18,7 +18,10 @@ re-reads the last SI_LOOKBACK_SECONDS and emits only rows it has not written yet
 Delivery is at-least-once: a crash between writing the output and saving the
 state file can repeat rows, never drop them.
 
-Standard library only. Configuration is read from environment variables.
+Standard library only, so the script also runs on its own without the Debian
+package: python3 si_findings_export.py --livenx-host HOST --output FILE ...
+Every setting is an SI_* environment variable; command-line options override
+the environment, which overrides --env-file.
 """
 
 import argparse
@@ -296,21 +299,84 @@ class Exporter:
         return total
 
 
-def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+# Command-line option -> environment variable it sets.
+CLI_OPTIONS = [
+    ("--source", "SI_SOURCE", "api (default) or clickhouse"),
+    ("--livenx-host", "SI_LIVENX_HOST", "LiveNX hostname or IP to read findings from"),
+    ("--api-token", "SI_API_TOKEN", "LiveNX API token; prefer the SI_API_TOKEN variable, which is not visible in ps"),
+    ("--api-url", "SI_API_URL", "full findings endpoint URL, overriding --livenx-host"),
+    ("--ca-file", "SI_API_CA_FILE", "CA bundle used to verify the LiveNX certificate"),
+    ("--filter", "SI_API_FILTER", "extra RSQL filter, for example severity==High"),
+    ("--output", "SI_OUTPUT_FILE", "JSON Lines output file"),
+    ("--state", "SI_STATE_FILE", "export position file"),
+    ("--poll-interval", "SI_POLL_INTERVAL", "seconds between polls (default 30)"),
+    ("--lookback", "SI_LOOKBACK_SECONDS", "seconds re-read on every poll to catch late findings (default 3600)"),
+    ("--backfill-hours", "SI_INITIAL_BACKFILL_HOURS", "history exported on the first run (default 24)"),
+    ("--log-level", "SI_LOG_LEVEL", "DEBUG, INFO, WARNING or ERROR"),
+]
+
+
+def load_env_file(path):
+    """Apply KEY=VALUE lines from a systemd-style env file without overriding the environment."""
+    with open(path) as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            name, value = line.split("=", 1)
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1]
+            os.environ.setdefault(name.strip(), value)
+
+
+def parse_args(argv):
+    parser = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0],
+        epilog="Every option can also be set with the SI_* environment variable shown next to it.",
+    )
     parser.add_argument("--once", action="store_true", help="run a single cycle and exit")
+    parser.add_argument("--env-file", metavar="PATH", help="read SI_* settings from a KEY=VALUE file")
+    parser.add_argument(
+        "--insecure", action="store_true", help="do not verify the LiveNX certificate (SI_API_VERIFY_TLS=false)"
+    )
+    for flag, variable, text in CLI_OPTIONS:
+        parser.add_argument(flag, metavar="VALUE", help="%s [%s]" % (text, variable))
     args = parser.parse_args(argv)
+    if args.env_file:
+        load_env_file(args.env_file)
+    for flag, variable, _ in CLI_OPTIONS:
+        value = getattr(args, flag[2:].replace("-", "_"))
+        if value is not None:
+            os.environ[variable] = value
+    if args.insecure:
+        os.environ["SI_API_VERIFY_TLS"] = "false"
+    return args
+
+
+def main(argv=None):
+    try:
+        args = parse_args(argv)
+    except OSError as exc:
+        print("cannot read --env-file: %s" % exc, file=sys.stderr)
+        return EX_CONFIG
 
     logging.basicConfig(
         level=env("SI_LOG_LEVEL", "INFO").upper(), stream=sys.stderr, format="%(levelname)s %(message)s"
     )
     try:
         cfg = Config()
-    except ConfigError as exc:
+        for path in (cfg.output_file, cfg.state_file):
+            directory = os.path.dirname(path) or "."
+            os.makedirs(directory, exist_ok=True)
+            if not os.access(directory, os.W_OK):
+                raise ConfigError("%s is not writable; choose another location with --output/--state" % directory)
+    except OSError as exc:
+        log.error("configuration error: %s; choose another location with --output/--state", exc)
+        return EX_CONFIG
+    except (ConfigError, ValueError) as exc:
         log.error("configuration error: %s", exc)
         return EX_CONFIG
-    for path in (cfg.output_file, cfg.state_file):
-        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     source = ApiSource(cfg) if cfg.source == "api" else ClickHouseSource(cfg)
     exporter = Exporter(
         cfg, source, State(cfg.state_file).load(), Output(cfg.output_file, cfg.rotate_max_bytes, cfg.rotate_keep)
