@@ -1,0 +1,15 @@
+Package: livenx-si-findings-export
+Version: 1.0.0
+Section: admin
+Priority: optional
+Architecture: all
+Depends: python3 (>= 3.8), passwd
+Maintainer: LiveAction Integrations <noreply@liveaction.com>
+Description: Export LiveNX Security Insight findings to a JSON Lines file
+ Runs a systemd service that continuously reads LiveNX Security Insight
+ findings (the si_findings table) through the LiveNX REST API and appends
+ them to a JSON Lines file under /data. It can run on any Debian or Ubuntu
+ host that reaches LiveNX on port 443, or on the LiveNX server itself.
+ .
+ Everything is installed under /var, /etc and /data, the locations LiveNX
+ keeps across reboots, so the service survives a restart of the appliance.

@@ -1,0 +1,24 @@
+[Unit]
+Description=LiveNX Security Insight findings exporter
+After=network-online.target clickhouse.service
+Wants=network-online.target
+RequiresMountsFor=/data
+
+[Service]
+Type=simple
+User=si-findings-export
+Group=si-findings-export
+EnvironmentFile=-/etc/livenx-si-findings-export/si-findings-export.env
+# "+" runs as root: recreate the output directory if /data was re-provisioned.
+ExecStartPre=+/usr/bin/install -d -o si-findings-export -g si-findings-export -m 0755 /data/si-findings-export
+ExecStart=/usr/bin/python3 /var/lib/livenx-si-findings-export/si_findings_export.py
+Restart=always
+RestartSec=10
+# Exit status 78 = configuration error; wait for the operator instead of looping.
+RestartPreventExitStatus=78
+NoNewPrivileges=yes
+ProtectSystem=full
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

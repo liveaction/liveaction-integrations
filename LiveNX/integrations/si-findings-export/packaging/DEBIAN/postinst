@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+SERVICE=livenx-si-findings-export.service
+RUN_USER=si-findings-export
+DATA_DIR=/data/si-findings-export
+
+if [ "$1" = "configure" ]; then
+    # /etc is persistent on LiveNX, so the account survives a reboot.
+    if ! getent passwd "$RUN_USER" >/dev/null; then
+        useradd --system --user-group --no-create-home --home-dir /nonexistent \
+            --shell /usr/sbin/nologin "$RUN_USER"
+    fi
+    install -d -o "$RUN_USER" -g "$RUN_USER" -m 0755 "$DATA_DIR"
+    if [ -d /run/systemd/system ]; then
+        systemctl daemon-reload
+        systemctl enable "$SERVICE"
+        # Exits immediately (and stays stopped) until SI_LIVENX_HOST is set.
+        systemctl restart "$SERVICE" || true
+    fi
+fi

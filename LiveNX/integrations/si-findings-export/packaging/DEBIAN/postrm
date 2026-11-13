@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+if [ -d /run/systemd/system ]; then
+    systemctl daemon-reload || true
+fi
+
+# Purge forgets the export position and removes the service account. Exported
+# findings in /data/si-findings-export are left for the operator to remove.
+if [ "$1" = "purge" ]; then
+    rm -f /data/si-findings-export/state.json /data/si-findings-export/state.json.tmp
+    if getent passwd si-findings-export >/dev/null; then
+        userdel si-findings-export || true
+    fi
+fi
