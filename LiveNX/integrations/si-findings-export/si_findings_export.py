@@ -47,6 +47,9 @@ log = logging.getLogger("si-findings-export")
 IP_FIELDS = ("saddr", "daddr", "data_src")
 V4_MAPPED_PREFIX = "::ffff:"
 API_PATH = "/api/security-proxy/api/v1/findings"
+LOGIN_PATH = "/auth/oauth/login"
+# Log in again this long before a JWT expires.
+TOKEN_REFRESH_MARGIN = 60
 EX_CONFIG = 78  # sysexits.h: configuration error; the systemd unit does not restart on it
 
 
@@ -65,6 +68,9 @@ class Config:
         self.livenx_host = env("SI_LIVENX_HOST", "")
         self.api_url = env("SI_API_URL", "")
         self.api_token = env("SI_API_TOKEN", "")
+        self.api_username = env("SI_API_USERNAME", "")
+        self.api_password = env("SI_API_PASSWORD", "")
+        self.api_login_url = env("SI_API_LOGIN_URL", "")
         self.api_verify_tls = env("SI_API_VERIFY_TLS", "true").lower() not in ("0", "false", "no")
         self.api_ca_file = env("SI_API_CA_FILE", "")
         self.api_page_size = int(env("SI_API_PAGE_SIZE", "5000"))
@@ -91,8 +97,24 @@ class Config:
             if not self.livenx_host:
                 raise ConfigError("set SI_LIVENX_HOST (and SI_API_TOKEN) to the LiveNX server to read from")
             self.api_url = "https://%s%s" % (self.livenx_host, API_PATH)
+        if self.source == "api":
+            if bool(self.api_username) != bool(self.api_password):
+                raise ConfigError("SI_API_USERNAME and SI_API_PASSWORD must be set together")
+            if not self.api_login_url:
+                parts = urllib.parse.urlsplit(self.api_url)
+                self.api_login_url = "%s://%s%s" % (parts.scheme, parts.netloc, LOGIN_PATH)
         if not re.fullmatch(r"[A-Za-z0-9_]+", self.ch_database + self.ch_table):
             raise ConfigError("SI_CH_DATABASE and SI_CH_TABLE must be plain identifiers")
+
+
+def _jwt_expiry(token):
+    """Expiry (epoch seconds) from a JWT's exp claim; 15 minutes from now if unreadable."""
+    try:
+        payload = token.split(".")[1]
+        claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+        return float(claims["exp"])
+    except (IndexError, KeyError, ValueError, TypeError):
+        return time.time() + 900
 
 
 class ApiSource:
@@ -105,9 +127,10 @@ class ApiSource:
 
     def __init__(self, cfg):
         self.cfg = cfg
-        self.headers = {"Accept": "application/json"}
-        if cfg.api_token:
-            self.headers["Authorization"] = "Bearer " + cfg.api_token
+        # A static SI_API_TOKEN wins; otherwise log in with a username and
+        # password and keep the short-lived JWT, renewing it before it expires.
+        self._jwt = None
+        self._jwt_expires = 0.0
         if cfg.api_ca_file:
             self.ssl_context = ssl.create_default_context(cafile=cfg.api_ca_file)
         elif cfg.api_verify_tls:
@@ -115,26 +138,73 @@ class ApiSource:
         else:
             self.ssl_context = ssl._create_unverified_context()
 
+    def _login(self):
+        """Log in to LiveNX and cache the JWT it returns."""
+        body = json.dumps({"username": self.cfg.api_username, "password": self.cfg.api_password}).encode()
+        req = urllib.request.Request(
+            self.cfg.api_login_url,
+            data=body,
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=self.cfg.http_timeout, context=self.ssl_context) as resp:
+                token = json.loads(resp.read())["token"]
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(
+                "LiveNX login HTTP %d: %s" % (exc.code, exc.read(300).decode(errors="replace"))
+            ) from exc
+        except (KeyError, ValueError, TypeError) as exc:
+            raise RuntimeError("LiveNX login returned no token") from exc
+        self._jwt = token
+        self._jwt_expires = _jwt_expiry(token)
+        log.debug("logged in to LiveNX as %s", self.cfg.api_username)
+
+    def _auth_header(self):
+        if self.cfg.api_token:
+            return "Bearer " + self.cfg.api_token
+        if not self.cfg.api_username:
+            return None
+        if not self._jwt or time.time() >= self._jwt_expires - TOKEN_REFRESH_MARGIN:
+            self._login()
+        return "Bearer " + self._jwt
+
     def fetch(self, start, end):
         """Return all findings with start <= time < end (epoch seconds)."""
         return self._fetch(start, end, self.cfg.api_page_size)
+
+    def _get(self, url):
+        """GET url as JSON; a 401 on a logged-in session triggers one fresh login and retry."""
+        for attempt in (0, 1):
+            headers = {"Accept": "application/json"}
+            auth = self._auth_header()
+            if auth:
+                headers["Authorization"] = auth
+            req = urllib.request.Request(url, headers=headers)
+            try:
+                with urllib.request.urlopen(req, timeout=self.cfg.http_timeout, context=self.ssl_context) as resp:
+                    return json.loads(resp.read())
+            except urllib.error.HTTPError as exc:
+                if exc.code == 401 and attempt == 0 and self._jwt:
+                    self._jwt = None
+                    continue
+                raise
 
     def _fetch(self, start, end, page_size):
         rsql = "time=ge=%d;time=lt=%d" % (start, end)
         if self.cfg.api_filter:
             rsql += ";" + self.cfg.api_filter
         query = urllib.parse.urlencode({"pageSize": page_size, "sort": "time", "filter": rsql})
-        req = urllib.request.Request(self.cfg.api_url + "?" + query, headers=self.headers)
         try:
-            with urllib.request.urlopen(req, timeout=self.cfg.http_timeout, context=self.ssl_context) as resp:
-                body = json.loads(resp.read())
+            body = self._get(self.cfg.api_url + "?" + query)
         except urllib.error.HTTPError as exc:
             detail = exc.read(300).decode(errors="replace")
             # The service answers an empty time window with 404 rather than an empty list.
             if exc.code == 404 and "findings:not_found" in detail:
                 return []
             if exc.code in (401, 403):
-                detail = "LiveNX rejected the API token (SI_API_TOKEN): " + detail
+                which = "API token (SI_API_TOKEN)" if self.cfg.api_token else "login (SI_API_USERNAME)"
+                detail = "LiveNX rejected the %s: %s" % (which, detail)
             raise RuntimeError("findings API HTTP %d: %s" % (exc.code, detail)) from exc
         rows = body.get("data") or []
         if not body.get("hasMore"):
@@ -304,6 +374,7 @@ CLI_OPTIONS = [
     ("--source", "SI_SOURCE", "api (default) or clickhouse"),
     ("--livenx-host", "SI_LIVENX_HOST", "LiveNX hostname or IP to read findings from"),
     ("--api-token", "SI_API_TOKEN", "LiveNX API token; prefer the SI_API_TOKEN variable, which is not visible in ps"),
+    ("--api-username", "SI_API_USERNAME", "LiveNX user to log in as when no token is set; the password comes from SI_API_PASSWORD"),
     ("--api-url", "SI_API_URL", "full findings endpoint URL, overriding --livenx-host"),
     ("--ca-file", "SI_API_CA_FILE", "CA bundle used to verify the LiveNX certificate"),
     ("--filter", "SI_API_FILTER", "extra RSQL filter, for example severity==High"),

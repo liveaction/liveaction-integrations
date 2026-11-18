@@ -185,3 +185,89 @@ def test_cli_options_override_environment_and_env_file(tmp_path, monkeypatch):
     assert cfg.state_file == "/from/environment.json"
     assert cfg.output_file == str(out)
     assert cfg.api_verify_tls is False
+
+
+def _jwt(exp):
+    import base64
+
+    def part(obj):
+        return base64.urlsafe_b64encode(json.dumps(obj).encode()).decode().rstrip("=")
+
+    return "%s.%s.sig" % (part({"alg": "RS256"}), part({"exp": exp}))
+
+
+def _login_env(monkeypatch):
+    for name in ("SI_API_TOKEN", "SI_API_URL", "SI_API_LOGIN_URL"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("SI_LIVENX_HOST", "livenx.example.com")
+    monkeypatch.setenv("SI_API_USERNAME", "svc")
+    monkeypatch.setenv("SI_API_PASSWORD", "pw")
+
+
+def test_config_requires_username_and_password_together(monkeypatch):
+    _login_env(monkeypatch)
+    monkeypatch.delenv("SI_API_PASSWORD")
+    with pytest.raises(mod.ConfigError):
+        mod.Config()
+
+
+def test_login_url_derived_from_api_url(monkeypatch):
+    _login_env(monkeypatch)
+    assert mod.Config().api_login_url == "https://livenx.example.com/auth/oauth/login"
+
+
+def test_api_source_logs_in_and_relogs_on_401(monkeypatch):
+    import io
+    import time
+
+    _login_env(monkeypatch)
+    logins, auths = [], []
+    tokens = iter([_jwt(time.time() + 900), _jwt(time.time() + 900) + "2"])
+
+    class Resp:
+        def __init__(self, payload):
+            self.payload = payload
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+        def read(self):
+            return json.dumps(self.payload).encode()
+
+    def fake_urlopen(req, timeout=None, context=None):
+        if req.full_url.endswith("/auth/oauth/login"):
+            assert json.loads(req.data) == {"username": "svc", "password": "pw"}
+            logins.append(1)
+            return Resp({"token": next(tokens)})
+        auths.append(req.get_header("Authorization"))
+        if len(auths) == 1:  # first token is rejected, as after a server-side session reset
+            raise mod.urllib.error.HTTPError(req.full_url, 401, "no", {}, io.BytesIO(b"{}"))
+        return Resp({"data": [{"time": 10}], "hasMore": False})
+
+    monkeypatch.setattr(mod.urllib.request, "urlopen", fake_urlopen)
+    assert mod.ApiSource(mod.Config()).fetch(10, 20) == [{"time": 10}]
+    assert len(logins) == 2
+    assert auths[0] != auths[1] and all(a.startswith("Bearer ") for a in auths)
+
+
+def test_expiring_jwt_is_renewed(monkeypatch):
+    import time
+
+    _login_env(monkeypatch)
+    src = mod.ApiSource(mod.Config())
+    calls = []
+    src._login = lambda: (calls.append(1), setattr(src, "_jwt", "t"), setattr(src, "_jwt_expires", time.time() + 30))
+    src._auth_header()
+    src._auth_header()  # 30s left is inside the refresh margin, so it logs in again
+    assert len(calls) == 2
+
+
+def test_static_token_never_logs_in(monkeypatch):
+    _login_env(monkeypatch)
+    monkeypatch.setenv("SI_API_TOKEN", "static")
+    src = mod.ApiSource(mod.Config())
+    src._login = lambda: pytest.fail("should not log in")
+    assert src._auth_header() == "Bearer static"
