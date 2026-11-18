@@ -1,4 +1,4 @@
-# Build output: run ./build_deb.sh
+# Build output: run ./build_deb.sh or ./build_rpm.sh
 dist/
 __pycache__/
 .pytest_cache/

@@ -1,6 +1,6 @@
 # LiveNX Security Insight findings exporter
 
-A Debian package that runs a small Python service which continuously reads
+A Debian or RHEL 8 package that runs a small Python service which continuously reads
 LiveNX Security Insight findings (the `si_findings` table) and appends them to
 a JSON Lines file:
 
@@ -27,7 +27,7 @@ server itself.
 
 ## Run without the package
 
-The exporter is a single standard-library script (Python 3.8+), so it also runs
+The exporter is a single standard-library script (Python 3.6+, so RHEL 8's default `python3` works), so it also runs
 straight from this directory on any machine that reaches LiveNX on port 443:
 
 ```bash
@@ -35,6 +35,23 @@ export SI_API_TOKEN=<LiveNX API token>
 python3 si_findings_export.py --livenx-host livenx.example.com --insecure \
     --output ./si_findings.jsonl --state ./state.json
 ```
+
+Some LiveNX servers only accept a JWT on the Security Insight path and answer
+the API token with `401 ... jwt malformed`, even though the same token works
+on port 8093. On those servers log in with a LiveNX user instead:
+
+```bash
+export SI_API_USERNAME=<read-only LiveNX user>
+export SI_API_PASSWORD='<password>'   # environment only, there is no password option
+python3 si_findings_export.py --livenx-host livenx.example.com --insecure \
+    --output ./si_findings.jsonl --state ./state.json
+```
+
+The exporter logs in at `/auth/oauth/login`, uses the 15 minute JWT it gets
+back, and logs in again shortly before it expires or after a 401. If both a
+token and a username and password are set, the token is used. SAML, OIDC and
+RADIUS-only accounts cannot use this; on the LiveNX server itself,
+`SI_SOURCE=clickhouse` needs neither.
 
 It runs until interrupted (Ctrl-C); add `--once` for a single pass. Every
 setting has an `SI_*` environment variable and most have an option
@@ -46,21 +63,40 @@ package installs). Without `--output` and `--state` the script writes to
 ## Build
 
 ```bash
-./build_deb.sh        # needs dpkg-deb (macOS: brew install dpkg)
+./build_deb.sh        # Debian/Ubuntu; needs dpkg-deb (macOS: brew install dpkg)
+./build_rpm.sh        # RHEL 8; uses rpmbuild, or an AlmaLinux 8 container via docker
 ```
 
-Produces `dist/livenx-si-findings-export_1.0.0_all.deb`. The package is
-`Architecture: all` and needs only `python3` (3.8+, standard library only).
+Produces `dist/livenx-si-findings-export_<version>_all.deb` and
+`dist/livenx-si-findings-export-<version>-1.noarch.rpm`. Both packages are
+architecture independent, carry the same files and need only `python3`
+(standard library only).
 
 ## Install
 
-Works on any Debian/Ubuntu host with systemd, including the LiveNX server.
+Works on any Debian/Ubuntu or RHEL 8 host with systemd, including the LiveNX
+server.
+
+Debian/Ubuntu:
 
 ```bash
-scp dist/livenx-si-findings-export_1.0.0_all.deb admin@<host>:/tmp/
+scp dist/livenx-si-findings-export_<version>_all.deb admin@<host>:/tmp/
 ssh admin@<host>
-sudo dpkg -i /tmp/livenx-si-findings-export_1.0.0_all.deb
+sudo dpkg -i /tmp/livenx-si-findings-export_<version>_all.deb
 ```
+
+RHEL 8 (Rocky, Alma and other rebuilds too):
+
+```bash
+scp dist/livenx-si-findings-export-<version>-1.noarch.rpm admin@<host>:/tmp/
+ssh admin@<host>
+sudo dnf install /tmp/livenx-si-findings-export-<version>-1.noarch.rpm
+```
+
+`dnf` installs `python36` if it is missing. The install was tested on AlmaLinux 8
+in a container without systemd, so the service start was not exercised there.
+If SELinux is enforcing and the service fails to write to `/data`, check
+`ausearch -m avc -ts recent`.
 
 Then point it at LiveNX and start it:
 
@@ -151,6 +187,8 @@ upgrades keep your edits.
 |---|---|---|
 | `SI_LIVENX_HOST` | (required for `api`) | LiveNX hostname or IP |
 | `SI_API_TOKEN` | | LiveNX API bearer token |
+| `SI_API_USERNAME` / `SI_API_PASSWORD` | | Log in with a LiveNX user instead of using a token (see below). Set both. Ignored when `SI_API_TOKEN` is set |
+| `SI_API_LOGIN_URL` | `https://<host>/auth/oauth/login` | Login endpoint override |
 | `SI_API_VERIFY_TLS` / `SI_API_CA_FILE` | `true` / none | Certificate verification for the LiveNX HTTPS endpoint |
 | `SI_API_FILTER` | | Extra RSQL filter, e.g. `severity==High` |
 | `SI_API_URL` | derived from host | Full endpoint URL override |
@@ -171,6 +209,16 @@ sudo dpkg -r livenx-si-findings-export     # keeps configuration and state
 sudo dpkg -P livenx-si-findings-export     # also removes config, state and the service account
 ```
 
+On RHEL 8:
+
+```bash
+sudo dnf remove livenx-si-findings-export  # keeps the account, state and exported files
+```
+
+An edited env file is kept as `si-findings-export.env.rpmsave`. Remove the
+`si-findings-export` account and `/data/si-findings-export/state.json` by hand
+for a full clean-up.
+
 Exported files in `/data/si-findings-export/` are never deleted by the package.
 
 ## Development
@@ -181,4 +229,4 @@ pytest test_si_findings_export.py
 
 ```
 
-`dist/` (the built package) is ignored by git; run `./build_deb.sh` to produce it.
+`dist/` (the built package) is ignored by git; run `./build_deb.sh` or `./build_rpm.sh` to produce it.
