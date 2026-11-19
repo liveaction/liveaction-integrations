@@ -1,21 +1,22 @@
 # LiveNX Integration Tool
 
-A Python3 utility for synchronizing inventory and alerts between LiveNX, NetLD, BlueCat and ServiceNow platforms.
+A Python3 utility for synchronizing inventory and alerts between LiveNX, NetLD, BlueCat, Cisco SD-WAN vManage and ServiceNow platforms.
 
 ## Overview
 
 This tool provides bidirectional synchronization capabilities for:
 - Device inventory between LiveNX, NetLD and BlueCat
+- Device inventory from Cisco SD-WAN vManage into LiveNX
 - Alerts/incidents between LiveNX, NetLD, and ServiceNow
 - Sites between LiveNX and BlueCat
 
 ## Prerequisites
 
 - Python 3.x
-- Access to LiveNX, NetLD, BlueCat and/or ServiceNow APIs
+- Access to LiveNX, NetLD, BlueCat, vManage and/or ServiceNow APIs
 - Required Python packages (install via pip):
   - `argparse`
-  - Additional dependencies from the `common`, `netld`, and `servicenow` modules
+  - Additional dependencies from the `common`, `netld`, `servicenow` and `vmanage` modules
 
 ## Installation
 
@@ -31,6 +32,8 @@ This tool provides bidirectional synchronization capabilities for:
 │   └── incidents.py
 ├── servicenow/
 │   └── incidents.py
+├── vmanage/
+│   └── inventory.py
 ├── helper/
 │   ├── timer.py
 │   └── prompt.py
@@ -58,6 +61,9 @@ python3 main.py --sites --fromproduct bluecat_integrity --toproduct livenx
 # Sync custom applications from snow to Linenx
 python3 main.py --custom_applications --fromproduct snow_csv --toproduct livenx --csv_input /data/mdb_ci_server.csv
 
+# Sync Cisco SD-WAN (vManage) devices into LiveNX as virtual devices
+python3 main.py --inventory --fromproduct vmanage --toproduct livenx
+
 # Sync alerts from LiveNX to Freshwork
 python3 main.py --alerts --fromproduct livenx --toproduct freshwork
 
@@ -72,7 +78,7 @@ python3 main.py --serialsync
 | `--inventory` | Enable inventory synchronization | False |
 | `--alerts` | Enable alerts synchronization | False |
 | `--sites` | Enable sites synchronization | False |
-| `--fromproduct` | Source platform (livenx/netld/bluecat_integrity) | '' |
+| `--fromproduct` | Source platform (livenx/netld/bluecat_integrity/vmanage) | '' |
 | `--toproduct` | Destination platform (livenx/netld/servicenow) | '' |
 | `--starttimesecs` | Start time in epoch seconds | 0 |
 | `--endtimesecs` | End time in epoch seconds | 0 |
@@ -88,6 +94,7 @@ python3 main.py --serialsync
 
 ### Inventory Synchronization
 - Bidirectional sync between LiveNX, BlueCat and NetLD
+- Cisco SD-WAN vManage → LiveNX device import (add-only, see [vmanage/README.md](vmanage/README.md))
 - Differential updates (only changed devices)
 - Interactive prompts for additions/removals (unless --noprompt is used)
 - Hostname-based verification
@@ -148,6 +155,28 @@ docker run -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOK
 Examples:
 ---------
 
+vManage
+-------
+
+Add Cisco SD-WAN devices from vManage to LiveNX as virtual devices. These environment variables must be set (example):
+
+LIVENX_API_HOST=10.4.205.201
+LIVENX_API_PORT=8093
+LIVENX_API_TOKEN="foobar"
+LIVENX_TARGET_IP=10.4.205.201
+VMANAGE_API_HOST=10.10.10.1
+VMANAGE_API_PORT=8443
+VMANAGE_API_USER="admin"
+VMANAGE_API_PASSWORD="password"
+
+python3 main.py --inventory --fromproduct vmanage --toproduct livenx
+
+Using Docker Run:
+
+docker run -e LIVENX_API_HOST=10.0.0.1 -e LIVENX_API_PORT=8093 -e LIVENX_API_TOKEN=your_token_here -e LIVENX_TARGET_IP=10.0.0.1 -e VMANAGE_API_HOST=10.10.10.1 -e VMANAGE_API_USER=admin -e VMANAGE_API_PASSWORD="password" liveaction/livenx-integrations --inventory --fromproduct vmanage --toproduct livenx --continuous --noprompt
+
+See [vmanage/README.md](vmanage/README.md) for all options.
+
 
 netLD
 -----
@@ -206,3 +235,9 @@ docker compose up -d
 | LiveNX | LiveNCA/NetLD | vendorProduct>displayName | softwareVendor |
 | LiveNX | LiveNCA/NetLD | osVersionString | osVersion |
 | LiveNX | LiveNCA/NetLD | serialNumber | serialNumber |
+| LiveWire Product | External Product | Attribute in LiveNX | Attribute in External Product |
+| ---------------- | ---------------- | ------------------- | ----------------------------- |
+| LiveNX | vManage | hostName / systemName | host-name (falls back to system-ip) |
+| LiveNX | vManage | address | system-ip |
+| LiveNX | vManage | systemDescription | device-model, version, board-serial |
+| LiveNX | vManage | site | site-id (as `SDWAN-Site-<site-id>`) |

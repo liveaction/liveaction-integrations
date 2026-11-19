@@ -12,4 +12,8 @@ services:
       THIRDEYE_API_USER: admin
       THIRDEYE_API_PASSWORD: ""
       THIRDEYE_NETWORK: Default
+      VMANAGE_API_HOST: ""
+      VMANAGE_API_PORT: 8443
+      VMANAGE_API_USER: ""
+      VMANAGE_API_PASSWORD: ""
     command: ["--inventory", "--fromproduct", "livenx", "--toproduct", "netld", "--continuous", "--noprompt", "--logstdout"]

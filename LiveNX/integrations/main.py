@@ -25,6 +25,7 @@ from helper.prompt import query_yes_no
 from servicenow.incidents import get_servicenow_incidents, push_servicenow_incidents
 from common.livenx_sites import get_bluecat_blocks, get_livenx_sites, map_bluecat_blocks_to_livenx_sites, diff_bluecat_sites, add_to_livenx_sites, get_clickhouse_sites, diff_clickhouse_sites, add_to_clickhouse_sites
 from snow.inventory import get_snow_inventory, get_diff_snow_inventory
+from vmanage.inventory import get_vmanage_inventory, map_vmanage_inventory_to_livenx_inventory, diff_vmanage_inventory
 
 from config.logger import setup_logger
 local_logger = None
@@ -111,6 +112,17 @@ def main(args):
                 if len(livenx_ch_inventory_diff_to_remove) > 0:
                     if args.noprompt == True or query_yes_no("This inventory will be removed: " + str(livenx_ch_inventory_diff_to_remove)):
                         remove_from_livenx_ch_inventory(livenx_ch_inventory_diff_to_remove)
+            elif args.fromproduct == "vmanage" and args.toproduct == "livenx":
+                ## sync the vManage (Cisco SD-WAN) devices to the livenx inventory (add only)
+                orig_livenx_inventory = get_livenx_inventory()
+                new_livenx_inventory = map_vmanage_inventory_to_livenx_inventory(get_vmanage_inventory())
+                vmanage_diff_to_add = diff_vmanage_inventory(new_livenx_inventory, orig_livenx_inventory)
+                if len(vmanage_diff_to_add) > 0:
+                    prompt_devices = [{'hostname': d.get('hostName'), 'address': d.get('address')} for d in vmanage_diff_to_add]
+                    if args.noprompt == True or query_yes_no("This inventory will be added: " + str(prompt_devices)):
+                        add_to_livenx_inventory({'devices': vmanage_diff_to_add})
+                else:
+                    local_logger.info("vManage devices are already sync with livenx inventory")
             if args.fromproduct == "bluecat_integrity" and args.toproduct == "livenxch":
                 ## sync the Bluecat address to the livenx clickhouse
                 ## figure out which sites to add
